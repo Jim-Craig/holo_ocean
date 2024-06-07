@@ -25,7 +25,7 @@ void FRenderRequest::ExecuteTask()
 
 	if (rt_resource != nullptr) {
 		const FTexture2DRHIRef& rhi_texture = rt_resource->GetRenderTargetTexture();
-		FIntPoint size;
+		//FIntPoint size;
 		FReadSurfaceDataFlags flags(RCM_UNorm, CubeFace_MAX);
 		flags.SetLinearToGamma(false);
 

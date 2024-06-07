@@ -112,6 +112,7 @@ Octree* Octree::makeEnvOctreeRoot(){
     root->makeTill = Octree::OctreeMax;
     root->load();
     
+    UE_LOG(LogHolodeck, Log, TEXT("Octree: Before line 117"));
     // set filename/makeTill for all OctreeMax nodes
     std::function<void(Octree*)> fix;
     fix = [&filePath, &fix](Octree* tree){
@@ -188,8 +189,8 @@ Octree* Octree::makeOctree(FVector center, float octreeSize, float octreeMin, FS
                 if(isnan(child->normal.Y)) child->normal.Y = sign(child->normal.Y); 
                 if(isnan(child->normal.Z)) child->normal.Z = sign(child->normal.Z); 
                 if(hit.Normal.ContainsNaN()){
-                    UE_LOG(LogHolodeck, Warning, TEXT("Found position: %s"), *child->loc.ToString());
-                    UE_LOG(LogHolodeck, Warning, TEXT("Found nan: %s"), *child->normal.ToString());
+                    UE_LOG(LogHolodeck, Warning, TEXT("Octree: Found position: %s"), *child->loc.ToString());
+                    UE_LOG(LogHolodeck, Warning, TEXT("Octree: Found nan: %s"), *child->normal.ToString());
                 }
                 // DrawDebugLine(World, center, center+hit.Normal*OctreeMin/2, FColor::Blue, true, 100, ECC_WorldStatic, 1.f);
                 // DrawDebugBox(World, center, FVector(octreeSize/2), FColor::Green, true, 2, ECC_WorldStatic, 5.0f);
@@ -226,11 +227,16 @@ void Octree::toJson(){
     gason::JSonBuilder doc(buffer, num-1);
 
     // fill in buffer
+    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): Before toJson line 230"));
     toJson(doc);
+    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): After toJson line 230"));
 
     if( doc.isBufferAdequate() ){
         // String to file
-        FILE* fp = fopen(TCHAR_TO_ANSI(*file), "w+t");
+        // FILE* fp = fopen(TCHAR_TO_ANSI(*file), "w+t");
+        FILE* fp;
+        errno_t err = fopen_s(&fp, TCHAR_TO_ANSI(*file), "w+t");
+
         fwrite(buffer, strlen(buffer), 1, fp);
         fclose(fp);
     }
@@ -242,13 +248,15 @@ void Octree::toJson(){
 }
 
 void Octree::toJson(gason::JSonBuilder& doc){
-    doc.startObject()
-        .startArray("p")
-            .addValue(loc[0])
-            .addValue(loc[1])
-            .addValue(loc[2])
-        .endArray();
-
+    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): toJson start"));
+    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): values: %d, %d, %d"), loc[0], loc[1], loc[2]);
+    doc.startObject();
+        // .startArray("p")
+        //     .addValue(loc[0])
+        //     .addValue(loc[1])
+        //     .addValue(loc[2])
+        // .endArray();
+    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): toJson after startObject"));
     if(leaves.Num() != 0){
         doc.startArray("l");
         for(Octree* l : leaves){
@@ -256,6 +264,7 @@ void Octree::toJson(gason::JSonBuilder& doc){
         }
         doc.endArray();
     }
+    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): toJson after if(leaves.Num() != 0)"));
     if(size == OctreeMin){
         doc.startArray("n")
                 .addValue(normal[0])
@@ -273,7 +282,7 @@ void Octree::load(){
     if(leaves.Num() == 0){
         // if it's been saved as a json, load it
         if(FPaths::FileExists(file)){
-            // UE_LOG(LogHolodeck, Log, TEXT("Loading Octree %s"), *file);
+            UE_LOG(LogHolodeck, Log, TEXT("Octree: Loading Octree %s"), *file);
             // load file to a string
             gason::JsonAllocator allocator;
             std::ifstream t(TCHAR_TO_ANSI(*file));
@@ -298,14 +307,16 @@ void Octree::load(){
 
         // Otherwise build it & save for later
         else{
-            // UE_LOG(LogHolodeck, Log, TEXT("Making Octree %s"), *file);
+            UE_LOG(LogHolodeck, Log, TEXT("Octree: Making Octree %s"), *file);
             for(FVector off : corners){
                 Octree* l = makeOctree(loc+(off*size/4), size/2, makeTill);
                 if(l) leaves.Add(l);
             }
+            UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): Before toJson line 312"));
             toJson();
+            UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): After toJson line 312"));
         }
-
+    
     }
 }
 
@@ -342,7 +353,7 @@ void Octree::unload(){
 
         // if we need to unload this one
         else if(size == Octree::OctreeMax){
-            // UE_LOG(LogHolodeck, Log, TEXT("Unloading Octree %s"), *file);
+            UE_LOG(LogHolodeck, Log, TEXT("Octree: Unloading Octree %s"), *file);
             for(Octree* leaf : leaves) delete leaf;
             leaves.Reset();
         }
@@ -354,7 +365,7 @@ void Octree::fillMaterialProperties(FString mat){
     float matProp;
     bool found = materials.Find(material, matProp);
     if(!found){
-        UE_LOG(LogHolodeck, Warning, TEXT("Missing material information for %s, adding in blank row to csv"), *this->material);
+        UE_LOG(LogHolodeck, Warning, TEXT("Octree: Missing material information for %s, adding in blank row to csv"), *this->material);
 
         // Add default line to material file to fill in later
         FString filePath = FPaths::ProjectDir() + "../../materials.csv";
@@ -387,6 +398,6 @@ FString Octree::getMaterialName(FHitResult hit){
 	}
 
 	// If we have extra issues getting material
-    UE_LOG(LogHolodeck, Warning, TEXT("Couldn't get material name for an octree leaf, putting as MaterialNotFound"));
+    UE_LOG(LogHolodeck, Warning, TEXT("Octree: Couldn't get material name for an octree leaf, putting as MaterialNotFound"));
 	return "MaterialNotFound";
 }

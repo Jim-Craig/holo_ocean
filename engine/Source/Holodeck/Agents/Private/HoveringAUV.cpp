@@ -85,9 +85,9 @@ void AHoveringAUV::ApplyThrusters(float* const ThrusterArray){
 		// 4 + 6 have negative y
 		FVector LocalForce = FVector(0, 0, 0);
 		if(i % 2 == 0) 	
-			LocalForce = FVector(force/FMath::Sqrt(2), force/FMath::Sqrt(2), 0);
+			LocalForce = FVector(force/UKismetMathLibrary::Sqrt(2), force/UKismetMathLibrary::Sqrt(2), 0);
 		else	
-			LocalForce = FVector(force/FMath::Sqrt(2), -force/FMath::Sqrt(2), 0);
+			LocalForce = FVector(force/UKismetMathLibrary::Sqrt(2), -force/UKismetMathLibrary::Sqrt(2), 0);
 		LocalForce = ConvertLinearVector(LocalForce, ClientToUE);
 
 		RootMesh->AddForceAtLocationLocal(LocalForce, thrusterLocations[i]);

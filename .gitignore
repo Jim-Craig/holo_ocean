@@ -2,7 +2,11 @@
 engine/Content/DesertRuins
 engine/Content/ForestCollection
 engine/Content/Worlds
+engine/Content/WorldsHowdy
 !engine/Content/StarterContent
+engine/Saved/Crashes
+engine/Saved/Config/CrashReportClient
+engine/Saved/logs
 
 *.VC.db
 

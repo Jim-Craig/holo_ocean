@@ -23,5 +23,5 @@ bool IsInSight(AActor* seeing_actor, AActor* target_actor, FVector& start, FVect
 	bool TraceResult = seeing_actor->GetWorld()->LineTraceSingleByChannel(Hit, start, end, ECollisionChannel::ECC_Visibility, QueryParams);
 
 	// Evaluate - if the actor is in our field of view and either the ray trace has intersected with the target or there is nothing between ourself and the target
-	return TargetAngle < FOVRad && (Hit.Actor == target_actor || Hit.Actor == nullptr);
+	return TargetAngle < FOVRad && (Hit.GetActor() == target_actor || Hit.GetActor() == nullptr);
 }

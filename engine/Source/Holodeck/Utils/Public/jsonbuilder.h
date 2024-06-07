@@ -52,7 +52,8 @@ public:
             length = strlen(string);
 
         if ( ( length + iindex ) < ilength ) {
-            strncat(ibuffer+iindex, string, length);
+            // strncat(ibuffer+iindex, string, length);
+            strncat_s(ibuffer+iindex, strlen(ibuffer),string, length);
             iindex += length;
         }
         return *this;
@@ -122,12 +123,12 @@ public:
 
     /** starts an object by @code { @endcode or @code "name" : { @endcode if name is not empty. */
     JSonBuilder&    startObject(const char* name = 0) {
-        addPossibleComma();
-        if ( name != 0    &&    strlen(name) > 0 ) {
-            *this << "\"" << name << "\":";
-        }
+        //addPossibleComma();
+        // if ( name != 0    &&    strlen(name) > 0 ) {
+        //     *this << "\"" << name << "\":";
+        // }
 
-        operator <<("{");
+        // operator <<("{");
         return *this;
     }
 

@@ -88,9 +88,9 @@ void UHolodeckSonar::ParseSensorParms(FString ParmsJson) {
 
 
 	}
-	else {
-		UE_LOG(LogHolodeck, Fatal, TEXT("UHolodeckSonar::ParseSensorParms:: Unable to parse json."));
-	}
+	// else {
+	// 	UE_LOG(LogHolodeck, Fatal, TEXT("UHolodeckSonar::ParseSensorParms:: Unable to parse json."));
+	// }
 
 	if(InitOctreeRange == 0){
 		InitOctreeRange = RangeMax;
@@ -120,7 +120,8 @@ void UHolodeckSonar::BeginDestroy() {
 void UHolodeckSonar::initOctree(){
 	// We delay making trees till the message has been printed to the screen
 	if(toMake.Num() != 0 && TickCounter >= 8){
-		UE_LOG(LogHolodeck, Log, TEXT("Sonar::Initial building num: %d"), toMake.Num());
+		int temp = toMake.Num();
+		// UE_LOG(LogHolodeck, Log, TEXT("Sonar::Initial building num: %d"), *temp);
 		ParallelFor(toMake.Num(), [&](int32 i){
 			toMake.GetData()[i]->load();
 			toMake.GetData()[i]->unload();
@@ -151,7 +152,7 @@ void UHolodeckSonar::initOctree(){
 		// Premake octrees within range
 		FVector loc = this->GetComponentLocation();
 		// Offset by size of OctreeMax radius to get everything in range
-		float offset = InitOctreeRange + Octree::OctreeMax*FMath::Sqrt(3)/2;
+		float offset = InitOctreeRange + Octree::OctreeMax*UKismetMathLibrary::Sqrt(3)/2;
 		// recursively search for close leaves
 		std::function<void(Octree*, TArray<Octree*>&)> findCloseLeaves;
 		findCloseLeaves = [&offset, &loc, &findCloseLeaves](Octree* tree, TArray<Octree*>& list){
