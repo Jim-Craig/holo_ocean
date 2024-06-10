@@ -255,6 +255,11 @@ void Octree::toJson(FJsonDomBuilder::FObject& doc){
     UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): toJson start"));
     UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): values: %d, %d, %d"), loc[0], loc[1], loc[2]);
     
+    FJsonDomBuilder::FArray pArray;
+    pArray.Add(loc[0], loc[1], loc[2]);
+
+    doc.Set("p", pArray);
+
     if(leaves.Num() != 0) 
     {
         UE_LOG(LogHolodeck, Warning, TEXT("Start array is the problem?"));
@@ -262,11 +267,12 @@ void Octree::toJson(FJsonDomBuilder::FObject& doc){
         //doc.startArray("l");
 
         FJsonDomBuilder::FArray leafArray;
+        
 
         for(Octree* l : leaves){
             UE_LOG(LogHolodeck, Warning, TEXT("Octtree leaf problem?"));
 
-            l->toJson(doc);
+            leafArray.Add(l->createLeafObject());
         }
         UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): after leaves to Json"));
 
@@ -282,23 +288,45 @@ void Octree::toJson(FJsonDomBuilder::FObject& doc){
         normalArray.Add(normal[0], normal[1], normal[2]);
         doc.Set("n", normalArray);
         doc.Set("m", TCHAR_TO_ANSI(*material));
+    }
+}
+
+FJsonDomBuilder::FObject Octree::createLeafObject()
+{
+    FJsonDomBuilder::FObject leafObject;
+    FJsonDomBuilder::FArray pArray;
+    pArray.Add(loc[0], loc[1], loc[2]);
+    leafObject.Set("p", pArray);
 
 
-        //doc.startArray("n")
-        //        .addValue(normal[0])
-        //        .addValue(normal[1])
-        //        .addValue(normal[2])
-            //.endArray()
-        //    .addValue("m", TCHAR_TO_ANSI(*material));
+    if (leaves.Num() != 0)
+    {
+        FJsonDomBuilder::FArray leafArray;
+
+        for (Octree* l : leaves) {
+            UE_LOG(LogHolodeck, Warning, TEXT("Octtree leaf problem?"));
+
+            leafArray.Add(l->createLeafObject());
+        }
+
+        leafObject.Set("l", leafArray);
     }
 
 
+    if (size == OctreeMin)
+    {
+        FJsonDomBuilder::FArray normalArray;
 
-    //UE_LOG(LogHolodeck, Warning, TEXT("%s"), doc.AsJsonValue()->AsString().GetCharArray());
+        normalArray.Add(normal[0], normal[1], normal[2]);
+        leafObject.Set("n", normalArray);
+        leafObject.Set("m", TCHAR_TO_ANSI(*material));
+    }
 
-    
-    //doc.endObject();
+
+    return leafObject;
 }
+
+
 
 void Octree::load(){
     // if it's not already loaded
@@ -307,6 +335,9 @@ void Octree::load(){
         if(FPaths::FileExists(file)){
             UE_LOG(LogHolodeck, Log, TEXT("Octree: Loading Octree %s"), *file);
             // load file to a string
+
+            FJsonDomBuilder::FObject 
+
             gason::JsonAllocator allocator;
             std::ifstream t(TCHAR_TO_ANSI(*file));
             std::string str((std::istreambuf_iterator<char>(t)),

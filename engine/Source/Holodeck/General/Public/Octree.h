@@ -41,6 +41,7 @@ class Octree
 
         static void loadJson(gason::JsonValue& json, TArray<Octree*>& parent, float size);
         void toJson(FJsonDomBuilder::FObject& doc);
+        FJsonDomBuilder::FObject createLeafObject();
 
         static FCollisionQueryParams init_params(){
             FCollisionQueryParams p;
