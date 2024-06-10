@@ -12,12 +12,17 @@
 #include "LandscapeProxy.h"
 
 #include "Conversion.h"
-#include "gason.h"
-#include "jsonbuilder.h"
+//#include "gason.h"
+//#include "jsonbuilder.h"
+#include "JsonDomBuilder.h"
+
 #include <string>
 #include <fstream>
 #include <streambuf>
 #include <functional>
+#include <format>
+
+
 
 class Octree
 {
@@ -35,7 +40,7 @@ class Octree
         static FVector EnvCenter;
 
         static void loadJson(gason::JsonValue& json, TArray<Octree*>& parent, float size);
-        void toJson(gason::JSonBuilder& doc);
+        void toJson(FJsonDomBuilder::FObject& doc);
 
         static FCollisionQueryParams init_params(){
             FCollisionQueryParams p;

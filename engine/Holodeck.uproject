@@ -13,6 +13,12 @@
 			]
 		}
 	],
+	"Plugins": [
+		{
+			"Name": "RapidJson",
+			"Enabled": false
+		}
+	],
 	"TargetPlatforms": [
 		"Linux",
 		"Windows"
