@@ -2,6 +2,7 @@
 
 
 #include "Octree.h"
+#include <iostream>
 
 // Initialize static variables
 // Used when making octree
@@ -221,39 +222,18 @@ void Octree::toJson(){
     // make directory
     FFileManagerGeneric().MakeDirectory(*FPaths::GetPath(file), true);
 
-    // calculate buffer size and make writer
-    int num = numLeaves()*100;
-    char* buffer = new char[num]();
-    //gason::JSonBuilder doc(buffer, num-1);
-
     FJsonDomBuilder::FObject doc;
 
     // fill in buffer
-    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): Before toJson line 230"));
     toJson(doc);
-    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): After toJson line 230"));
 
-    // TODO: Hmmm. Maybe not the best to just comment this out, but I don't really have a choice!
-    // 
-    //if( doc.isBufferAdequate() ){
-        // String to file
-        // FILE* fp = fopen(TCHAR_TO_ANSI(*file), "w+t");
-    FILE* fp;
-    errno_t err = fopen_s(&fp, TCHAR_TO_ANSI(*file), "w+t");
+    std::ofstream fp(TCHAR_TO_UTF8(*file));
 
-    fwrite(buffer, strlen(buffer), 1, fp);
-    fclose(fp);
-    //}
-    /*else{
-        UE_LOG(LogHolodeck, Warning, TEXT("Octree: The buffer is too small and the output json for file %s is not valid."), *file);
-    }*/
-
-    delete[] buffer;
+    fp << TCHAR_TO_ANSI(*(doc.ToString()));
+    fp.close();
 }
 
 void Octree::toJson(FJsonDomBuilder::FObject& doc){
-    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): toJson start"));
-    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): values: %d, %d, %d"), loc[0], loc[1], loc[2]);
     
     FJsonDomBuilder::FArray pArray;
     pArray.Add(loc[0], loc[1], loc[2]);
@@ -262,24 +242,17 @@ void Octree::toJson(FJsonDomBuilder::FObject& doc){
 
     if(leaves.Num() != 0) 
     {
-        UE_LOG(LogHolodeck, Warning, TEXT("Start array is the problem?"));
-
-        //doc.startArray("l");
 
         FJsonDomBuilder::FArray leafArray;
         
 
         for(Octree* l : leaves){
-            UE_LOG(LogHolodeck, Warning, TEXT("Octtree leaf problem?"));
-
             leafArray.Add(l->createLeafObject());
         }
-        UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): after leaves to Json"));
 
         doc.Set("l", leafArray);
     }
 
-    UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): toJson after if(leaves.Num() != 0)"));
 
     if(size == OctreeMin) 
     {
@@ -304,8 +277,6 @@ FJsonDomBuilder::FObject Octree::createLeafObject()
         FJsonDomBuilder::FArray leafArray;
 
         for (Octree* l : leaves) {
-            UE_LOG(LogHolodeck, Warning, TEXT("Octtree leaf problem?"));
-
             leafArray.Add(l->createLeafObject());
         }
 
@@ -336,8 +307,6 @@ void Octree::load(){
             UE_LOG(LogHolodeck, Log, TEXT("Octree: Loading Octree %s"), *file);
             // load file to a string
 
-            FJsonDomBuilder::FObject 
-
             gason::JsonAllocator allocator;
             std::ifstream t(TCHAR_TO_ANSI(*file));
             std::string str((std::istreambuf_iterator<char>(t)),
@@ -366,9 +335,7 @@ void Octree::load(){
                 Octree* l = makeOctree(loc+(off*size/4), size/2, makeTill);
                 if(l) leaves.Add(l);
             }
-            UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): Before toJson line 312"));
             toJson();
-            UE_LOG(LogHolodeck, Warning, TEXT("Octree (DELETE THIS): After toJson line 312"));
         }
     
     }
