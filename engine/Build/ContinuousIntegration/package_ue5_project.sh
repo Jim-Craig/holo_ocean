@@ -2,7 +2,7 @@
 
 # This script packages the entire project
 
-ue5 setroot /home/ue5/UnrealEngine
+ue4 setroot /home/ue4/UnrealEngine
 
 packagename="$1"
 commit="$2"
@@ -24,7 +24,7 @@ echo "⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠�
 
 # Package it up
 echo "👉 Starting Packaging Process..."
-ue5 package Development
+ue4 package Development
 
 # Make sure it worked
 code=$?

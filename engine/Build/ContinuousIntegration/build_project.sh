@@ -4,8 +4,8 @@
 # to package it
 
 
-ue5 setroot /home/ue4/UnrealEngine 
-ue5 clean
+ue4 setroot /home/ue4/UnrealEngine 
+ue4 clean
 
 # Do the actual build
-ue5 build
+ue4 build

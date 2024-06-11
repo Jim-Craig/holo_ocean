@@ -50,7 +50,7 @@ engine/dist/
 # Builds
 !engine/Build/
 engine/Build/*
-!engine/Build/ContinuousIntegration/
+!engine/Build/ContinuousIntegration
 !engine/Build/ContinuousIntegration/*.sh
 engine/dist/*
 
