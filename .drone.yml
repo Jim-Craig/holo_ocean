@@ -18,6 +18,8 @@ steps:
     image: ghcr.io/epicgames/unreal-engine:dev-slim-5.3.2
     commands:
       - cd engine
+      - pip3 install ue4cli
+      - export PATH="/home/ue4/.local/bin:$PATH"
       - bash Build/ContinuousIntegration/package_ue5_project.sh "TestWorlds" ${DRONE_COMMIT:0:7}
       - echo "The pull request was successfully packaged"
     depends_on:
