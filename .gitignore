@@ -48,6 +48,7 @@ engine/dist/
 
 # Keep the build scripts folder
 # Builds
+!engine/Build/
 engine/Build/*
 !engine/Build/ContinuousIntegration/
 !engine/Build/ContinuousIntegration/*.sh
