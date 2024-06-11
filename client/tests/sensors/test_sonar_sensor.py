@@ -51,7 +51,7 @@ def test_folder_creation(size, config):
 
     dir = os.path.join(
         holoocean.util.get_holoocean_path(),
-        "worlds/TestWorlds/LinuxNoEditor/Holodeck/Octrees",
+        "worlds/TestWorlds/Linux/Holodeck/Octrees",
     )
     dir = os.path.join(
         dir, f"{config['world']}/min{int(size[0]*100)}_max{int(size[1]*100)}"
