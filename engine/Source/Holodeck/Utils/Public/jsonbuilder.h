@@ -17,7 +17,7 @@
 #define _JSONBUILDER_HPP__
 
 #include <string.h>
-#include <stdio.h>
+#include <cstring>
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace gason {
@@ -49,12 +49,16 @@ public:
     }
 
     StringBuilder&  append(const char* string, size_t length=0) {
-        if ( length == 0 )
+        if (length == 0)
+        {
             length = strlen(string);
+        }
 
-        if ( ( length + iindex ) < ilength ) {
-            // strncat(ibuffer+iindex, string, length);
-            strncat_s(ibuffer+iindex, strlen(ibuffer),string, length);
+        if ((length + iindex ) < ilength) 
+        {
+            //strncat(ibuffer+iindex, string, length);
+            //strncat_s(ibuffer+iindex, strlen(ibuffer), string, length);
+            std::strncat(ibuffer + iindex, string, length);
             iindex += length;
         }
         return *this;
