@@ -4,19 +4,20 @@ name: default
 
 steps:
   - name: Build Editor
-    image: adamrehn/ue4-full:4.27.2_10June2023
+    image: ghcr.io/epicgames/unreal-engine:dev-slim-5.3.2
     commands:
       - cd engine
+      - pip3 install ue4cli
       - bash Build/ContinuousIntegration/build_project.sh
       - echo "The commit builds"
     depends_on:
       - clone
 
   - name: Package Project
-    image: adamrehn/ue4-full:4.27.2_10June2023
+    image: ghcr.io/epicgames/unreal-engine:dev-slim-5.3.2
     commands:
       - cd engine
-      - bash Build/ContinuousIntegration/package_ue4_project.sh "TestWorlds" ${DRONE_COMMIT:0:7}
+      - bash Build/ContinuousIntegration/package_ue5_project.sh "TestWorlds" ${DRONE_COMMIT:0:7}
       - echo "The pull request was successfully packaged"
     depends_on:
       - Build Editor

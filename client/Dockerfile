@@ -1,4 +1,4 @@
-FROM adamrehn/ue4-runtime:22.04-cudagl11-noaudio
+FROM ghcr.io/epicgame/unreal-engine:runtime
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
