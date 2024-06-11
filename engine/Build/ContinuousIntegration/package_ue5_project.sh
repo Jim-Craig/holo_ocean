@@ -24,7 +24,7 @@ echo "⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠�
 
 # Package it up
 echo "👉 Starting Packaging Process..."
-ue4 package Development
+ue5 package Development
 
 # Make sure it worked
 code=$?
