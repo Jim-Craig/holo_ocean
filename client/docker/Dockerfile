@@ -1,4 +1,4 @@
-FROM ghcr.io/epicgame/unreal-engine:runtime
+FROM ghcr.io/epicgames/unreal-engine:runtime
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
