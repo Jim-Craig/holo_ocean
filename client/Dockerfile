@@ -2,7 +2,7 @@ FROM ghcr.io/epicgames/unreal-engine:runtime
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
+# RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git libglib2.0-dev software-properties-common
 
