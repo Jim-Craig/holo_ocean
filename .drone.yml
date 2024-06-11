@@ -8,6 +8,7 @@ steps:
     commands:
       - cd engine
       - pip3 install ue4cli
+      - export PATH="/home/ue4/.local/bin:$PATH"
       - bash Build/ContinuousIntegration/build_project.sh
       - echo "The commit builds"
     depends_on:
