@@ -124,7 +124,7 @@ public:
 private:
 
 	FString UUID;
-	std::map<std::string, std::unique_ptr<HolodeckSharedMemory>> Memory;
+	std::map<std::string, TUniquePtr<HolodeckSharedMemory>> Memory;
 	bool bIsRunning;
 
 	#if PLATFORM_WINDOWS

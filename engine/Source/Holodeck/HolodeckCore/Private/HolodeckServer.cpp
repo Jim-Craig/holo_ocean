@@ -86,7 +86,7 @@ void* UHolodeckServer::Malloc(const std::string& Key, unsigned int BufferSize) {
     // If this key doesn't already exist, or the buffer size has changed, allocate the memory.
     if (!Memory.count(Key) || Memory[Key]->Size() != BufferSize) {
         UE_LOG(LogHolodeck, Log, TEXT("Mallocing %u bytes for key %s"), BufferSize, UTF8_TO_TCHAR(Key.c_str()));
-        Memory[Key] = std::unique_ptr<HolodeckSharedMemory>(new HolodeckSharedMemory(Key, BufferSize, TCHAR_TO_UTF8(*UUID)));
+        Memory[Key] = MakeUnique<HolodeckSharedMemory>(HolodeckSharedMemory(Key, BufferSize, TCHAR_TO_UTF8(*UUID)));
     }
     return Memory[Key]->GetPtr();
 }
