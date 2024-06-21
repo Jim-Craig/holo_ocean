@@ -56,6 +56,7 @@ void UAddSensorCommand::Execute() {
 										{ "DepthSensor", UDepthSensor::StaticClass() },
 										{ "MagnetometerSensor", UMagnetometerSensor::StaticClass() },
 										{ "OpticalModemSensor", UOpticalModemSensor::StaticClass() },
+										{ "CameraSensor", UCameraSensor::StaticClass()}
 									};
 
 	FString AgentName = StringParams[0].c_str();

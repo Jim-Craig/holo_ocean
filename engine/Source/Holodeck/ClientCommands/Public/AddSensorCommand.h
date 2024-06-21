@@ -34,6 +34,7 @@
 #include "DepthSensor.h"
 #include "MagnetometerSensor.h"
 #include "OpticalModemSensor.h"
+#include "CameraSensor.h"
 
 #include "Command.h"
 #include "AddSensorCommand.generated.h"

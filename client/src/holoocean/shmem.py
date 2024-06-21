@@ -51,8 +51,7 @@ class Shmem:
         else:
             raise HoloOceanException("Currently unsupported os: " + os.name)
 
-        self.np_array = np.ndarray(shape, dtype=dtype)
-        self.np_array.data = (Shmem._numpy_to_ctype[dtype] * size).from_buffer(self._mem_pointer)
+        self.np_array = np.ndarray(shape, dtype=dtype, buffer=(Shmem._numpy_to_ctype[dtype] * size).from_buffer(self._mem_pointer))
 
     def unlink(self):
         """unlinks the shared memory"""

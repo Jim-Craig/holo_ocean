@@ -1596,6 +1596,72 @@ class OpticalModemSensor(HoloOceanSensor):
     def reset(self):
         self.__class__.instances = dict()
 
+class CameraSensor(HoloOceanSensor):
+    """Captures agent's view.
+
+    The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
+    The resolution can be increased, but will significantly impact performance.
+
+    **Configuration**
+
+    The ``configuration`` block (see :ref:`configuration-block`) accepts the following
+    options:
+
+    - ``CaptureWidth``: Width of captured image
+    - ``CaptureHeight``: Height of captured image
+
+    """
+
+    sensor_type = "CameraSensor"
+
+    def __init__(self, client, agent_name, agent_type, name="CameraSensor", config=None):
+        self.config = {} if config is None else config
+
+        width = 256
+        height = 256
+
+        if "CaptureHeight" in self.config:
+            height = self.config["CaptureHeight"]
+
+        if "CaptureWidth" in self.config:
+            width = self.config["CaptureWidth"]
+
+        self.shape = (height, width, 4)
+
+        super(CameraSensor, self).__init__(
+            client, agent_name, agent_type, name=name, config=config
+        )
+
+    @property
+    def dtype(self):
+        return np.uint8
+
+    @property
+    def data_shape(self):
+        return self.shape
+
+    def set_ticks_per_capture(self, ticks_per_capture):
+        """Sets this CameraSensor to capture a new frame every ticks_per_capture.
+
+        The sensor's image will remain unchanged between captures.
+
+        This method must be called after every call to env.reset.
+
+        Args:
+            ticks_per_capture (:obj:`int`): The amount of ticks to wait between camera captures.
+        """
+        if not isinstance(ticks_per_capture, int) or ticks_per_capture < 1:
+            raise HoloOceanConfigurationException(
+                "Invalid ticks_per_capture value " + str(ticks_per_capture)
+            )
+
+        command_to_send = RGBCameraRateCommand(
+            self.agent_name, self.name, ticks_per_capture
+        )
+        self._client.command_center.enqueue_command(command_to_send)
+        self.tick_every = ticks_per_capture
+
+
 
 ######################################################################################
 class SensorDefinition:
@@ -1616,6 +1682,7 @@ class SensorDefinition:
 
     _sensor_keys_ = {
         "RGBCamera": RGBCamera,
+        "CameraSensor": CameraSensor,
         "DistanceTask": DistanceTask,
         "LocationTask": LocationTask,
         "FollowTask": FollowTask,

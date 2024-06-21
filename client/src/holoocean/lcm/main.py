@@ -48,7 +48,7 @@ class SensorData:
             if value.shape[0] == 7:
                 self.msg.range = value[3:].tolist()
             else:
-                self.msg.range = np.full(4, np.NaN)
+                self.msg.range = np.full(4, np.nan)
         elif self.type == "IMUSensor":
             self.msg.acceleration = value[0].tolist()
             self.msg.angular_velocity = value[1].tolist()
@@ -56,18 +56,18 @@ class SensorData:
                 self.msg.acceleration_bias = value[2].tolist()
                 self.msg.angular_velocity_bias = value[3].tolist()
             else:
-                self.msg.acceleration_bias = np.full(3, np.NaN)
-                self.msg.angular_velocity_bias = np.full(3, np.NaN)
+                self.msg.acceleration_bias = np.full(3, np.nan)
+                self.msg.angular_velocity_bias = np.full(3, np.nan)
         elif self.type == "GPSSensor":
             self.msg.position = value.tolist()
         elif self.type == "AcousticBeaconSensor":
             self.msg.msg_type    = value[0]
             self.msg.from_beacon = value[1]
             # TODO Eventually somehow handle data passed through in value[2]
-            self.msg.azimuth   = value[3] if value[0] not in ["OWAY", "MSG_REQ", "MSG_RESP"] else np.NaN
-            self.msg.elevation = value[4] if value[0] not in ["OWAY", "MSG_REQ", "MSG_RESP"] else np.NaN
-            self.msg.range     = value[5] if value[0] in ["MSG_RESPU", "MSG_RESPX"] else np.NaN
-            self.msg.z         = value[-1] if value[0] in ["MSG_REQX", "MSG_RESPX"] else np.NaN
+            self.msg.azimuth   = value[3] if value[0] not in ["OWAY", "MSG_REQ", "MSG_RESP"] else np.nan
+            self.msg.elevation = value[4] if value[0] not in ["OWAY", "MSG_REQ", "MSG_RESP"] else np.nan
+            self.msg.range     = value[5] if value[0] in ["MSG_RESPU", "MSG_RESPX"] else np.nan
+            self.msg.z         = value[-1] if value[0] in ["MSG_REQX", "MSG_RESPX"] else np.nan
         elif self.type == "ImagingSonar":
             self.msg.bins_range = value.shape[0]
             self.msg.bins_azimuth = value.shape[1]
