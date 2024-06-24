@@ -1663,7 +1663,7 @@ class CameraSensor(HoloOceanSensor):
 
         
 
-class DepthCamera(HoloOceanSensor):
+class RGBDCamera(HoloOceanSensor):
     """Captures agent's view.
 
     The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
@@ -1679,9 +1679,9 @@ class DepthCamera(HoloOceanSensor):
 
     """
 
-    sensor_type = "DepthCamera"
+    sensor_type = "RGBDCamera"
 
-    def __init__(self, client, agent_name, agent_type, name="DepthCamera", config=None):
+    def __init__(self, client, agent_name, agent_type, name="RGBDCamera", config=None):
         self.config = {} if config is None else config
 
         width = 256
@@ -1695,7 +1695,7 @@ class DepthCamera(HoloOceanSensor):
 
         self.shape = (height, width, 4)
 
-        super(DepthCamera, self).__init__(
+        super(RGBDCamera, self).__init__(
             client, agent_name, agent_type, name=name, config=config
         )
 
@@ -1708,7 +1708,7 @@ class DepthCamera(HoloOceanSensor):
         return self.shape
 
     def set_ticks_per_capture(self, ticks_per_capture):
-        """Sets this CameraSensor to capture a new frame every ticks_per_capture.
+        """Sets this RGBDCamera to capture a new frame every ticks_per_capture.
 
         The sensor's image will remain unchanged between captures.
 
@@ -1751,7 +1751,7 @@ class SensorDefinition:
     _sensor_keys_ = {
         "RGBCamera": RGBCamera,
         "CameraSensor": CameraSensor,
-        "DepthCamera": DepthCamera,
+        "RGBDCamera": RGBDCamera,
         "DistanceTask": DistanceTask,
         "LocationTask": LocationTask,
         "FollowTask": FollowTask,

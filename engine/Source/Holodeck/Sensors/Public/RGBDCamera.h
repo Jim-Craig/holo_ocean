@@ -7,14 +7,14 @@
 #include "Holodeck.h"
 
 
-#include "DepthCamera.generated.h"
+#include "RGBDCamera.generated.h"
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class HOLODECK_API UDepthCamera : public UCameraSensor
+class HOLODECK_API URGBDCamera : public UCameraSensor
 {
 	GENERATED_BODY()
 
 public:
-	UDepthCamera();
+	URGBDCamera();
 
 	/**
 		* InitializeSensor
