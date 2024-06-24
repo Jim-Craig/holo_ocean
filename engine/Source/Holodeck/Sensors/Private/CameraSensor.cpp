@@ -261,7 +261,7 @@ void UCameraSensor::SetExposureCompensation(float Compensation)
 #if PLATFORM_LINUX
 	// Looks like Windows and Linux have different outputs with the
 	// same exposure compensation, this fixes it.
-	SceneCapture->PostProcessSettings.AutoExposureBias = Compensation + 0.75f
+	SceneCapture->PostProcessSettings.AutoExposureBias = Compensation + 0.75f;
 #else
 	SceneCapture->PostProcessSettings.AutoExposureBias = Compensation;
 #endif
