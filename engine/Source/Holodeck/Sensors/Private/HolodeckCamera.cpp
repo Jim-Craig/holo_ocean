@@ -42,9 +42,6 @@ void UHolodeckCamera::InitializeSensor() {
 		SceneCapture->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 		SceneCapture->FOVAngle = 90; //90 degrees for field of view.
 		//Handle whatever setup of the SceneCapture that won't likely change across different cameras. (These will be the defaults)
-		SceneCapture->ProjectionType = ECameraProjectionMode::Perspective;
-		SceneCapture->CompositeMode = SCCM_Overwrite;
-		SceneCapture->CaptureSource = SCS_SceneColorHDR;
 		SceneCapture->PostProcessSettings.bOverride_AutoExposureBias = 1;
 		
 		// Higher = brighter captured image. Lower = darker
@@ -63,8 +60,11 @@ void UHolodeckCamera::InitializeSensor() {
 	TargetTexture->CompressionSettings = TC_VectorDisplacementmap;
 	TargetTexture->RenderTargetFormat = RTF_RGBA8;
 	TargetTexture->InitCustomFormat(CaptureWidth, CaptureHeight, PF_FloatRGBA, false);
+	SceneCapture->PostProcessSettings.bOverride_AutoExposureBias = 1;
 
-
+	SceneCapture->ProjectionType = ECameraProjectionMode::Perspective;
+	SceneCapture->CompositeMode = SCCM_Overwrite;
+	SceneCapture->CaptureSource = SCS_SceneColorHDR;
 	SceneCapture->TextureTarget = TargetTexture;
 
 

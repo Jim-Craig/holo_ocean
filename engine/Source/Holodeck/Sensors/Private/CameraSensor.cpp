@@ -28,16 +28,182 @@ void UCameraSensor::ParseSensorParms(FString ParmsJson)
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 		
-		if (JsonParsed->HasTypedField<EJson::Number>("TicksPerCapture")) {
-			TicksPerCapture = JsonParsed->GetIntegerField("TicksPerCapture");
-		}
+		JsonParsed->TryGetNumberField("TicksPerCapture", TicksPerCapture);
 
-		if (JsonParsed->HasField("FovAngle"))
+		if (JsonParsed->TryGetNumberField("FovAngle", FovAngle))
 		{
-			
-			SetFOVAngle(static_cast<float>(JsonParsed->GetNumberField("FovAngle")));
+			SetFOVAngle(FovAngle);
 		}
 
+		if (JsonParsed->TryGetNumberField("TargetGamma", TargetGamma))
+		{
+			SetTargetGamma(TargetGamma);
+		}
+
+		if (FString exposureMethod; JsonParsed->TryGetStringField("ExposureMethod", exposureMethod))
+		{
+			if (exposureMethod == "AEM_Histogram")
+			{
+				SetExposureMethod(AEM_Histogram);
+			}
+			else if (exposureMethod == "AEM_Basic")
+			{
+				SetExposureMethod(AEM_Basic);
+			}
+			else if (exposureMethod == "AEM_Manual")
+			{
+				SetExposureMethod(AEM_Manual);
+			}
+			else if (exposureMethod == "AEM_MAX")
+			{
+				SetExposureMethod(AEM_MAX);
+			}
+			else
+			{
+				UE_LOG(LogHolodeck, Error, TEXT("%s is NOT a valid Exposure Method"), *exposureMethod);
+			}
+
+		}
+		if (JsonParsed->TryGetNumberField("ExposureCompensation", ExposureCompensation))
+		{
+			SetExposureCompensation(ExposureCompensation);
+		}
+		else
+		{
+			// Higher = brighter captured image. Lower = darker
+			// This is a magic number that has been fine-tuned to the default worlds. Do not edit without thorough testing.
+			SetExposureCompensation(4);
+		}
+
+		if (JsonParsed->TryGetNumberField("ShutterSpeed", ShutterSpeed))
+		{
+			SetShutterSpeed(ShutterSpeed);
+		}
+
+		if (JsonParsed->TryGetNumberField("ISO", Iso))
+		{
+			SetISO(Iso);
+		}
+
+		if (JsonParsed->TryGetNumberField("Aperture", Aperture))
+		{
+			SetAperture(Aperture);
+		}
+
+		if (JsonParsed->TryGetNumberField("FocalDistance", FocalDistance))
+		{
+			SetFocalDistance(FocalDistance);
+		}
+
+		if (JsonParsed->TryGetNumberField("DepthBlurAmount", DepthBlurAmount))
+		{
+			SetDepthBlurAmount(DepthBlurAmount);
+		}
+
+		if (JsonParsed->TryGetNumberField("DepthBlurRadius", DepthBlurRadius))
+		{
+			SetDepthBlurRadius(DepthBlurRadius);
+		}
+
+		if (JsonParsed->TryGetNumberField("BladeCount", BladeCount))
+		{
+			SetBladeCount(BladeCount);
+		}
+
+		if (JsonParsed->TryGetNumberField("DepthOfFieldMinFstop", DepthOfFieldMinFstop))
+		{
+			SetDepthOfFieldMinFstop(DepthOfFieldMinFstop);
+		}
+
+		if (JsonParsed->TryGetNumberField("FilmSlope", FilmSlope))
+		{
+			SetFilmSlope(FilmSlope);
+		}
+
+		if (JsonParsed->TryGetNumberField("FilmToe", FilmToe))
+		{
+			SetFilmToe(FilmToe);
+		}
+
+		if (JsonParsed->TryGetNumberField("FilmShoulder", FilmShoulder))
+		{
+			SetFilmShoulder(FilmShoulder);
+		}
+
+		if (JsonParsed->TryGetNumberField("FilmBlackClip", FilmBlackClip))
+		{
+			SetFilmBlackClip(FilmBlackClip);
+		}
+
+		if (JsonParsed->TryGetNumberField("FilmWhiteClip", FilmWhiteClip))
+		{
+			SetFilmWhiteClip(FilmWhiteClip);
+		}
+
+		if (JsonParsed->TryGetNumberField("ExposureMinBrightness", ExposureMinBrightness))
+		{
+			SetExposureMinBrightness(ExposureMinBrightness);
+		}
+
+		if (JsonParsed->TryGetNumberField("ExposureMaxBrightness", ExposureMinBrightness))
+		{
+			SetExposureMinBrightness(ExposureMaxBrightness);
+		}
+
+		if (JsonParsed->TryGetNumberField("ExposureSpeedDown", ExposureSpeedDown))
+		{
+			SetExposureSpeedDown(ExposureSpeedDown);
+		}
+
+		if (JsonParsed->TryGetNumberField("ExposureSpeedUp", ExposureSpeedUp))
+		{
+			SetExposureSpeedUp(ExposureSpeedUp);
+		}
+
+		if (JsonParsed->TryGetNumberField("MotionBlurIntensity", MotionBlurIntensity))
+		{
+			SetMotionBlurIntensity(MotionBlurIntensity);
+		}
+
+		if (JsonParsed->TryGetNumberField("MotionBlurMaxDistortion", MotionBlurMaxDistortion))
+		{
+			SetMotionBlurMaxDistortion(MotionBlurMaxDistortion);
+		}
+
+		if (JsonParsed->TryGetNumberField("MotionBlurMinObjectScreenSize", MotionBlurMinObjectScreenSize))
+		{
+			SetMotionBlurMinObjectScreenSize(MotionBlurMinObjectScreenSize);
+		}
+
+		if (JsonParsed->TryGetNumberField("LensFlareIntensity", LensFlareIntensity))
+		{
+			SetLensFlareIntensity(LensFlareIntensity);
+		}
+
+		if (JsonParsed->TryGetNumberField("BloomIntensity", BloomIntensity))
+		{
+			SetBloomIntensity(BloomIntensity);
+		}
+
+		if (JsonParsed->TryGetNumberField("WhiteTemp", WhiteTemp))
+		{
+			SetWhiteTemp(WhiteTemp);
+		}
+		
+		if (JsonParsed->TryGetNumberField("WhiteTint", WhiteTint))
+		{
+			SetWhiteTemp(WhiteTint);
+		}
+
+		if (JsonParsed->TryGetNumberField("ChromAberrIntensity", ChromAberrIntensity))
+		{
+			SetChromAberrIntensity(ChromAberrIntensity);
+		}
+
+		if (JsonParsed->TryGetNumberField("ChromAberrOffset", ChromAberrOffset))
+		{
+			SetChromAberrOffset(ChromAberrOffset);
+		}
 		
 	} else {
 		UE_LOG(LogHolodeck, Fatal, TEXT("UCameraSensor::ParseSensorParms:: Unable to parse json."));
@@ -52,8 +218,6 @@ void UCameraSensor::InitializeSensor() {
 	
 	//Set up everything for the SceneCaptureComponent2D
 	SceneCapture->CaptureSource = SCS_FinalColorLDR; //Pick what type of output you want to be sent to the texture target.
-
-		UE_LOG(LogHolodeck, Error, TEXT("FOV IS SET TO: %f"), SceneCapture->FOVAngle);
 }
 
 
@@ -134,10 +298,10 @@ float UCameraSensor::GetISO() const
 	return SceneCapture->PostProcessSettings.CameraISO;
 }
 
-void UCameraSensor::SetAperture(float Aperture)
+void UCameraSensor::SetAperture(float aperture)
 {
 	check(SceneCapture != nullptr);
-	SceneCapture->PostProcessSettings.DepthOfFieldFstop = Aperture;
+	SceneCapture->PostProcessSettings.DepthOfFieldFstop = aperture;
 }
 
 float UCameraSensor::GetAperture() const
