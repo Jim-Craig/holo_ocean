@@ -4,12 +4,6 @@
 #include "Engine.h"
 
 #include "Engine/SceneCapture2D.h"
-#include "Components/SceneCaptureComponent2D.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "Kismet/GameplayStatics.h"
-#include "ShowFlags.h"
-
-#include "Materials/Material.h"
 
 #include "RHICommandList.h"
 
@@ -26,6 +20,10 @@ void UCameraSensor::ParseSensorParms(FString ParmsJson)
 {
 	Super::ParseSensorParms(ParmsJson);
 
+	SceneCapture = NewObject<USceneCaptureComponent2D>(this, "SceneCap");
+	SceneCapture->RegisterComponent();
+	SceneCapture->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+	
 	TSharedPtr<FJsonObject> JsonParsed;
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
@@ -33,6 +31,14 @@ void UCameraSensor::ParseSensorParms(FString ParmsJson)
 		if (JsonParsed->HasTypedField<EJson::Number>("TicksPerCapture")) {
 			TicksPerCapture = JsonParsed->GetIntegerField("TicksPerCapture");
 		}
+
+		if (JsonParsed->HasField("FovAngle"))
+		{
+			
+			SetFOVAngle(static_cast<float>(JsonParsed->GetNumberField("FovAngle")));
+		}
+
+		
 	} else {
 		UE_LOG(LogHolodeck, Fatal, TEXT("UCameraSensor::ParseSensorParms:: Unable to parse json."));
 	}
@@ -46,7 +52,10 @@ void UCameraSensor::InitializeSensor() {
 	
 	//Set up everything for the SceneCaptureComponent2D
 	SceneCapture->CaptureSource = SCS_FinalColorLDR; //Pick what type of output you want to be sent to the texture target.
+
+		UE_LOG(LogHolodeck, Error, TEXT("FOV IS SET TO: %f"), SceneCapture->FOVAngle);
 }
+
 
 void UCameraSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 
@@ -59,14 +68,14 @@ void UCameraSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UCameraSensor::SetFOVAngle(float FOVAngle)
 {
-	check(SceneCapture != nullptr);
-	SceneCapture->FOVAngle = FOVAngle;
+	check(this->SceneCapture != nullptr);
+	this->SceneCapture->FOVAngle = FOVAngle;
 }
 
 float UCameraSensor::GetFOVAngle() const
 {
-	check(SceneCapture != nullptr);
-	return SceneCapture->FOVAngle;	
+	check(this->SceneCapture != nullptr);
+	return this->SceneCapture->FOVAngle;
 }
 
 void UCameraSensor::SetExposureMethod(EAutoExposureMethod Method)
@@ -92,6 +101,7 @@ void UCameraSensor::SetExposureCompensation(float Compensation)
 #else
 	SceneCapture->PostProcessSettings.AutoExposureBias = Compensation;
 #endif
+
 }
 
 float UCameraSensor::GetExposureCompensation() const
@@ -403,10 +413,10 @@ float UCameraSensor::GetChromAberrIntensity() const
 	return SceneCapture->PostProcessSettings.SceneFringeIntensity;
 }
 
-void UCameraSensor::SetChromAberrOffset(float ChromAberrOffset)
+void UCameraSensor::SetChromAberrOffset(float chromAberrOffset)
 {
 	check(SceneCapture != nullptr);
-	SceneCapture->PostProcessSettings.ChromaticAberrationStartOffset = ChromAberrOffset;
+	SceneCapture->PostProcessSettings.ChromaticAberrationStartOffset = chromAberrOffset;
 }
 
 float UCameraSensor::GetChromAberrOffset() const
