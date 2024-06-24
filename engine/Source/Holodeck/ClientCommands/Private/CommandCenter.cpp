@@ -18,7 +18,7 @@ UCommandCenter::UCommandCenter() {
 }
 
 void UCommandCenter::Tick(float DeltaTime) {
-	if (ShouldReadBufferPtr && *ShouldReadBufferPtr == true) {
+	if (ShouldReadBufferPtr && *ShouldReadBufferPtr) {
 		ReadCommandBuffer();
 		*ShouldReadBufferPtr = false;
 	}
@@ -29,23 +29,19 @@ void UCommandCenter::Tick(float DeltaTime) {
 
 void UCommandCenter::GetCommandBuffer() {
 	UE_LOG(LogHolodeck, Log, TEXT("CommandCenter:: is getting command buffer"));
-	if (Server == nullptr) {
+	if (!Server)
+	{
 		UE_LOG(LogHolodeck, Warning, TEXT("CommandCenter could not find server..."));
-	} else {
+	}
+	else
+	{
 		Buffer = static_cast<char*>(Server->Malloc(TCHAR_TO_UTF8(*BUFFER_NAME), BUFFER_SIZE * BYTE_SIZE));
 
 		if (!Buffer) {
 			UE_LOG(LogHolodeck, Fatal, TEXT("CommandCenter::GetCommandBuffer: Failed to allocate shared memory for buffer!"));
 		}
 
-		ShouldReadBufferPtr = static_cast<bool*>(Server->Malloc(TCHAR_TO_UTF8(*BUFFER_SHOULD_READ_NAME), BUFFER_SHOULD_READ_SIZE * sizeof(bool) + 4095));
-		if (ShouldReadBufferPtr != nullptr){
-			UE_LOG(LogHolodeck, Warning, TEXT("Next line has been bugged. Debug log message 1."));
-			*ShouldReadBufferPtr = false;
-			UE_LOG(LogHolodeck, Warning, TEXT("Prev line is bugged. debug msg 2."))
-		}
-		else
-			UE_LOG(LogHolodeck, Error, TEXT("UCommandCenter::ShouldReadBufferPtr is null"));
+		ShouldReadBufferPtr = static_cast<bool*>(Server->Malloc(TCHAR_TO_UTF8(*BUFFER_SHOULD_READ_NAME), BUFFER_SHOULD_READ_SIZE * sizeof(bool)));
 	}
 }
 
@@ -59,6 +55,8 @@ int UCommandCenter::ReadCommandBuffer() {
 	char *Endptr;
 	gason::JsonValue Value;
 	gason::JsonAllocator Allocator;
+	UE_LOG(LogHolodeck, Warning, TEXT("Reading from command buffer"))
+
 	int Status = gason::jsonParse(Buffer, &Endptr, &Value, Allocator);
 	if (Status != gason::JSON_PARSE_OK) {
 		UE_LOG(LogHolodeck, Error, TEXT("Unable to parse command buffer as a json file"));
