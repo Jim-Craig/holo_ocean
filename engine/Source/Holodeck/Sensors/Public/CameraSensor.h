@@ -77,6 +77,14 @@ public:
   float FovAngle;
 
   UFUNCTION(BlueprintCallable)
+  void SetViewDistance(float viewDistance);
+
+  UFUNCTION(BlueprintCallable)
+  float GetViewDistance() const;
+
+  float ViewDistance;
+
+  UFUNCTION(BlueprintCallable)
   void SetTargetGamma(float InTargetGamma)
   {
     TargetGamma = InTargetGamma;

@@ -204,6 +204,17 @@ void UCameraSensor::ParseSensorParms(FString ParmsJson)
 		{
 			SetChromAberrOffset(ChromAberrOffset);
 		}
+
+		if (JsonParsed->TryGetNumberField("MaxViewDistanceOverride", ViewDistance))
+		{
+			SetViewDistance(ViewDistance);
+		}
+		else
+		{
+			// Half of the maximum view distance
+			ViewDistance = 5000;
+			SetViewDistance(ViewDistance);
+		}
 		
 	} else {
 		UE_LOG(LogHolodeck, Fatal, TEXT("UCameraSensor::ParseSensorParms:: Unable to parse json."));
@@ -241,6 +252,19 @@ float UCameraSensor::GetFOVAngle() const
 	check(this->SceneCapture != nullptr);
 	return this->SceneCapture->FOVAngle;
 }
+
+void UCameraSensor::SetViewDistance(float viewDistance)
+{
+	check(this->SceneCapture != nullptr);
+	this->SceneCapture->MaxViewDistanceOverride = viewDistance;
+}
+
+float UCameraSensor::GetViewDistance() const
+{
+	check(this->SceneCapture != nullptr);
+	return this->SceneCapture->MaxViewDistanceOverride;	
+}
+
 
 void UCameraSensor::SetExposureMethod(EAutoExposureMethod Method)
 {
