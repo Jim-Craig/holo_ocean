@@ -2,11 +2,12 @@
 
 #include "CameraSensor.h"
 #include "Holodeck.h"
+#include "ShaderBasedSensor.h"
 
 #include "SemanticSegmentationCamera.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class HOLODECK_API USemanticSegmentationCamera : public UCameraSensor
+class HOLODECK_API USemanticSegmentationCamera : public UShaderBasedSensor
 {
 	GENERATED_BODY()
 

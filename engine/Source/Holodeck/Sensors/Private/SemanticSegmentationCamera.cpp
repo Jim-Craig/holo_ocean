@@ -4,6 +4,8 @@
 USemanticSegmentationCamera::USemanticSegmentationCamera()
 {
 	SensorName = "RGBDCamera";
+
+	//AddPostProcessingMaterial();
 }
 
 void USemanticSegmentationCamera::ParseSensorParms(FString ParmsJson)
