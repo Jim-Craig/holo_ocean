@@ -35,9 +35,20 @@ void UHolodeckCamera::InitializeSensor() {
 	UE_LOG(LogHolodeck, Log, TEXT("UHolodeckCamera::InitializeSensor"));
 	Super::InitializeSensor();
 
-	SceneCapture = NewObject<USceneCaptureComponent2D>(this, "SceneCap");
-	SceneCapture->RegisterComponent();
-	SceneCapture->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+	if (!SceneCapture)
+	{
+		SceneCapture = NewObject<USceneCaptureComponent2D>(this, "SceneCap");
+		SceneCapture->RegisterComponent();
+		SceneCapture->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+		SceneCapture->FOVAngle = 90; //90 degrees for field of view.
+		//Handle whatever setup of the SceneCapture that won't likely change across different cameras. (These will be the defaults)
+		SceneCapture->PostProcessSettings.bOverride_AutoExposureBias = 1;
+		
+		// Higher = brighter captured image. Lower = darker
+		// This is a magic number that has been fine tuned to the default worlds. Do not edit without thourough testing.
+		SceneCapture->PostProcessSettings.AutoExposureBias = 4;
+	}
+
 	
 	TargetTexture = NewObject<UTextureRenderTarget2D>(this);
 
@@ -49,18 +60,14 @@ void UHolodeckCamera::InitializeSensor() {
 	TargetTexture->CompressionSettings = TC_VectorDisplacementmap;
 	TargetTexture->RenderTargetFormat = RTF_RGBA8;
 	TargetTexture->InitCustomFormat(CaptureWidth, CaptureHeight, PF_FloatRGBA, false);
-
-	//Handle whatever setup of the SceneCapture that won't likely change across different cameras. (These will be the defaults)
-	SceneCapture->ProjectionType = ECameraProjectionMode::Perspective;
-	SceneCapture->CompositeMode = SCCM_Overwrite;
-	SceneCapture->FOVAngle = 90; //90 degrees for field of view.
-	SceneCapture->CaptureSource = SCS_SceneColorHDR;
-	SceneCapture->TextureTarget = TargetTexture;
 	SceneCapture->PostProcessSettings.bOverride_AutoExposureBias = 1;
 
-	// Higher = brighter captured image. Lower = darker
-	// This is a magic number that has been fine tuned to the default worlds. Do not edit without thourough testing.
-	SceneCapture->PostProcessSettings.AutoExposureBias = 4;
+	SceneCapture->ProjectionType = ECameraProjectionMode::Perspective;
+	SceneCapture->CompositeMode = SCCM_Overwrite;
+	SceneCapture->CaptureSource = SCS_SceneColorHDR;
+	SceneCapture->TextureTarget = TargetTexture;
+
+
 
 	//The buffer has got to be an FColor pointer so you can export the pixel data to it. 
 	this->Buffer = static_cast<FColor*>(Super::Buffer);

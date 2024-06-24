@@ -723,7 +723,7 @@ class HoveringAUV(HoloOceanAgent):
         limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
         
         scheme_control = "[des_x, des_y, des_z, des_roll, des_pitch, des_yaw]"
-        limits_control = [np.NaN, np.NaN, np.NaN, 180, 90, 180]
+        limits_control = [np.nan, np.nan, np.nan, 180, 90, 180]
         
         return [(scheme_thrusters, ContinuousActionSpace([8], low=[-self.__MAX_THRUST]*8, high=[self.__MAX_THRUST]*8)),
                 (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
@@ -784,7 +784,7 @@ class SurfaceVessel(HoloOceanAgent):
         limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
         
         scheme_control = "[des_x, des_y]"
-        limits_control = [np.NaN, np.NaN]
+        limits_control = [np.nan, np.nan]
         
         return [(scheme_thrusters, ContinuousActionSpace([2], low=[-self.__MAX_THRUST]*8, high=[self.__MAX_THRUST]*8)),
                 (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),

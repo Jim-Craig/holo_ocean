@@ -52,9 +52,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	int CaptureHeight = 256;
+	UHolodeckViewportClient* ViewportClient;
 
 private:
 
 	bool bPointerGivenToViewport = false;
-	UHolodeckViewportClient* ViewportClient;
 };
