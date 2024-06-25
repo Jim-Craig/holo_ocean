@@ -36,6 +36,7 @@
 #include "OpticalModemSensor.h"
 #include "CameraSensor.h"
 #include "RGBDCamera.h"
+#include "SemanticSegmentationCamera.h"
 
 #include "Command.h"
 #include "AddSensorCommand.generated.h"

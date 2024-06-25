@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿
+#pragma once
 #include "CameraSensor.h"
 #include "SensorShader.h"
 #include "ShaderFloatParameterValue.h"
@@ -20,7 +21,7 @@ public:
 
 	/**
 	* Allows parameters to be set dynamically
-	*/
+	**/
 	virtual void ParseSensorParms(FString ParmsJson) override {};
 
 	/// Load the UMaterialInstanceDynamic at the given @a Path and
@@ -59,3 +60,4 @@ private:
 	UPROPERTY()
 	TArray<FShaderFloatParameterValue> FloatShaderParams;
 };
+

@@ -18,12 +18,12 @@ public:
 	/**
 	* InitializeSensor
 	* Sets up the class
-	*/
+	**/
 	virtual void InitializeSensor() override;
 
 	/**
 	* Allows parameters to be set dynamically
-	*/
+	**/
 	virtual void ParseSensorParms(FString ParmsJson) override;
 
 protected:

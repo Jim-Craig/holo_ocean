@@ -5,7 +5,10 @@ USemanticSegmentationCamera::USemanticSegmentationCamera()
 {
 	SensorName = "RGBDCamera";
 
-	//AddPostProcessingMaterial();
+	//AddPostProcessingMaterial(
+	//	TEXT("/Script/Engine.Material'/Game/PostProcessingMaterials/PhysicLensDistortion.PhysicLensDistortion'"));
+	//AddPostProcessingMaterial(
+	//	TEXT("/Script/Engine.Material'/Game/PostProcessingMaterials/GTMaterial.GTMaterial'"));
 }
 
 void USemanticSegmentationCamera::ParseSensorParms(FString ParmsJson)
@@ -24,10 +27,10 @@ void USemanticSegmentationCamera::TickSensorComponent(float DeltaTime, ELevelTic
 	TickCounter++;
 	if (TickCounter >= TicksPerCapture) {
 		RenderRequest.RetrievePixels(Buffer, TargetTexture);
-
 		TickCounter -= TicksPerCapture;
 	}
 }
+
 
 
 

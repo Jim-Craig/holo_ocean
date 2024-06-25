@@ -59,7 +59,9 @@ void UAddSensorCommand::Execute() {
 		{ "OpticalModemSensor", UOpticalModemSensor::StaticClass() },
 		{ "CameraSensor", UCameraSensor::StaticClass()},
 		{"RGBDCamera", URGBDCamera::StaticClass()},
-									};
+		{"SemanticSegmentationCamera", USemanticSegmentationCamera::StaticClass()},
+
+	};
 
 	FString AgentName = StringParams[0].c_str();
 	FString SensorName = StringParams[1].c_str();
