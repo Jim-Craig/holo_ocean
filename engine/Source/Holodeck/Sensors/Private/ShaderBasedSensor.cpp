@@ -42,4 +42,10 @@ void UShaderBasedSensor::SetFloatShaderParameter(uint8_t ShaderIndex, const FNam
 	FloatShaderParams.Add({ShaderIndex, ParameterName, Value});
 }
 
+void UShaderBasedSensor::InitializeSensor()
+{
+	Super::InitializeSensor();
+	SetUpSceneCaptureComponent();
+}
+
 

@@ -1815,7 +1815,7 @@ class SensorDefinition:
         "RGBCamera": RGBCamera,
         "CameraSensor": CameraSensor,
         "RGBDCamera": RGBDCamera,
-        # "SemanticSegmentationCamera": SemanticSegmentationCamera,
+        "SemanticSegmentationCamera": SemanticSegmentationCamera,
         "DistanceTask": DistanceTask,
         "LocationTask": LocationTask,
         "FollowTask": FollowTask,

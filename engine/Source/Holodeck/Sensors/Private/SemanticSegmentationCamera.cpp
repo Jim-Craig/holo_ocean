@@ -3,12 +3,12 @@
 
 USemanticSegmentationCamera::USemanticSegmentationCamera()
 {
-	SensorName = "RGBDCamera";
+	SensorName = "SemanticSegmentationCamera";
 
-	//AddPostProcessingMaterial(
-	//	TEXT("/Script/Engine.Material'/Game/PostProcessingMaterials/PhysicLensDistortion.PhysicLensDistortion'"));
-	//AddPostProcessingMaterial(
-	//	TEXT("/Script/Engine.Material'/Game/PostProcessingMaterials/GTMaterial.GTMaterial'"));
+	AddPostProcessingMaterial(
+	TEXT("/Script/Engine.Material'/Game/PostProcessingMaterials/PhysicLensDistortion.PhysicLensDistortion'"));
+	AddPostProcessingMaterial(
+	TEXT("/Script/Engine.Material'/Game/PostProcessingMaterials/GTMaterial.GTMaterial'"));
 }
 
 void USemanticSegmentationCamera::ParseSensorParms(FString ParmsJson)

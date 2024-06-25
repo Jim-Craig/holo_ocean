@@ -211,9 +211,8 @@ void UCameraSensor::ParseSensorParms(FString ParmsJson)
 		}
 		else
 		{
-			// Half of the maximum view distance
-			ViewDistance = 5000;
-			SetViewDistance(ViewDistance);
+			/*ViewDistance = 10000;
+			SetViewDistance(ViewDistance);*/
 		}
 		
 	} else {

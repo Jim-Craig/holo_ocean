@@ -17,7 +17,7 @@ class HOLODECK_API UShaderBasedSensor : public UCameraSensor
 public:
 	UShaderBasedSensor() { SensorName = "ShaderBasedSensor (DO NOT INSTANTIATE BY ITSELF!)"; };
 
-	virtual void InitializeSensor() override {};
+	virtual void InitializeSensor() override;
 
 	/**
 	* Allows parameters to be set dynamically
