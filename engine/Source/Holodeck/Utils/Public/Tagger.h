@@ -57,6 +57,13 @@ public:
 	/// Method that computes the label corresponding to a folder path
 	static holoocean::ObjectLabel GetLabelByFolderName(const FString &String);
 
+	virtual void BeginPlay() override
+	{
+		if (UWorld* world = GetWorld(); world)
+		{
+			TagActorsInLevel(*world, true);
+		}
+	}
 	
 	
 	/// Method that computes the label corresponding to an specific object
@@ -70,13 +77,10 @@ public:
 
 		if (StringArray.Num() > 4)
 		{
-			UE_LOG(LogHolodeck, Log, TEXT("Folder name it searched: %s"), *StringArray[StringArray.Num() - 3]);
-
 			holoocean::ObjectLabel folderLabel = GetLabelByFolderName(StringArray[StringArray.Num() - 3]);
 			return folderLabel;
 		}
 		return holoocean::ObjectLabel::None;
-		//return (StringArray.Num() > 4 ? GetLabelByFolderName(StringArray[4]) : holoocean::ObjectLabel::None);
 	}
 
 	static void SetStencilValue(UPrimitiveComponent &Component, const holoocean::ObjectLabel& Label, const bool bShouldSetRenderCustomDepth);

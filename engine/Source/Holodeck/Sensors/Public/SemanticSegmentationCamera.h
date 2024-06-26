@@ -6,6 +6,7 @@
 
 #include "SemanticSegmentationCamera.generated.h"
 
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class HOLODECK_API USemanticSegmentationCamera : public UShaderBasedSensor
 {

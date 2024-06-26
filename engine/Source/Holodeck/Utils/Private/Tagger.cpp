@@ -13,6 +13,8 @@ holoocean::ObjectLabel ATagger::GetLabelByFolderName(const FString& String)
 	else if (String == "OceanFloor") return holoocean::ObjectLabel::Ground;
 	else if (String == "Yachts") return holoocean::ObjectLabel::Yacht;
 	else if (String == "ContainerShips") return holoocean::ObjectLabel::ContainerBoat;
+	else if (String == "DamEnvironment") return holoocean::ObjectLabel::DamEnvironment;
+	else if (String == "Landscape") return holoocean::ObjectLabel::Landscape;
 	else return holoocean::ObjectLabel::None;
 }
 
@@ -49,13 +51,27 @@ void ATagger::TagActor(const AActor& Actor, bool bShouldTagForSemanticSegmentati
 
 	for (UStaticMeshComponent* Component : StaticMeshComponents)
 	{
-		auto Label = GetLabelByPath(Component->GetStaticMesh());
-
-		SetStencilValue(*Component, Label, bShouldTagForSemanticSegmentation);
-
-		if (!Component->IsVisible() || !Component->GetStaticMesh())
+		if (Actor.Tags.Num() > 0)
 		{
-			continue;
+			auto Label = GetLabelByFolderName(Actor.Tags[0].ToString());
+			UE_LOG(LogHolodeck, Error, TEXT("TAG FOUND!: %s"), *Actor.Tags[0].ToString());
+			SetStencilValue(*Component, Label, bShouldTagForSemanticSegmentation);
+
+			if (!Component->IsVisible() || !Component->GetStaticMesh())
+			{
+				continue;
+			}
+		}
+		else
+		{
+			auto Label = GetLabelByPath(Component->GetStaticMesh());
+
+			SetStencilValue(*Component, Label, bShouldTagForSemanticSegmentation);
+
+			if (!Component->IsVisible() || !Component->GetStaticMesh())
+			{
+				continue;
+			}
 		}
 	}
 }
@@ -100,6 +116,11 @@ FString ATagger::GetTagAsString(holoocean::ObjectLabel Tag)
 		HOLOOCEAN_GET_LABEL_STR(None)
 		HOLOOCEAN_GET_LABEL_STR(Boat)
 		HOLOOCEAN_GET_LABEL_STR(Ground)
+		HOLOOCEAN_GET_LABEL_STR(Yacht)
+		HOLOOCEAN_GET_LABEL_STR(ContainerBoat)
+		HOLOOCEAN_GET_LABEL_STR(DamEnvironment)
+		HOLOOCEAN_GET_LABEL_STR(Landscape)
+
 		HOLOOCEAN_GET_LABEL_STR(Any)
 
 	#undef CARLA_GET_LABEL_STR
@@ -119,12 +140,18 @@ void ATagger::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 }
 #endif // WITH_EDITOR
 
+
+
 ATagger::ATagger()
 {
+	/*
 	if (GetWorld())
 	{
+		UE_LOG(LogHolodeck, Warning, TEXT("Tagging all actors in level"));
+
 		TagActorsInLevel(*GetWorld(), true);
 	}
+	*/
 	
 }
 

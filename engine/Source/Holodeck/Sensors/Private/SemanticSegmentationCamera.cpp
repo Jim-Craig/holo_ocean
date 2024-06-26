@@ -26,7 +26,7 @@ void USemanticSegmentationCamera::TickSensorComponent(float DeltaTime, ELevelTic
 
 	TickCounter++;
 	if (TickCounter >= TicksPerCapture) {
-		RenderRequest.RetrievePixels(Buffer, TargetTexture);
+		RenderRequest.RetrievePixels(Buffer, TargetTexture, true);
 		TickCounter -= TicksPerCapture;
 	}
 }

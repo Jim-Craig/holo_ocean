@@ -14,7 +14,18 @@ void FRenderRequest::RetrievePixels(FColor* PixelBuffer, UTextureRenderTarget2D*
 	TGraphTask<FRenderRequest>::CreateTask().ConstructAndDispatchWhenReady(*this);
 }
 
-void FRenderRequest::ExecuteTask()
+void FRenderRequest::RetrievePixels(FColor* PixelBuffer, UTextureRenderTarget2D* Texture, bool ShouldConvertToPalette) {
+	this->Buffer = PixelBuffer;
+	this->TargetTexture = Texture;
+	this->ConvertToPalette = ShouldConvertToPalette;
+	this->Palette = HolooceanPalette();
+	CheckNotBlockedOnRenderThread(); // not the issue
+
+	// Queue up the task of rendering the scene in the render thread
+	TGraphTask<FRenderRequest>::CreateTask().ConstructAndDispatchWhenReady(*this);
+}
+
+void FRenderRequest::ExecuteTask() const
 {
 	SCOPE_CYCLE_COUNTER(STAT_CameraExecuteTask);
 
@@ -41,7 +52,19 @@ void FRenderRequest::ExecuteTask()
 
 		{
 			SCOPE_CYCLE_COUNTER(STAT_CameraExecuteTask_Memcpy);
+
+			if (ConvertToPalette)
+			{
+				// Translate the surface data using the palette
+				for (int i = 0; i < SurfaceData.Num(); i++)
+				{
+					const unsigned char* color = Palette.GetColor(SurfaceData[i].R);
+					SurfaceData[i] = FColor(color[0], color[1], color[2]);
+				}
+			}
+
 			FMemory::Memcpy(this->Buffer, &SurfaceData[0], SurfaceData.Num() * sizeof(FColor)); // this line isn't the problem
+			
 		}
 
 	}

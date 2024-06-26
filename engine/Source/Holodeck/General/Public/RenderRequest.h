@@ -3,6 +3,7 @@
 #include "Holodeck.h"
 
 #include "CoreMinimal.h"
+#include "HolooceanPalette.h"
 #include "Engine/TextureRenderTarget2D.h"
 
 // Adapted from Microsoft Airsim Open Source Project
@@ -18,6 +19,8 @@ class FRenderRequest : public FRenderCommand
 	private:
 		FColor* Buffer;
 		UTextureRenderTarget2D* TargetTexture;
+		HolooceanPalette Palette;
+		bool ConvertToPalette;
 
 	public:
 		virtual ~FRenderRequest();
@@ -27,7 +30,10 @@ class FRenderRequest : public FRenderCommand
 		*/
 		virtual void RetrievePixels(FColor* Buffer, UTextureRenderTarget2D* TargetTexture);
 
-		void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& MyCompletionGraphEvent)
+		// TODO: Replace this specific palette with a generic palette for extension
+		virtual void RetrievePixels(FColor* Buffer, UTextureRenderTarget2D* TargetTexture, bool ConvertToPalette);
+
+		void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& MyCompletionGraphEvent) const
 		{
 			ExecuteTask();
 		}
@@ -37,6 +43,6 @@ class FRenderRequest : public FRenderCommand
 			RETURN_QUICK_DECLARE_CYCLE_STAT(RenderRequest, STATGROUP_RenderThreadCommands);
 		}
 
-		void ExecuteTask();
-
+		void ExecuteTask() const;
+	
 };
