@@ -60,6 +60,7 @@ void FRenderRequest::ExecuteTask() const
 				{
 					const unsigned char* color = Palette.GetColor(SurfaceData[i].R);
 					SurfaceData[i] = FColor(color[0], color[1], color[2]);
+					
 				}
 			}
 
