@@ -37,6 +37,8 @@
 #include "CameraSensor.h"
 #include "RGBDCamera.h"
 #include "SemanticSegmentationCamera.h"
+#include "RaycastLidar.h"
+#include "RaycastSemanticLidar.h"
 
 #include "Command.h"
 #include "AddSensorCommand.generated.h"

@@ -60,6 +60,8 @@ void UAddSensorCommand::Execute() {
 		{ "CameraSensor", UCameraSensor::StaticClass()},
 		{"RGBDCamera", URGBDCamera::StaticClass()},
 		{"SemanticSegmentationCamera", USemanticSegmentationCamera::StaticClass()},
+		{"RaycastLidar", URaycastLidar::StaticClass()},
+		{"RaycastSemanticLidar", URaycastSemanticLidar::StaticClass()},
 
 	};
 

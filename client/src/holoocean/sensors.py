@@ -1793,6 +1793,47 @@ class SemanticSegmentationCamera(HoloOceanSensor):
         self._client.command_center.enqueue_command(command_to_send)
         self.tick_every = ticks_per_capture
 
+class RaycastLidar(HoloOceanSensor):
+    """Captures agent's view.
+
+    The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
+    The resolution can be increased, but will significantly impact performance.
+
+    **Configuration**
+
+    The ``configuration`` block (see :ref:`configuration-block`) accepts the following
+    options:
+
+    - ``CaptureWidth``: Width of captured image
+    - ``CaptureHeight``: Height of captured image
+
+    """
+
+    sensor_type = "RaycastLidar"
+
+    def __init__(self, client, agent_name, agent_type, name="RaycastLidar", config=None):
+        self.config = {} if config is None else config
+
+        self.shape = [56000]
+
+        super(RaycastLidar, self).__init__(
+            client, agent_name, agent_type, name=name, config=config
+        )
+
+    @property
+    def dtype(self):
+        return np.uint8
+
+    @property
+    def data_shape(self):
+        return self.shape
+
+    @property
+    def sensor_data(self):
+        print(self._sensor_data_buffer)
+
+
+
 
 ######################################################################################
 class SensorDefinition:
@@ -1848,6 +1889,7 @@ class SensorDefinition:
         "GPSSensor": GPSSensor,
         "MagnetometerSensor": MagnetometerSensor,
         "SinglebeamSonar": SinglebeamSonar,
+        "RaycastLidar": RaycastLidar,
     }
 
     # Sensors that need timeout turned off

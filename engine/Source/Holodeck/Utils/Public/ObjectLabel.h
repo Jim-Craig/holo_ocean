@@ -18,7 +18,6 @@ namespace holoocean {
 		ContainerBoat =   4u,
 		DamEnvironment =  5u,
 		Landscape	 =	  6u,
-
 		Any          =  0xFF
 	  };
 } 
