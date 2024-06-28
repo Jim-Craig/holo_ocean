@@ -18,15 +18,15 @@ namespace holoocean
 		class LidarDetection
 		{
 		public:
-			FVector3f point{};
+			FVector3d point{};
 			float intensity;
 
-			LidarDetection() : point(0.0f, 0.0f, 0.0f), intensity{0.0f}
+			LidarDetection() : point(0.0, 0.0, 0.0), intensity{0.0}
 			{
 				
 			}
 
-			LidarDetection(float x, float y, float z, float intensity) :
+			LidarDetection(double x, double y, double z, float intensity) :
 				point(x, y, z), intensity{intensity}
 			{ }
 
@@ -70,7 +70,7 @@ namespace holoocean
 				_points.reserve(total_points * 4);
 			}
 
-			void WritePointSync(LidarDetection &detection) {
+			void WritePointSync(LidarDetection& detection) {
 				_points.emplace_back(detection.point.X);
 				_points.emplace_back(detection.point.Y);
 				_points.emplace_back(detection.point.Z);
@@ -86,7 +86,7 @@ namespace holoocean
 				return _points.size();
 			}
 
-			std::vector<float> _points;
+			std::vector<double> _points;
 
 			
 		private:

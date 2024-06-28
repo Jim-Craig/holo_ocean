@@ -49,9 +49,9 @@ protected:
 	using FSemanticDetection = holoocean::data::SemanticLidarDetection;
 	
 	//See HolodeckSensor for the documentation of these overridden functions.
-	int GetNumItems() override { return 3; };
-	int GetItemSize() override { return sizeof(float); };
-	void TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	int virtual GetNumItems() override { return 3; };
+	int virtual GetItemSize() override { return sizeof(float); };
+	void virtual TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 
 	/// Creates a Laser for each channel.

@@ -14,9 +14,6 @@ URaycastLidar::URaycastLidar()
 	DropOffGenActive = false;
 	
 	RandomEngine = CreateDefaultSubobject<URandomEngine>(TEXT("RandomEngine"));
-
-
-	
 }
 
 void URaycastLidar::ParseSensorParms(FString ParmsJson)
@@ -32,6 +29,8 @@ void URaycastLidar::InitializeSensor()
 
 	LidarDescription = FLidarDescription();
 	Set(LidarDescription);
+	
+	this->Buffer = static_cast<float*>(Super::Buffer);
 }
 
 void URaycastLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -40,14 +39,16 @@ void URaycastLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FA
 
 	UE_LOG(LogHolodeck, Error, TEXT("%llu number of elements!"), TempData.CountOfPoints())
 
-	float* FloatBuffer = static_cast<float*>(Buffer);
-
-	for (int i = 0; i < TempData.CountOfPoints(); i++)
-	{
-		FloatBuffer[i] = TempData._points[i];
-	}
+	//float* FloatBuffer = static_cast<float*>(Buffer);
 	
-	// TODO: Get the data and write it to the buffer
+	
+	for (int i = 0; i < TempData._points.size() - 1; i++)
+	{
+		if (i < TempData.CountOfPoints())
+		{
+			Buffer[i] = static_cast<float>(TempData._points[i]);
+		}
+	}
 }
 
 void URaycastLidar::Set(const FLidarDescription& LidarDescription)
@@ -87,7 +88,7 @@ URaycastLidar::FDetection URaycastLidar::ComputeDetection(const FHitResult& HitI
 {
 	FDetection Detection;
 	const FVector HitPoint = HitInfo.ImpactPoint;
-	Detection.point = static_cast<FVector3f>(SensorTransf.Inverse().TransformPosition(HitPoint));
+	Detection.point = SensorTransf.Inverse().TransformPosition(HitPoint);
 
 	const float Distance = Detection.point.Length();
 	const float AttenAtm = Description.AtmospAttenRate;

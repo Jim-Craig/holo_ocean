@@ -1814,7 +1814,7 @@ class RaycastLidar(HoloOceanSensor):
     def __init__(self, client, agent_name, agent_type, name="RaycastLidar", config=None):
         self.config = {} if config is None else config
 
-        self.shape = [56000]
+        self.shape = [7000]
 
         super(RaycastLidar, self).__init__(
             client, agent_name, agent_type, name=name, config=config
@@ -1822,7 +1822,7 @@ class RaycastLidar(HoloOceanSensor):
 
     @property
     def dtype(self):
-        return np.uint8
+        return np.float32
 
     @property
     def data_shape(self):
@@ -1830,7 +1830,7 @@ class RaycastLidar(HoloOceanSensor):
 
     @property
     def sensor_data(self):
-        print(self._sensor_data_buffer)
+        return np.reshape(self._sensor_data_buffer, (-1, 4))
 
 
 
