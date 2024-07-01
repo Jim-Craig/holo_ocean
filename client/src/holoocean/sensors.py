@@ -13,7 +13,7 @@ from holoocean.command import (
 )
 from holoocean.exceptions import HoloOceanConfigurationException
 from holoocean.lcm import SensorData
-
+from copy import deepcopy
 
 class HoloOceanSensor:
     """Base class for a sensor
@@ -1728,16 +1728,32 @@ class RGBDCamera(HoloOceanSensor):
         self._client.command_center.enqueue_command(command_to_send)
         self.tick_every = ticks_per_capture
 
-    # @property
-    # def sensor_data(self):
-    #     # data: self._sensor_data_buffer
-    #     # It already is a camera_width x camera_height x 4, so we just need to add another channel for converted distances
+    @property
+    def sensor_data(self):
+        # data: self._sensor_data_buffer
+        # It already is a camera_width x camera_height x 4, so we just need to add another channel for converted distances
         
-    #     distances = np.zeros(shape=(self.shape[0], self.shape[1], 1))
+        # return self._sensor_data_buffer
 
+        # self._sensor_data_buffer[..., 1] = np.zeros(shape=(self.shape[0], self.shape[1]))
+        
+        # print(np.concatenate((self._sensor_data_buffer, np.zeros(shape=(self.shape[0], self.shape[1], 1))), axis=2).shape)
 
+        if (self.config["convertToDistance"]):
+            return np.concatenate((self._sensor_data_buffer, np.ones(shape=(self.shape[0], self.shape[1], 1))), axis=2)
+        else:
+            return self._sensor_data_buffer
+        # distances = np.zeros(shape=(self.shape[0], self.shape[1], 1))
+        # alpha_channel = self._sensor_data_buffer[..., 3]
+        
+        # for i in range(len(alpha_channel)):
+        #     for j in range(len(alpha_channel[i])): 
+        #         distances[i][j] = (alpha_channel[i][j] / 255.0) * 1000
 
-    #     return np.concatenate(self._sensor_data_buffer, distances, axis=2)
+        # self._sensor_data_buffer = np.concatenate((self._sensor_data_buffer, distances), axis=2)
+        # return self._sensor_data_buffer
+        
+        # return np.concatenate((self._sensor_data_buffer, distances), axis=2)
 
 class SemanticSegmentationCamera(HoloOceanSensor):
     """Captures agent's view.
