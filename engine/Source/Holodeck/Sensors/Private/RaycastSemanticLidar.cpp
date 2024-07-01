@@ -192,6 +192,7 @@ bool URaycastSemanticLidar::ShootLaser(const float VerticalAngle, float Horizont
 
 	FTransform ActorTransf = Parent->GetTransform();
 	FVector LidarBodyLoc = ActorTransf.GetLocation();
+	//UE_LOG(LogHolodeck, Error, TEXT("%f, %f, %f"), LidarBodyLoc.X, LidarBodyLoc.Y, LidarBodyLoc.Z);
 	FRotator LidarBodyRot = ActorTransf.Rotator();
 
 	FRotator LaserRot(VerticalAngle, HorizontalAngle, 0); // float InPitch, float InYaw, float InRoll
@@ -202,6 +203,7 @@ bool URaycastSemanticLidar::ShootLaser(const float VerticalAngle, float Horizont
 
 	const auto Range = Description.Range;
 	FVector EndTrace = Range * UKismetMathLibrary::GetForwardVector(ResultRot) + LidarBodyLoc;
+	//UE_LOG(LogHolodeck, Error, TEXT("End Trace: %f, %f, %f"), EndTrace.X, EndTrace.Y, EndTrace.Z);
 
 	// TODO: This was parallel in Carla. UE5 is different though, would need to figure out the async.
 	// This is a major area for speed up in the future
@@ -209,11 +211,13 @@ bool URaycastSemanticLidar::ShootLaser(const float VerticalAngle, float Horizont
 		HitInfo,
 		LidarBodyLoc,
 		EndTrace,
-		ECC_GameTraceChannel2,
+		ECC_Visibility,
 		TraceParams,
 		FCollisionResponseParams::DefaultResponseParam
 	  );
 
+	
+	
 	if (HitInfo.bBlockingHit)
 	{
 		HitResult = HitInfo;

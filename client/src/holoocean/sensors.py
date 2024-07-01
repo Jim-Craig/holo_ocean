@@ -1728,6 +1728,17 @@ class RGBDCamera(HoloOceanSensor):
         self._client.command_center.enqueue_command(command_to_send)
         self.tick_every = ticks_per_capture
 
+    # @property
+    # def sensor_data(self):
+    #     # data: self._sensor_data_buffer
+    #     # It already is a camera_width x camera_height x 4, so we just need to add another channel for converted distances
+        
+    #     distances = np.zeros(shape=(self.shape[0], self.shape[1], 1))
+
+
+
+    #     return np.concatenate(self._sensor_data_buffer, distances, axis=2)
+
 class SemanticSegmentationCamera(HoloOceanSensor):
     """Captures agent's view.
 

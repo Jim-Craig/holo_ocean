@@ -37,7 +37,7 @@ void URaycastLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FA
 {
 	SimulateLidar(DeltaTime);
 
-	UE_LOG(LogHolodeck, Error, TEXT("%llu number of elements!"), TempData.CountOfPoints())
+	//UE_LOG(LogHolodeck, Error, TEXT("%llu number of elements!"), TempData.CountOfPoints())
 
 	//float* FloatBuffer = static_cast<float*>(Buffer);
 	
@@ -46,6 +46,10 @@ void URaycastLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FA
 	{
 		if (i < TempData.CountOfPoints())
 		{
+			/*if (i < 100)
+			{
+				UE_LOG(LogHolodeck, Error, TEXT("%f datapoint!"), TempData._points[i]);
+			}*/
 			Buffer[i] = static_cast<float>(TempData._points[i]);
 		}
 	}
@@ -119,6 +123,7 @@ bool URaycastLidar::PostprocessDetection(FDetection& Detection) const
 	if (Description.NoiseStdDev > std::numeric_limits<float>::epsilon())
 	{
 		const auto ForwardVector = Detection.point.GetSafeNormal();
+		UE_LOG(LogHolodeck, Error, TEXT("%f, %f, %f"), ForwardVector.X, ForwardVector.Y, ForwardVector.Z);
 		const auto Noise = ForwardVector * RandomEngine->GetNormalDistribution(0.0f, Description.NoiseStdDev);
 		Detection.point += Noise;
 	}
