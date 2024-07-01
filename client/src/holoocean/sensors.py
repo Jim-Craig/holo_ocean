@@ -1740,7 +1740,14 @@ class RGBDCamera(HoloOceanSensor):
         # print(np.concatenate((self._sensor_data_buffer, np.zeros(shape=(self.shape[0], self.shape[1], 1))), axis=2).shape)
 
         if (self.config["convertToDistance"]):
-            return np.concatenate((self._sensor_data_buffer, np.ones(shape=(self.shape[0], self.shape[1], 1))), axis=2)
+            distances = np.zeros(shape=(self.shape[0], self.shape[1], 1), dtype=np.uint16)
+            alpha_channel = self._sensor_data_buffer[..., 3]
+
+            for i in range(len(alpha_channel)):
+                for j in range(len(alpha_channel[i])): 
+                    distances[i][j] = int((alpha_channel[i][j] / 255.0) * 1000)
+
+            return np.concatenate((self._sensor_data_buffer, distances), axis=2, dtype=np.uint16)
         else:
             return self._sensor_data_buffer
         # distances = np.zeros(shape=(self.shape[0], self.shape[1], 1))
