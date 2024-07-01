@@ -16,7 +16,7 @@
 #include "RandomEngine.h"
 #include "SemanticLidarData.h"
 
-#include "RayCastSemanticLidar.generated.h"
+#include "RaycastSemanticLidar.generated.h"
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 
 class HOLODECK_API URaycastSemanticLidar : public UHolodeckSensor
