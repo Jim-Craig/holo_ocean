@@ -40,17 +40,14 @@ void URaycastLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FA
 	//UE_LOG(LogHolodeck, Error, TEXT("%llu number of elements!"), TempData.CountOfPoints())
 
 	//float* FloatBuffer = static_cast<float*>(Buffer);
-	
-	
-	for (int i = 0; i < TempData._points.size() - 1; i++)
 	{
-		if (i < TempData.CountOfPoints())
+		SCOPE_CYCLE_COUNTER(STAT_CopyBuffer)
+		for (int i = 0; i < TempData._points.size() - 1; i++)
 		{
-			/*if (i < 100)
+			if (i < TempData.CountOfPoints())
 			{
-				UE_LOG(LogHolodeck, Error, TEXT("%f datapoint!"), TempData._points[i]);
-			}*/
-			Buffer[i] = static_cast<float>(TempData._points[i]);
+				Buffer[i] = static_cast<float>(TempData._points[i]);
+			}
 		}
 	}
 }

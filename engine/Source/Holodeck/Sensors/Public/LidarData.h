@@ -60,7 +60,8 @@ namespace holoocean
 
 			~LidarData() = default;
 
-			virtual void ResetMemory(std::vector<uint32_t> points_per_channel) {
+			virtual void ResetMemory(std::vector<uint32_t> points_per_channel)
+			{
 				std::memset(_header.data() + Index::SIZE, 0, sizeof(uint32_t) * GetChannelCount());
 
 				uint32_t total_points = static_cast<uint32_t>(
@@ -70,14 +71,16 @@ namespace holoocean
 				_points.reserve(total_points * 4);
 			}
 
-			void WritePointSync(LidarDetection& detection) {
+			void WritePointSync(LidarDetection& detection)
+			{
 				_points.emplace_back(detection.point.X);
 				_points.emplace_back(detection.point.Y);
 				_points.emplace_back(detection.point.Z);
 				_points.emplace_back(detection.intensity);
 			}
 
-			virtual void WritePointSync(SemanticLidarDetection& detection) {
+			virtual void WritePointSync(SemanticLidarDetection& detection) override
+			{
 				(void) detection;
 			}
 

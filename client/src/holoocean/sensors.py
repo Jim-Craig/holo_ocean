@@ -1750,17 +1750,6 @@ class RGBDCamera(HoloOceanSensor):
             return np.concatenate((self._sensor_data_buffer, distances), axis=2, dtype=np.uint16)
         else:
             return self._sensor_data_buffer
-        # distances = np.zeros(shape=(self.shape[0], self.shape[1], 1))
-        # alpha_channel = self._sensor_data_buffer[..., 3]
-        
-        # for i in range(len(alpha_channel)):
-        #     for j in range(len(alpha_channel[i])): 
-        #         distances[i][j] = (alpha_channel[i][j] / 255.0) * 1000
-
-        # self._sensor_data_buffer = np.concatenate((self._sensor_data_buffer, distances), axis=2)
-        # return self._sensor_data_buffer
-        
-        # return np.concatenate((self._sensor_data_buffer, distances), axis=2)
 
 class SemanticSegmentationCamera(HoloOceanSensor):
     """Captures agent's view.
@@ -1867,7 +1856,44 @@ class RaycastLidar(HoloOceanSensor):
         return np.reshape(self._sensor_data_buffer, (-1, 4))
 
 
+class RaycastSemanticLidar(HoloOceanSensor):
+    """Captures agent's view.
 
+    The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
+    The resolution can be increased, but will significantly impact performance.
+
+    **Configuration**
+
+    The ``configuration`` block (see :ref:`configuration-block`) accepts the following
+    options:
+
+    - ``CaptureWidth``: Width of captured image
+    - ``CaptureHeight``: Height of captured image
+
+    """
+
+    sensor_type = "RaycastSemanticLidar"
+
+    def __init__(self, client, agent_name, agent_type, name="RaycastSemanticLidar", config=None):
+        self.config = {} if config is None else config
+
+        self.shape = [50004]
+
+        super(RaycastSemanticLidar, self).__init__(
+            client, agent_name, agent_type, name=name, config=config
+        )
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return self.shape
+
+    @property
+    def sensor_data(self):
+        return np.reshape(self._sensor_data_buffer, (-1, 6))
 
 ######################################################################################
 class SensorDefinition:
@@ -1924,6 +1950,7 @@ class SensorDefinition:
         "MagnetometerSensor": MagnetometerSensor,
         "SinglebeamSonar": SinglebeamSonar,
         "RaycastLidar": RaycastLidar,
+        "RaycastSemanticLidar": RaycastSemanticLidar
     }
 
     # Sensors that need timeout turned off

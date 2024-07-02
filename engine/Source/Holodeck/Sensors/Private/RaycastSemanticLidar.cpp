@@ -20,8 +20,9 @@ void URaycastSemanticLidar::InitializeSensor()
 
 
 	// TODO: Move this into the Read JSON params
-	FLidarDescription testDescription = FLidarDescription();
-	Set(testDescription);
+	Description = FLidarDescription();
+	Set(Description);
+	this->Buffer = static_cast<float*>(Super::Buffer);
 
 	
 }
@@ -31,7 +32,28 @@ void URaycastSemanticLidar::TickSensorComponent(float DeltaTime, ELevelTick Tick
 	SimulateLidar(DeltaTime);
 
 	// TODO: Get the data and write it to the buffer
-	
+	{
+		SCOPE_CYCLE_COUNTER(STAT_CopyBuffer)
+		std::vector<holoocean::data::SemanticLidarDetection> points = SemanticLidarData.GetPoints();
+		int writeIndex = 0;
+		for (int i = 0; i < points.size() - 1; i++ )
+		{
+			if (i < 1)
+			{
+				/*if (i < 100)
+				{
+					UE_LOG(LogHolodeck, Error, TEXT("%f datapoint!"), TempData._points[i]);
+				}*/
+				Buffer[writeIndex] = static_cast<float>(points[i].point.X);
+				Buffer[writeIndex + 1] = static_cast<float>(points[i].point.Y);
+				Buffer[writeIndex + 2] = static_cast<float>(points[i].point.Z);
+				//Buffer[writeIndex + 4] = static_cast<float>(points[i].cos_inc_angle);
+				//Buffer[writeIndex + 5] = static_cast<float>(points[i].object_idx);
+				//Buffer[writeIndex + 6] = static_cast<float>(points[i].object_tag);
+				writeIndex += 3;
+			}
+		}
+	}
 }
 
 void URaycastSemanticLidar::Set(const FLidarDescription& LidarDescription)
@@ -86,9 +108,11 @@ void URaycastSemanticLidar::SimulateLidar(const float DeltaTime)
 	// NOTE: The default physics engine changed between UE4 and UE5. It no longer uses PhysX, but uses Chaos.
 	// Thus, this function call no longer works. But Chaos *might* be async already.
 	//GetWorld()->GetPhysicsScene()->GetPxScene()->lockRead();
+	
 	{
+		SCOPE_CYCLE_COUNTER(STAT_ParallelForHoloocean)
 		ParallelFor(ChannelCount, [&](int32 idxChannel) {
-		  TRACE_CPUPROFILER_EVENT_SCOPE(ParallelForTask);
+		  TRACE_CPUPROFILER_EVENT_SCOPE(STAT_ParallelFor);
 
 			// TODO: Parent was "this" before, but since the sensors are not actors, it couldn't be. This might
 			// cause issues though if it gets garbase collected
@@ -190,7 +214,7 @@ bool URaycastSemanticLidar::ShootLaser(const float VerticalAngle, float Horizont
 {
 	FHitResult HitInfo(ForceInit);
 
-	FTransform ActorTransf = Parent->GetTransform();
+	FTransform ActorTransf = this->GetComponentTransform();
 	FVector LidarBodyLoc = ActorTransf.GetLocation();
 	//UE_LOG(LogHolodeck, Error, TEXT("%f, %f, %f"), LidarBodyLoc.X, LidarBodyLoc.Y, LidarBodyLoc.Z);
 	FRotator LidarBodyRot = ActorTransf.Rotator();
@@ -203,8 +227,7 @@ bool URaycastSemanticLidar::ShootLaser(const float VerticalAngle, float Horizont
 
 	const auto Range = Description.Range;
 	FVector EndTrace = Range * UKismetMathLibrary::GetForwardVector(ResultRot) + LidarBodyLoc;
-	//UE_LOG(LogHolodeck, Error, TEXT("End Trace: %f, %f, %f"), EndTrace.X, EndTrace.Y, EndTrace.Z);
-
+	
 	// TODO: This was parallel in Carla. UE5 is different though, would need to figure out the async.
 	// This is a major area for speed up in the future
 	GetWorld()->LineTraceSingleByChannel(

@@ -58,6 +58,7 @@ void FRenderRequest::ExecuteTask() const
 				// Translate the surface data using the palette
 				for (int i = 0; i < SurfaceData.Num(); i++)
 				{
+					//UE_LOG(LogHolodeck, Warning, TEXT("%d"), SurfaceData[i].R);
 					const unsigned char* color = Palette.GetColor(SurfaceData[i].R);
 					SurfaceData[i] = FColor(color[0], color[1], color[2]);
 					
@@ -65,7 +66,6 @@ void FRenderRequest::ExecuteTask() const
 			}
 
 			FMemory::Memcpy(this->Buffer, &SurfaceData[0], SurfaceData.Num() * sizeof(FColor)); // this line isn't the problem
-			
 		}
 
 	}

@@ -103,6 +103,11 @@ namespace holoocean
 				_ser_points.emplace_back(detection);
 			}
 
+			std::vector<SemanticLidarDetection> GetPoints()
+			{
+				return this->_ser_points;
+			}
+
 		protected:
 			std::vector<uint32_t> _header;
 			uint32_t _max_channel_points;

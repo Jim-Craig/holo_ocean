@@ -227,7 +227,7 @@ void UCameraSensor::InitializeSensor() {
 	
 	
 	//Set up everything for the SceneCaptureComponent2D
-	SceneCapture->CaptureSource = SCS_SceneColorHDR; //Pick what type of output you want to be sent to the texture target.
+	SceneCapture->CaptureSource = SCS_FinalColorLDR; //Pick what type of output you want to be sent to the texture target.
 }
 
 

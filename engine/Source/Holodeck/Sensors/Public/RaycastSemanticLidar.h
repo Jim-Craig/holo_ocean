@@ -16,15 +16,23 @@
 #include "RandomEngine.h"
 #include "SemanticLidarData.h"
 
+DECLARE_STATS_GROUP(TEXT("HoloOceanRaycasting"), STATGROUP_RaycastFunction, STATCAT_Advanced);
+DECLARE_CYCLE_STAT(TEXT("CopyBuffer"), STAT_CopyBuffer, STATGROUP_RaycastFunction);
+DECLARE_CYCLE_STAT(TEXT("ParallelFor"), STAT_ParallelForHoloocean, STATGROUP_RaycastFunction);
+
+
 #include "RaycastSemanticLidar.generated.h"
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 
 class HOLODECK_API URaycastSemanticLidar : public UHolodeckSensor
 {
 	GENERATED_BODY()
-	
 
+
+	
 public:
+
+
 	/*
 	 * Default Constructor
 	 */
@@ -49,7 +57,7 @@ protected:
 	using FSemanticDetection = holoocean::data::SemanticLidarDetection;
 	
 	//See HolodeckSensor for the documentation of these overridden functions.
-	int virtual GetNumItems() override { return 3; };
+	int virtual GetNumItems() override { return Description.PointsPerSecond; };
 	int virtual GetItemSize() override { return sizeof(float); };
 	void virtual TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -92,7 +100,8 @@ protected:
 	/// Random Engine used to provide noise for sensor output.
 	UPROPERTY(VisibleAnywhere)
 	URandomEngine* RandomEngine = nullptr;
-	
+	float* Buffer;
+
 	
 private:
 	/*
