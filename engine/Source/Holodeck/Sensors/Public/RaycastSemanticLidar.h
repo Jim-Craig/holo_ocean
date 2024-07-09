@@ -75,7 +75,7 @@ protected:
 	virtual void PreprocessRays(uint32_t Channels, uint32_t MaxPointsPerChannel);
 
 	/// Compute all raw detection information
-	void ComputeRawDetection(const FHitResult &HitInfo, const FTransform &SensorTransf, FSemanticDetection &Detection) const;
+	void ComputeRawDetection(const FHitResult &HitInfo, const FTransform& SensorTransf, FSemanticDetection& Detection) const;
 
 	/// Saving the hits the raycast returns per channel
 	void WritePointAsync(uint32_t Channel, FHitResult &Detection);
@@ -100,7 +100,6 @@ protected:
 	/// Random Engine used to provide noise for sensor output.
 	UPROPERTY(VisibleAnywhere)
 	URandomEngine* RandomEngine = nullptr;
-	float* Buffer;
 
 	
 private:

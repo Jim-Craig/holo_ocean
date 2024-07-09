@@ -33,7 +33,9 @@ public class Holodeck : ModuleRules
 	        "RHI", 
 	        "Landscape",
 	        "ImageWrapper",
-	        "Renderer"
+	        "Renderer",
+	        "Sockets",
+	        "Networking"
         });
 
 #if PLATFORM_LINUX

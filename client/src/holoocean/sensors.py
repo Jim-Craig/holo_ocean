@@ -1837,7 +1837,7 @@ class RaycastLidar(HoloOceanSensor):
     def __init__(self, client, agent_name, agent_type, name="RaycastLidar", config=None):
         self.config = {} if config is None else config
 
-        self.shape = [7000]
+        self.shape = [20000]
 
         super(RaycastLidar, self).__init__(
             client, agent_name, agent_type, name=name, config=config

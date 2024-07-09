@@ -56,27 +56,40 @@ namespace holoocean
 			  : SemanticLidarData(ChannelCount) {
 			}
 
+			LidarData(float* buffer, uint32_t ChannelCount = 0u) : SemanticLidarData(ChannelCount)
+			{
+				Buffer = buffer;
+			}
+
 			LidarData &operator=(LidarData &&) = default;
 
 			~LidarData() = default;
 
 			virtual void ResetMemory(std::vector<uint32_t> points_per_channel)
 			{
-				std::memset(_header.data() + Index::SIZE, 0, sizeof(uint32_t) * GetChannelCount());
+				//std::memset(_header.data() + Index::SIZE, 0, sizeof(uint32_t) * GetChannelCount());
 
 				uint32_t total_points = static_cast<uint32_t>(
 					std::accumulate(points_per_channel.begin(), points_per_channel.end(), 0));
 
-				_points.clear();
-				_points.reserve(total_points * 4);
+				points.clear();
+				points.reserve(total_points * 4);
+				LastFrameMaxPoints = NumPoints;
+				NumPoints = 0;
 			}
 
 			void WritePointSync(LidarDetection& detection)
 			{
-				_points.emplace_back(detection.point.X);
-				_points.emplace_back(detection.point.Y);
-				_points.emplace_back(detection.point.Z);
-				_points.emplace_back(detection.intensity);
+				points.emplace_back(detection.point.X);
+				points.emplace_back(detection.point.Y);
+				points.emplace_back(detection.point.Z);
+				points.emplace_back(detection.intensity);
+
+				Buffer[4 * NumPoints] = detection.point.X;
+				Buffer[4 * NumPoints + 1] = detection.point.Y;
+				Buffer[4 * NumPoints + 2] = detection.point.Z;
+				Buffer[4 * NumPoints + 3] = detection.intensity;
+				NumPoints++;
 			}
 
 			virtual void WritePointSync(SemanticLidarDetection& detection) override
@@ -86,10 +99,13 @@ namespace holoocean
 
 			std::size_t CountOfPoints()
 			{
-				return _points.size();
+				return points.size();
 			}
 
-			std::vector<double> _points;
+			std::vector<float> points;
+			float* Buffer;
+			int NumPoints;
+			int LastFrameMaxPoints;
 
 			
 		private:

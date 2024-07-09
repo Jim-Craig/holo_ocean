@@ -45,11 +45,11 @@ public:
 
 protected:
 	virtual void TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	int virtual GetNumItems() override { return LidarDescription.PointsPerSecond; };
+	int virtual GetNumItems() override { return LidarDescription.PointsPerSecond * 4; };
 	int virtual GetItemSize() override { return sizeof(float); };
 
 	float* Buffer;
-
+	FLidarData Data;
 	
 private:
 	FSemanticLidarData SemanticLidarData;

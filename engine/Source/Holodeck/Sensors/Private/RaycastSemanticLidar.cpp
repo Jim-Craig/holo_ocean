@@ -22,7 +22,7 @@ void URaycastSemanticLidar::InitializeSensor()
 	// TODO: Move this into the Read JSON params
 	Description = FLidarDescription();
 	Set(Description);
-	this->Buffer = static_cast<float*>(Super::Buffer);
+	//this->Buffer = static_cast<float*>(Super::Buffer);
 
 	
 }
@@ -44,13 +44,13 @@ void URaycastSemanticLidar::TickSensorComponent(float DeltaTime, ELevelTick Tick
 				{
 					UE_LOG(LogHolodeck, Error, TEXT("%f datapoint!"), TempData._points[i]);
 				}*/
-				Buffer[writeIndex] = static_cast<float>(points[i].point.X);
-				Buffer[writeIndex + 1] = static_cast<float>(points[i].point.Y);
-				Buffer[writeIndex + 2] = static_cast<float>(points[i].point.Z);
-				//Buffer[writeIndex + 4] = static_cast<float>(points[i].cos_inc_angle);
+				//Buffer[writeIndex] = static_cast<float>(points[i].point.X);
+				//Buffer[writeIndex + 1] = static_cast<float>(points[i].point.Y);
+				//Buffer[writeIndex + 2] = static_cast<float>(points[i].point.Z);
+				///Buffer[writeIndex + 4] = static_cast<float>(points[i].cos_inc_angle);
 				//Buffer[writeIndex + 5] = static_cast<float>(points[i].object_idx);
 				//Buffer[writeIndex + 6] = static_cast<float>(points[i].object_tag);
-				writeIndex += 3;
+				//writeIndex += 3;
 			}
 		}
 	}
