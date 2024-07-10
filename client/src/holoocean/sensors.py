@@ -1607,9 +1607,39 @@ class CameraSensor(HoloOceanSensor):
     The ``configuration`` block (see :ref:`configuration-block`) accepts the following
     options:
 
-    - ``CaptureWidth``: Width of captured image
-    - ``CaptureHeight``: Height of captured image
-
+    - ``CaptureWidth`` (int): Width of captured image
+    - ``CaptureHeight`` (int): Height of captured image
+    - ``FovAngle`` (float): FOV of the Camera (default: 90, min: 0.001, max: 360.0)
+    - ``TargetGamma`` (float): Target Gamma of the Camera (default: 1.0)
+    - ``ExposureMethod`` (string): Luminance computation method. Four options: ``AEM_Histogram``, ``AEM_Basic``, ``AEM_Manual``, and ``AEM_MAX``
+    - ``ExposureCompensation`` (float): Logarithmic adjustment for the exposure. Only used if a tonemapper is specified.  Exposure compensation. Pretested worlds we decided that 4 looked the best (default: 4, min: -15.0, max: 15.0)
+    - ``ShutterSpeed`` (float): The camera shutter in seconds. In Unreal, this only affects exposure. (default: 60, min: 1.0, max: 2000.0)
+    - ``ISO`` (float): The camera sensor sensitivity in ISO. (default: 100.0, min: 1.0)
+    - ``Aperature`` (float): Defines the opening of the camera lens, Aperture is 1/fstop, typical lens go down to f/1.2 (large opening), larger numbers reduce the DOF effect (default: 4.0, min: 1.0, max: 32.0)
+    - ``FocalDistance`` (float): Distance in which the Depth of Field effect should be sharp, in unreal units (cm) (default: disabled (i.e. 0.0 in Unreal), min: 0.0, max: 10000.0)
+    - ``DepthBlurAmount`` (float): Depth Blur km for 50% (default: disabled (but set to 1.0), min: 0.000001, max: 100.0)
+    - ``DepthBlurRadius`` (float): CircleDOF only: Depth blur radius in pixels at 1920x  (default: 0.0. min: 0.0, max: 4.0)
+    - ``BladeCount`` (int): Depth of Field Blade Count.  Defines the number of blades of the diaphragm within the lens (min: 4, max: 16)
+    - ``DepthOfFieldMinFstop`` (float): Defines the maximum opening of the camera lens to control the curvature of blades of the diaphragm. Set it to 0 to get straight blades. (min: 0.0, max: 32.0)
+    - ``FilmSlope`` (float): Film Slope (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmToe`` (float): Film Toe (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmShoulder`` (float): Overrides the base Film Shoulder (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmBlackClip`` (float): Overrides the baseFilm Black Clip (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmWhiteClip`` (float): Overrides the baseFile White Clip (default: disabled, min: 0.0, max: 1.0)
+    - ``ExposureMinBrightness (float): Auto-Exposure minimum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureMaxBrightness (float):  Auto-Exposure maximum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureSpeedDown`` (float): Overrides base auto exposure speed down (default: disabled, min: 0.02, max: 20.0)
+    - ``ExposureSpeedUp`` (float): Overrides base auto exposure speed up (default: disabled, min: 0.02, max: 20.0)
+    - ``MotionBlurIntensity`` (float): /** Strength of motion blur, 0:off */ (default: disabled, min: 0.0, max: 1.0)
+    - ``MotionBlurMaxDistortion`` (float): max distortion caused by motion blur, in percent of the screen width, 0:off  (default: disabled, min: 0.0, max: 1.0)
+    - ``MotionBlurMinObjectScreenSize`` (float): The minimum projected screen radius for a primitive to be drawn in the velocity pass, percentage of screen width. smaller numbers cause more draw calls, default: 4% (default: 2, min: 0.0, max: 100.0)
+    - ``LensFlareIntensity`` (float): Brightness scale of the image cased lens flares (linear) (default: disabled, min: 0.0, max: 16.0)
+    - ``BloomIntensity`` (float): Multiplier for all bloom contributions >=0: off, 1(default), >1 brighter (default: 1.0, min: 0.0, max: 8.0)
+    - ``WhiteTemp`` (float): Color Grading Temperature (default: disabled, min: 1500.0, max: 15000.0)
+    - ``WhiteTint`` (float): Color Grading Tint (default: disabled, min: -1.0, max: 1.0)
+    - ``ChromAberrIntensity`` (float): in percent, Scene chromatic aberration / color fringe (camera imperfection) to simulate an artifact that happens in real-world lens, mostly visible in the image corners. (default: disabled, min: 0.0, max: 5.0)
+    - ``ChromAberrOffset`` (float): A normalized distance to the center of the framebuffer where the effect takes place. (default: disabled, min: 0.0, max: 1.0)
+    - ``MaxViewDistanceOverride`` (float): if > 0, sets a maximum render distance override.  Can be used to cull distant objects from a reflection if the reflecting plane is in an enclosed area like a hallway or room (default: disabled, min: 100, max: 10000)
     """
 
     sensor_type = "CameraSensor"
@@ -1674,8 +1704,40 @@ class RGBDCamera(HoloOceanSensor):
     The ``configuration`` block (see :ref:`configuration-block`) accepts the following
     options:
 
-    - ``CaptureWidth``: Width of captured image
-    - ``CaptureHeight``: Height of captured image
+- ``CaptureWidth`` (int): Width of captured image
+    - ``CaptureHeight`` (int): Height of captured image
+    - ``FovAngle`` (float): FOV of the Camera (default: 90, min: 0.001, max: 360.0)
+    - ``TargetGamma`` (float): Target Gamma of the Camera (default: 1.0)
+    - ``ExposureMethod`` (string): Luminance computation method. Four options: ``AEM_Histogram``, ``AEM_Basic``, ``AEM_Manual``, and ``AEM_MAX``
+    - ``ExposureCompensation`` (float): Logarithmic adjustment for the exposure. Only used if a tonemapper is specified.  Exposure compensation. Pretested worlds we decided that 4 looked the best (default: 4, min: -15.0, max: 15.0)
+    - ``ShutterSpeed`` (float): The camera shutter in seconds. In Unreal, this only affects exposure. (default: 60, min: 1.0, max: 2000.0)
+    - ``ISO`` (float): The camera sensor sensitivity in ISO. (default: 100.0, min: 1.0)
+    - ``Aperature`` (float): Defines the opening of the camera lens, Aperture is 1/fstop, typical lens go down to f/1.2 (large opening), larger numbers reduce the DOF effect (default: 4.0, min: 1.0, max: 32.0)
+    - ``FocalDistance`` (float): Distance in which the Depth of Field effect should be sharp, in unreal units (cm) (default: disabled (i.e. 0.0 in Unreal), min: 0.0, max: 10000.0)
+    - ``DepthBlurAmount`` (float): Depth Blur km for 50% (default: disabled (but set to 1.0), min: 0.000001, max: 100.0)
+    - ``DepthBlurRadius`` (float): CircleDOF only: Depth blur radius in pixels at 1920x  (default: 0.0. min: 0.0, max: 4.0)
+    - ``BladeCount`` (int): Depth of Field Blade Count.  Defines the number of blades of the diaphragm within the lens (min: 4, max: 16)
+    - ``DepthOfFieldMinFstop`` (float): Defines the maximum opening of the camera lens to control the curvature of blades of the diaphragm. Set it to 0 to get straight blades. (min: 0.0, max: 32.0)
+    - ``FilmSlope`` (float): Film Slope (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmToe`` (float): Film Toe (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmShoulder`` (float): Overrides the base Film Shoulder (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmBlackClip`` (float): Overrides the baseFilm Black Clip (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmWhiteClip`` (float): Overrides the baseFile White Clip (default: disabled, min: 0.0, max: 1.0)
+    - ``ExposureMinBrightness (float): Auto-Exposure minimum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureMaxBrightness (float):  Auto-Exposure maximum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureSpeedDown`` (float): Overrides base auto exposure speed down (default: disabled, min: 0.02, max: 20.0)
+    - ``ExposureSpeedUp`` (float): Overrides base auto exposure speed up (default: disabled, min: 0.02, max: 20.0)
+    - ``MotionBlurIntensity`` (float): /** Strength of motion blur, 0:off */ (default: disabled, min: 0.0, max: 1.0)
+    - ``MotionBlurMaxDistortion`` (float): max distortion caused by motion blur, in percent of the screen width, 0:off  (default: disabled, min: 0.0, max: 1.0)
+    - ``MotionBlurMinObjectScreenSize`` (float): The minimum projected screen radius for a primitive to be drawn in the velocity pass, percentage of screen width. smaller numbers cause more draw calls, default: 4% (default: 2, min: 0.0, max: 100.0)
+    - ``LensFlareIntensity`` (float): Brightness scale of the image cased lens flares (linear) (default: disabled, min: 0.0, max: 16.0)
+    - ``BloomIntensity`` (float): Multiplier for all bloom contributions >=0: off, 1(default), >1 brighter (default: 1.0, min: 0.0, max: 8.0)
+    - ``WhiteTemp`` (float): Color Grading Temperature (default: disabled, min: 1500.0, max: 15000.0)
+    - ``WhiteTint`` (float): Color Grading Tint (default: disabled, min: -1.0, max: 1.0)
+    - ``ChromAberrIntensity`` (float): in percent, Scene chromatic aberration / color fringe (camera imperfection) to simulate an artifact that happens in real-world lens, mostly visible in the image corners. (default: disabled, min: 0.0, max: 5.0)
+    - ``ChromAberrOffset`` (float): A normalized distance to the center of the framebuffer where the effect takes place. (default: disabled, min: 0.0, max: 1.0)
+    - ``MaxViewDistanceOverride`` (float): if > 0, sets a maximum render distance override.  Can be used to cull distant objects from a reflection if the reflecting plane is in an enclosed area like a hallway or room (default: disabled, min: 100, max: 10000)
+
 
     """
 
@@ -1827,8 +1889,39 @@ class RaycastLidar(HoloOceanSensor):
     The ``configuration`` block (see :ref:`configuration-block`) accepts the following
     options:
 
-    - ``CaptureWidth``: Width of captured image
-    - ``CaptureHeight``: Height of captured image
+- ``CaptureWidth`` (int): Width of captured image
+    - ``CaptureHeight`` (int): Height of captured image
+    - ``FovAngle`` (float): FOV of the Camera (default: 90, min: 0.001, max: 360.0)
+    - ``TargetGamma`` (float): Target Gamma of the Camera (default: 1.0)
+    - ``ExposureMethod`` (string): Luminance computation method. Four options: ``AEM_Histogram``, ``AEM_Basic``, ``AEM_Manual``, and ``AEM_MAX``
+    - ``ExposureCompensation`` (float): Logarithmic adjustment for the exposure. Only used if a tonemapper is specified.  Exposure compensation. Pretested worlds we decided that 4 looked the best (default: 4, min: -15.0, max: 15.0)
+    - ``ShutterSpeed`` (float): The camera shutter in seconds. In Unreal, this only affects exposure. (default: 60, min: 1.0, max: 2000.0)
+    - ``ISO`` (float): The camera sensor sensitivity in ISO. (default: 100.0, min: 1.0)
+    - ``Aperature`` (float): Defines the opening of the camera lens, Aperture is 1/fstop, typical lens go down to f/1.2 (large opening), larger numbers reduce the DOF effect (default: 4.0, min: 1.0, max: 32.0)
+    - ``FocalDistance`` (float): Distance in which the Depth of Field effect should be sharp, in unreal units (cm) (default: disabled (i.e. 0.0 in Unreal), min: 0.0, max: 10000.0)
+    - ``DepthBlurAmount`` (float): Depth Blur km for 50% (default: disabled (but set to 1.0), min: 0.000001, max: 100.0)
+    - ``DepthBlurRadius`` (float): CircleDOF only: Depth blur radius in pixels at 1920x  (default: 0.0. min: 0.0, max: 4.0)
+    - ``BladeCount`` (int): Depth of Field Blade Count.  Defines the number of blades of the diaphragm within the lens (min: 4, max: 16)
+    - ``DepthOfFieldMinFstop`` (float): Defines the maximum opening of the camera lens to control the curvature of blades of the diaphragm. Set it to 0 to get straight blades. (min: 0.0, max: 32.0)
+    - ``FilmSlope`` (float): Film Slope (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmToe`` (float): Film Toe (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmShoulder`` (float): Overrides the base Film Shoulder (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmBlackClip`` (float): Overrides the baseFilm Black Clip (default: disabled, min: 0.0, max: 1.0)
+    - ``FilmWhiteClip`` (float): Overrides the baseFile White Clip (default: disabled, min: 0.0, max: 1.0)
+    - ``ExposureMinBrightness (float): Auto-Exposure minimum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureMaxBrightness (float):  Auto-Exposure maximum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureSpeedDown`` (float): Overrides base auto exposure speed down (default: disabled, min: 0.02, max: 20.0)
+    - ``ExposureSpeedUp`` (float): Overrides base auto exposure speed up (default: disabled, min: 0.02, max: 20.0)
+    - ``MotionBlurIntensity`` (float): /** Strength of motion blur, 0:off */ (default: disabled, min: 0.0, max: 1.0)
+    - ``MotionBlurMaxDistortion`` (float): max distortion caused by motion blur, in percent of the screen width, 0:off  (default: disabled, min: 0.0, max: 1.0)
+    - ``MotionBlurMinObjectScreenSize`` (float): The minimum projected screen radius for a primitive to be drawn in the velocity pass, percentage of screen width. smaller numbers cause more draw calls, default: 4% (default: 2, min: 0.0, max: 100.0)
+    - ``LensFlareIntensity`` (float): Brightness scale of the image cased lens flares (linear) (default: disabled, min: 0.0, max: 16.0)
+    - ``BloomIntensity`` (float): Multiplier for all bloom contributions >=0: off, 1(default), >1 brighter (default: 1.0, min: 0.0, max: 8.0)
+    - ``WhiteTemp`` (float): Color Grading Temperature (default: disabled, min: 1500.0, max: 15000.0)
+    - ``WhiteTint`` (float): Color Grading Tint (default: disabled, min: -1.0, max: 1.0)
+    - ``ChromAberrIntensity`` (float): in percent, Scene chromatic aberration / color fringe (camera imperfection) to simulate an artifact that happens in real-world lens, mostly visible in the image corners. (default: disabled, min: 0.0, max: 5.0)
+    - ``ChromAberrOffset`` (float): A normalized distance to the center of the framebuffer where the effect takes place. (default: disabled, min: 0.0, max: 1.0)
+    - ``MaxViewDistanceOverride`` (float): if > 0, sets a maximum render distance override.  Can be used to cull distant objects from a reflection if the reflecting plane is in an enclosed area like a hallway or room (default: disabled, min: 100, max: 10000)
 
     """
 
