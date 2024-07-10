@@ -15,28 +15,35 @@ void URaycastSemanticLidar::ParseSensorParms(FString ParmsJson)
 
 void URaycastSemanticLidar::InitializeSensor()
 {
+	
 	Super::InitializeSensor();
+
+	if (ShouldInitialize)
+	{
+		ShouldInitialize = false;
+		this->SemanticLidarBuffer = static_cast<float*>(Super::Buffer);
+		this->SemanticLidarData = FSemanticLidarData(this->SemanticLidarBuffer);
+	}
+	
 	Parent = this->GetAttachmentRootActor();
 
 
 	// TODO: Move this into the Read JSON params
 	Description = FLidarDescription();
 	Set(Description);
-	//this->Buffer = static_cast<float*>(Super::Buffer);
-
-	
+	//this->SemanticLidarBuffer = static_cast<float*>(Super::Buffer);
+	//this->SemanticLidarData = FSemanticLidarData(this->Buffer);
+	/*this->SemanticLidarBuffer = static_cast<float*>(Super::Buffer);
+	this->SemanticLidarData = FSemanticLidarData(this->SemanticLidarBuffer);*/
+	//this->SemanticLidarData = FSemanticLidarData(this->SemanticLidarBuffer);
 }
+
+
 
 void URaycastSemanticLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	SimulateLidar(DeltaTime);
 
-	// TODO: Get the data and write it to the buffer
-	{
-		SCOPE_CYCLE_COUNTER(STAT_CopyBuffer)
-		std::vector<holoocean::data::SemanticLidarDetection> points = SemanticLidarData.GetPoints();
-		int writeIndex = 0;
-	}
+	SimulateLidar(DeltaTime);
 }
 
 void URaycastSemanticLidar::Set(const FLidarDescription& LidarDescription)

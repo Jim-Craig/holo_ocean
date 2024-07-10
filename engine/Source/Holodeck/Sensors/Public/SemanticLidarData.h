@@ -68,6 +68,11 @@ namespace holoocean
 				_header[Index::ChannelCount] = ChannelCount;
 			}
 
+			SemanticLidarData(float* buffer, uint32_t ChannelCount = 0u)
+			{
+				Buffer = buffer;
+			}
+
 			SemanticLidarData& operator=(SemanticLidarData &&) = default;
 
 			virtual ~SemanticLidarData() {}
@@ -101,6 +106,13 @@ namespace holoocean
 
 			virtual void WritePointSync(SemanticLidarDetection &detection) {
 				_ser_points.emplace_back(detection);
+
+				Buffer[6 * NumPoints] = detection.point.X;
+				Buffer[6 * NumPoints + 1] = detection.point.Y;
+				Buffer[6 * NumPoints + 2] = detection.point.Z;
+				Buffer[6 * NumPoints + 3] = detection.cos_inc_angle;
+				Buffer[6 * NumPoints + 4] = detection.object_idx;
+				Buffer[6 * NumPoints + 5] = detection.object_tag;
 			}
 
 			std::vector<SemanticLidarDetection> GetPoints()
@@ -114,7 +126,9 @@ namespace holoocean
 
 		private:
 			std::vector<SemanticLidarDetection> _ser_points;
-
+			float* Buffer;
+			int NumPoints = 0;
+			int LastFrameMaxPoints = 0;
 		};
 	}
 

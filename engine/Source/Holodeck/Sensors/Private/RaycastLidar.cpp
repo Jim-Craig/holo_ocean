@@ -23,6 +23,8 @@ void URaycastLidar::ParseSensorParms(FString ParmsJson)
 
 void URaycastLidar::InitializeSensor()
 {
+	Super::ShouldInitialize = false;
+
 	Super::InitializeSensor();
 
 	Parent = TUniquePtr<AActor>(this->GetAttachmentRootActor());
@@ -38,41 +40,12 @@ void URaycastLidar::InitializeSensor()
 void URaycastLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	SimulateLidar(DeltaTime);
-
-	//UE_LOG(LogHolodeck, Error, TEXT("%llu number of elements!"), Buffer->CountOfPoints())
-
-	//Buffer = Data.points.data();
-	//Buffer = std::move(Data.points.data());
-	
-	//float* FloatBuffer = static_cast<float*>(Buffer);
-	/*{
-		SCOPE_CYCLE_COUNTER(STAT_CopyBuffer)
-		for (int i = 0; i < Data.NumPoints - 1; i++)
-		{
-			Buffer[4 * i] = Data.points[4 * i];
-			Buffer[4 * i + 1] = Data.points[4 * i + 1];
-			Buffer[4 * i + 2] = Data.points[4 * i + 2];
-			Buffer[4 * i + 3] = Data.points[4 * i + 3];
-
-			/*if (i < Data.CountOfPoints())
-			{
-				Buffer[i] = Data.points[i];
-			}#1#
-		}
-	}*/
 }
 
 void URaycastLidar::Set(const FLidarDescription& LidarDescription)
 {
 	Description = LidarDescription;
-
-	/*if (Buffer != nullptr)
-	{
-		delete Buffer;
-	}*/
 	
-	//Buffer = new FLidarData(Description.Channels);
-	//TempData = FLidarData(Description.Channels);
 	CreateLasers();
 	PointsPerChannel.resize(Description.Channels);
 
@@ -152,13 +125,8 @@ void URaycastLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
 	{
 		PointsPerChannel[idxChannel] = RecordedHits[idxChannel].size();
 	}
-
-	//Buffer->ResetMemory(PointsPerChannel);
-
 	Data.ResetMemory(PointsPerChannel);
-
-	int index = 0;
-
+	
 	for (auto idxChannel = 0u; idxChannel < Description.Channels; ++idxChannel)
 	{
 		for (auto& hit : RecordedHits[idxChannel])
@@ -166,7 +134,6 @@ void URaycastLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
 			FDetection Detection = ComputeDetection(hit, SensorTransform);
 			if (PostprocessDetection(Detection))
 			{
-				//Buffer->WritePointSync(Detection);
 				Data.WritePointSync(Detection);
 			}
 			else
@@ -174,21 +141,6 @@ void URaycastLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
 				PointsPerChannel[idxChannel]--;
 			}
 		}
-
-		// Reset the buffer for the data that wasn't overwritten
-		/*if (Data.LastFrameMaxPoints > Data.NumPoints)
-		{*/
-
-			//UE_LOG(LogHolodeck, Warning, TEXT("%d last frame max points"), Data.LastFrameMaxPoints)
-			//UE_LOG(LogHolodeck, Warning, TEXT("%d num points"), Data.NumPoints)
-			/*for (int i = Data.NumPoints; i < Data.LastFrameMaxPoints; i++)
-			{
-				Data.Buffer[4 * i] = 0.0f;
-				Data.Buffer[4 * i + 1] = 0.0f;
-				Data.Buffer[4 * i + 2] = 0.0f;
-				Data.Buffer[4 * i + 3] = 0.0f;
-			}*/
-		//}
 	}
 }
 
