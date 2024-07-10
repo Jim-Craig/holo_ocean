@@ -176,11 +176,11 @@ void URaycastLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
 		}
 
 		// Reset the buffer for the data that wasn't overwritten
-		if (Data.LastFrameMaxPoints > Data.NumPoints)
-		{
+		/*if (Data.LastFrameMaxPoints > Data.NumPoints)
+		{*/
 
-			UE_LOG(LogHolodeck, Warning, TEXT("%d last frame max points"), Data.LastFrameMaxPoints)
-			UE_LOG(LogHolodeck, Warning, TEXT("%d num points"), Data.NumPoints)
+			//UE_LOG(LogHolodeck, Warning, TEXT("%d last frame max points"), Data.LastFrameMaxPoints)
+			//UE_LOG(LogHolodeck, Warning, TEXT("%d num points"), Data.NumPoints)
 			/*for (int i = Data.NumPoints; i < Data.LastFrameMaxPoints; i++)
 			{
 				Data.Buffer[4 * i] = 0.0f;
@@ -188,7 +188,7 @@ void URaycastLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
 				Data.Buffer[4 * i + 2] = 0.0f;
 				Data.Buffer[4 * i + 3] = 0.0f;
 			}*/
-		}
+		//}
 	}
 }
 

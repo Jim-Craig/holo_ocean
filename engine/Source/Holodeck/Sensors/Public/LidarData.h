@@ -104,8 +104,8 @@ namespace holoocean
 
 			std::vector<float> points;
 			float* Buffer;
-			int NumPoints;
-			int LastFrameMaxPoints;
+			int NumPoints = 0;
+			int LastFrameMaxPoints = 0;
 
 			
 		private:

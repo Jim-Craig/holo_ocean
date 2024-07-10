@@ -36,23 +36,6 @@ void URaycastSemanticLidar::TickSensorComponent(float DeltaTime, ELevelTick Tick
 		SCOPE_CYCLE_COUNTER(STAT_CopyBuffer)
 		std::vector<holoocean::data::SemanticLidarDetection> points = SemanticLidarData.GetPoints();
 		int writeIndex = 0;
-		for (int i = 0; i < points.size() - 1; i++ )
-		{
-			if (i < 1)
-			{
-				/*if (i < 100)
-				{
-					UE_LOG(LogHolodeck, Error, TEXT("%f datapoint!"), TempData._points[i]);
-				}*/
-				//Buffer[writeIndex] = static_cast<float>(points[i].point.X);
-				//Buffer[writeIndex + 1] = static_cast<float>(points[i].point.Y);
-				//Buffer[writeIndex + 2] = static_cast<float>(points[i].point.Z);
-				///Buffer[writeIndex + 4] = static_cast<float>(points[i].cos_inc_angle);
-				//Buffer[writeIndex + 5] = static_cast<float>(points[i].object_idx);
-				//Buffer[writeIndex + 6] = static_cast<float>(points[i].object_tag);
-				//writeIndex += 3;
-			}
-		}
 	}
 }
 
