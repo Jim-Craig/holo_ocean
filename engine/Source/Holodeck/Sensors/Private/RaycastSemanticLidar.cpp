@@ -119,7 +119,7 @@ void URaycastSemanticLidar::SimulateLidar(const float DeltaTime)
 
 			// TODO: Parent was "this" before, but since the sensors are not actors, it couldn't be. This might
 			// cause issues though if it gets garbase collected
-		  FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("Laser_Trace")), true, Parent);
+		  FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("Laser_Trace")), true, Parent.Get());
 		  TraceParams.bTraceComplex = true;
 		  TraceParams.bReturnPhysicalMaterial = false;
 
