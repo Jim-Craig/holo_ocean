@@ -108,7 +108,7 @@ private:
 	 * Parent
 	 * After initialization, Parent contains a pointer to whatever the sensor is attached to.
 	 */
-	AActor* Parent;
+	TUniquePtr<AActor> Parent;
 
 	FSemanticLidarData SemanticLidarData;
 	float* SemanticLidarBuffer;

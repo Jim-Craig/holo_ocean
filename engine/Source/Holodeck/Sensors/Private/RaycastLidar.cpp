@@ -18,7 +18,32 @@ URaycastLidar::URaycastLidar()
 
 void URaycastLidar::ParseSensorParms(FString ParmsJson)
 {
-	// TODO: Parse all the config options for the lidar
+	Description = FLidarDescription();
+
+
+	TSharedPtr<FJsonObject> JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	
+	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
+	{
+		JsonParsed->TryGetNumberField("Channels", Description.Channels);
+		JsonParsed->TryGetNumberField("Range", Description.Range);
+		JsonParsed->TryGetNumberField("PointsPerSecond", Description.PointsPerSecond);
+		JsonParsed->TryGetNumberField("RotationFrequency", Description.RotationFrequency);
+		JsonParsed->TryGetNumberField("UpperFovLimit", Description.UpperFovLimit);
+		JsonParsed->TryGetNumberField("LowerFovLimit", Description.LowerFovLimit);
+		JsonParsed->TryGetNumberField("HorizontalFov", Description.HorizontalFov);
+		JsonParsed->TryGetNumberField("AtmospAttenRate", Description.AtmospAttenRate);
+		JsonParsed->TryGetNumberField("RandomSeed", Description.RandomSeed);
+		JsonParsed->TryGetNumberField("DropOffGenRate", Description.DropOffGenRate);
+		JsonParsed->TryGetNumberField("DropOffIntensityLimit", Description.DropOffIntensityLimit);
+		JsonParsed->TryGetNumberField("DropOffAtZeroIntensity", Description.DropOffAtZeroIntensity);
+		JsonParsed->TryGetBoolField("ShowDebugPoints", Description.ShowDebugPoints);
+		JsonParsed->TryGetNumberField("NoiseStdDev", Description.NoiseStdDev);
+	}
+	
+	Set(Description);
+	
 }
 
 void URaycastLidar::InitializeSensor()
@@ -29,12 +54,10 @@ void URaycastLidar::InitializeSensor()
 
 	Parent = TUniquePtr<AActor>(this->GetAttachmentRootActor());
 
-	LidarDescription = FLidarDescription();
-	Set(LidarDescription);
+
 
 	this->Buffer = static_cast<float*>(Super::Buffer);
 	this->Data = FLidarData(this->Buffer);
-
 }
 
 void URaycastLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
