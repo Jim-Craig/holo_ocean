@@ -168,8 +168,10 @@ def test_azimuth(env, data):
     # send a message
     env.send_acoustic_message(2, 0, "OWAYU", "my_message")
     state = env.tick()
-
-    assert np.isclose(state["Zero"][3], angle)
+    if np.isclose(angle, np.pi):
+        assert np.isclose(state["Zero"][3], -np.pi) or np.isclose(state["Zero"][3], np.pi)
+    else:
+        assert np.isclose(state["Zero"][3], angle)
 
 
 @pytest.mark.parametrize(
