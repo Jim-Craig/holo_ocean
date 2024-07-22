@@ -11,32 +11,52 @@ URaycastSemanticLidar::URaycastSemanticLidar()
 void URaycastSemanticLidar::ParseSensorParms(FString ParmsJson)
 {
 	// Parse all the configuration options for the lidar (num lasers, etc.)
+	Description = FLidarDescription();
+
+
+	TSharedPtr<FJsonObject> JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	
+	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
+	{
+		JsonParsed->TryGetNumberField("Channels", Description.Channels);
+		JsonParsed->TryGetNumberField("Range", Description.Range);
+		JsonParsed->TryGetNumberField("PointsPerSecond", Description.PointsPerSecond);
+		JsonParsed->TryGetNumberField("RotationFrequency", Description.RotationFrequency);
+		JsonParsed->TryGetNumberField("UpperFovLimit", Description.UpperFovLimit);
+		JsonParsed->TryGetNumberField("LowerFovLimit", Description.LowerFovLimit);
+		JsonParsed->TryGetNumberField("HorizontalFov", Description.HorizontalFov);
+		JsonParsed->TryGetNumberField("AtmospAttenRate", Description.AtmospAttenRate);
+		JsonParsed->TryGetNumberField("RandomSeed", Description.RandomSeed);
+		JsonParsed->TryGetNumberField("DropOffGenRate", Description.DropOffGenRate);
+		JsonParsed->TryGetNumberField("DropOffIntensityLimit", Description.DropOffIntensityLimit);
+		JsonParsed->TryGetNumberField("DropOffAtZeroIntensity", Description.DropOffAtZeroIntensity);
+		JsonParsed->TryGetBoolField("ShowDebugPoints", Description.ShowDebugPoints);
+		JsonParsed->TryGetNumberField("NoiseStdDev", Description.NoiseStdDev);
+	}
+	
+	Set(Description);
 }
 
 void URaycastSemanticLidar::InitializeSensor()
 {
 	Super::InitializeSensor();
-	Parent = this->GetAttachmentRootActor();
 
-
-	// TODO: Move this into the Read JSON params
+	if (ShouldInitialize)
+	{
+		ShouldInitialize = false;
+		this->SemanticLidarBuffer = static_cast<float*>(Super::Buffer);
+		this->SemanticLidarData = FSemanticLidarData(this->SemanticLidarBuffer);
+	}
+	
+	Parent = TUniquePtr<AActor>(this->GetAttachmentRootActor());
 	Description = FLidarDescription();
-	Set(Description);
-	//this->Buffer = static_cast<float*>(Super::Buffer);
-
 	
 }
 
 void URaycastSemanticLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	SimulateLidar(DeltaTime);
-
-	// TODO: Get the data and write it to the buffer
-	{
-		SCOPE_CYCLE_COUNTER(STAT_CopyBuffer)
-		std::vector<holoocean::data::SemanticLidarDetection> points = SemanticLidarData.GetPoints();
-		int writeIndex = 0;
-	}
 }
 
 void URaycastSemanticLidar::Set(const FLidarDescription& LidarDescription)
@@ -67,7 +87,6 @@ void URaycastSemanticLidar::CreateLasers()
 
 void URaycastSemanticLidar::SimulateLidar(const float DeltaTime)
 {
-	
 	const uint32 ChannelCount = Description.Channels;
 	const uint32 PointsToScanWithOneLaser = FMath::RoundHalfFromZero(
 			Description.PointsPerSecond * DeltaTime / static_cast<float>(ChannelCount)
@@ -78,6 +97,7 @@ void URaycastSemanticLidar::SimulateLidar(const float DeltaTime)
 		UE_LOG(LogHolodeck, Warning, TEXT("%s: no points request this frame.. Try increasing the number of points per second."), *GetName());
 		return;
 	}
+	
 
 	check(ChannelCount == LaserAngles.Num());
 
@@ -99,7 +119,7 @@ void URaycastSemanticLidar::SimulateLidar(const float DeltaTime)
 
 			// TODO: Parent was "this" before, but since the sensors are not actors, it couldn't be. This might
 			// cause issues though if it gets garbase collected
-		  FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("Laser_Trace")), true, Parent);
+		  FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("Laser_Trace")), true, Parent.Get());
 		  TraceParams.bTraceComplex = true;
 		  TraceParams.bReturnPhysicalMaterial = false;
 
@@ -136,6 +156,7 @@ void URaycastSemanticLidar::ResetRecordedHits(uint32_t Channels, uint32_t MaxPoi
 	}
 }
 
+
 void URaycastSemanticLidar::PreprocessRays(uint32_t Channels, uint32_t MaxPointsPerChannel)
 {
 	RayPreprocessCondition.resize(Channels);
@@ -148,10 +169,12 @@ void URaycastSemanticLidar::PreprocessRays(uint32_t Channels, uint32_t MaxPoints
 	}
 }
 
+
 void URaycastSemanticLidar::WritePointAsync(uint32_t Channel, FHitResult& Detection)
 {
 	RecordedHits[Channel].emplace_back(Detection);
 }
+
 
 void URaycastSemanticLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
 {
@@ -171,27 +194,37 @@ void URaycastSemanticLidar::ComputeAndSaveDetections(const FTransform& SensorTra
 		}
 	}
 
-	SemanticLidarData.WriteChannelCount(PointsPerChannel);
+	//SemanticLidarData.WriteChannelCount(PointsPerChannel);
 }
+
 
 void URaycastSemanticLidar::ComputeRawDetection(const FHitResult& HitInfo, const FTransform& SensorTransf, FSemanticDetection& Detection) const
 {
 	const FVector HitPoint = HitInfo.ImpactPoint;
 	Detection.point = static_cast<FVector3f>(SensorTransf.Inverse().TransformPosition(HitPoint));
 
+	
 	const FVector VecInc = - (HitPoint - SensorTransf.GetLocation()).GetSafeNormal();
 	Detection.cos_inc_angle = FVector::DotProduct(VecInc, HitInfo.ImpactNormal);
 
+	
 	const AActor* actor = HitInfo.GetActor();
-	Detection.object_idx = 0;
+
+	if (static_cast<uint32_t>(HitInfo.Component->CustomDepthStencilValue) != 0)
+	{
+		UE_LOG(LogHolodeck, Error, TEXT("%d hit"), static_cast<uint32_t>(HitInfo.Component->CustomDepthStencilValue))
+	}
+	
+	Detection.object_idx = 2;
 	Detection.object_tag = static_cast<uint32_t>(HitInfo.Component->CustomDepthStencilValue);
 
+	
 	if (actor != nullptr)
 	{
 		// TODO: Carla uses an Actor Registry to find actors and use their actor ID. We don't have one of these. Sooo ¯\_(ツ)_/¯
 	}
-	
 }
+
 
 bool URaycastSemanticLidar::ShootLaser(const float VerticalAngle, float HorizontalAngle, FHitResult& HitResult, FCollisionQueryParams& TraceParams) const
 {
@@ -220,19 +253,16 @@ bool URaycastSemanticLidar::ShootLaser(const float VerticalAngle, float Horizont
 		ECC_Visibility,
 		TraceParams,
 		FCollisionResponseParams::DefaultResponseParam
-	  );
+	  );	
 
-	
 	
 	if (HitInfo.bBlockingHit)
 	{
 		HitResult = HitInfo;
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+
+	return false;
 }
 
 

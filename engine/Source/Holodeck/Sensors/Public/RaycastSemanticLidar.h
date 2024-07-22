@@ -100,6 +100,7 @@ protected:
 	/// Random Engine used to provide noise for sensor output.
 	UPROPERTY(VisibleAnywhere)
 	URandomEngine* RandomEngine = nullptr;
+	bool ShouldInitialize = true;
 
 	
 private:
@@ -107,8 +108,12 @@ private:
 	 * Parent
 	 * After initialization, Parent contains a pointer to whatever the sensor is attached to.
 	 */
-	AActor* Parent;
+	TUniquePtr<AActor> Parent;
+
 	FSemanticLidarData SemanticLidarData;
+	float* SemanticLidarBuffer;
+
+	
 
 
 };
