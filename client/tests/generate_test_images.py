@@ -61,6 +61,49 @@ def test_viewport_capture(resolution):
         cv2.waitKey(0)
 
 
+def test_viewport_capture_after_teleport(resolution):
+    """Validates that the ViewportCapture is updated after teleporting the camera
+    to a different location.
+
+    Incidentally tests HoloOceanEnvironment.teleport_camera as well
+    """
+
+    # Other tests muck with this. Set it to true just in case
+    global base_cfg
+    cfg = copy.deepcopy(base_cfg)
+
+    cfg["window_width"] = resolution
+    cfg["window_height"] = resolution
+    cfg["agents"][0]["sensors"][0]["configuration"] = {
+        "CaptureWidth": resolution,
+        "CaptureHeight": resolution,
+    }
+
+    binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
+
+    with holoocean.environments.HoloOceanEnvironment(
+        scenario=cfg,
+        binary_path=binary_path,
+        show_viewport=False,
+        verbose=True,
+        uuid=str(uuid.uuid4()),
+    ) as env:
+
+        env.should_render_viewport(True)
+        env.move_viewport([0.9, -1.75, 0.5], [0, 0, 0])
+
+        for _ in range(5):
+            env.tick()
+
+        pixels = env.tick()["ViewportCapture"][:, :, 0:3]
+
+        # baseline = cv2.imread(os.path.join(request.fspath.dirname, "expected", "teleport_viewport_test.png"))
+        filepath = str("/baseline_images/baseline_viewport_moved_1024.png")
+
+        cv2.imwrite(filepath, pixels)
+        cv2.waitKey(0)
+
+
 def test_rgb_camera(resolution):
     """Makes sure that the RGB camera is positioned and capturing correctly.
 
@@ -92,7 +135,8 @@ def test_rgb_camera(resolution):
         for _ in range(5):
             env.tick()
 
-        pixels = env.tick()["TestCamera"][:, :, 0:3]
+        val = env.tick()
+        pixels = val["RGBCamera"][:, :, 0:3]
         filepath = str("baseline_temp_" + str(resolution) + ".png")
         cv2.imwrite(filepath, pixels)
         cv2.imshow("image", pixels)
@@ -101,8 +145,10 @@ def test_rgb_camera(resolution):
 
 if __name__ == "__main__":
     print("Hello")
-    # test_viewport_capture(256)
-    test_viewport_capture(500)
-    test_viewport_capture(1000)
+    test_viewport_capture(256)
+    test_rgb_camera(256)
+    # test_viewport_capture(500)
+    # test_viewport_capture(1000)
+    test_viewport_capture(1024)
 
     # test_sensor_rotation(rotation_env())
