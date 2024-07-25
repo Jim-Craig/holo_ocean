@@ -98,7 +98,7 @@ def test_viewport_capture_after_teleport(resolution):
         pixels = env.tick()["ViewportCapture"][:, :, 0:3]
 
         # baseline = cv2.imread(os.path.join(request.fspath.dirname, "expected", "teleport_viewport_test.png"))
-        filepath = str("/baseline_images/baseline_viewport_moved_1024.png")
+        filepath = str("baseline_viewport_moved_1024.png")
 
         cv2.imwrite(filepath, pixels)
         cv2.waitKey(0)
@@ -145,12 +145,13 @@ def test_rgb_camera(resolution):
 
 if __name__ == "__main__":
     print("Hello")
-    test_viewport_capture(256)
-    test_rgb_camera(256)
-    test_rgb_camera(500)
-    test_rgb_camera(1000)
-    # test_viewport_capture(500)
-    # test_viewport_capture(1000)
-    test_viewport_capture(1024)
+    # test_viewport_capture(256)
+    # test_rgb_camera(256)
+    # test_rgb_camera(500)
+    # test_rgb_camera(1000)
+    # # test_viewport_capture(500)
+    # # test_viewport_capture(1000)
+    # test_viewport_capture(1024)
     test_viewport_capture_after_teleport(1024)
+
     # test_sensor_rotation(rotation_env())
