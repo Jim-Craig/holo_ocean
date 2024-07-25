@@ -271,7 +271,7 @@ def test_angle_noise(env):
             "sensors": [
                 {
                     "sensor_type": "OpticalModemSensor",
-                    "configuration": {"MaxDistance": 20, "AngleSigma": 10},
+                    "configuration": {"MaxDistance": 20, "AngleSigma": 90},
                 }
             ],
             "control_scheme": 1,
@@ -284,12 +284,12 @@ def test_angle_noise(env):
             "sensors": [
                 {
                     "sensor_type": "OpticalModemSensor",
-                    "configuration": {"MaxDistance": 20, "AngleSigma": 10},
+                    "configuration": {"MaxDistance": 20, "AngleSigma": 90},
                 }
             ],
             "control_scheme": 1,
             "location": [-15, 10, 0.25],
-            "rotation": [0, 0, 90],
+            "rotation": [0, 0, 30],
         },
     ]
 
