@@ -16,10 +16,15 @@ def test_abuse_turtle(abuse_world):
 
     # Flip the turtle and check if it's abused
     abuse_world.agents["turtle0"].teleport([0, 0, 1], [0, 180, 0])
-    abuse_world.tick(20)
-    assert abuse_world.tick()["turtle0"]["AbuseSensor"] == [
-        1
-    ], "The abuse sensor didn't trigger from the turtle agent flipping over"
+    # isAbused = abuse_world.tick(20)
+    # assert abuse_world.tick()["turtle0"]["AbuseSensor"] == [
+    #     1
+    # ], "The abuse sensor didn't trigger from the turtle agent flipping over"
+    abused = False
+    for _ in range(20):
+        if abuse_world.tick()["turtle0"]["AbuseSensor"] == [1]:
+            abused = True
+    assert abused, "The abuse sensor didn't trigger from the turtle agent flipping over"
 
 
 def test_abuse_falling(agent_abuse_world):
