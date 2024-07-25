@@ -276,7 +276,7 @@ def test_angle_noise(env):
             ],
             "control_scheme": 1,
             "location": [-10, 10, 0.25],
-            "rotation": [0, 0, -90],
+            "rotation": [0, 0, 0],
         },
         {
             "agent_name": "uav1",
@@ -288,8 +288,8 @@ def test_angle_noise(env):
                 }
             ],
             "control_scheme": 1,
-            "location": [-15, 10, 0.25],
-            "rotation": [0, 0, 30],
+            "location": [-5, 10, 0.25],
+            "rotation": [0, 0, 180],
         },
     ]
 
