@@ -137,7 +137,7 @@ def test_rgb_camera(resolution):
 
         val = env.tick()
         pixels = val["RGBCamera"][:, :, 0:3]
-        filepath = str("baseline_temp_" + str(resolution) + ".png")
+        filepath = str("baseline_" + str(resolution) + ".png")
         cv2.imwrite(filepath, pixels)
         cv2.imshow("image", pixels)
         cv2.waitKey(0)
@@ -147,8 +147,10 @@ if __name__ == "__main__":
     print("Hello")
     test_viewport_capture(256)
     test_rgb_camera(256)
+    test_rgb_camera(500)
+    test_rgb_camera(1000)
     # test_viewport_capture(500)
     # test_viewport_capture(1000)
     test_viewport_capture(1024)
-
+    test_viewport_capture_after_teleport(1024)
     # test_sensor_rotation(rotation_env())
