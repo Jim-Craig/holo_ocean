@@ -261,7 +261,7 @@ def test_distance_noise(env):
 )
 def test_angle_noise(env):
     """Tests to ensure that noise generation for max distance is functional"""
-    num_tests = 80
+    num_tests = 100
     tests_passed = 0
 
     env._scenario["agents"] = [
@@ -271,7 +271,7 @@ def test_angle_noise(env):
             "sensors": [
                 {
                     "sensor_type": "OpticalModemSensor",
-                    "configuration": {"MaxDistance": 20, "AngleSigma": 45},
+                    "configuration": {"MaxDistance": 20, "AngleSigma": 95},
                 }
             ],
             "control_scheme": 1,
@@ -284,7 +284,7 @@ def test_angle_noise(env):
             "sensors": [
                 {
                     "sensor_type": "OpticalModemSensor",
-                    "configuration": {"MaxDistance": 20, "AngleSigma": 45},
+                    "configuration": {"MaxDistance": 20, "AngleSigma": 95},
                 }
             ],
             "control_scheme": 1,
