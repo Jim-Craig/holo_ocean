@@ -247,7 +247,7 @@ def test_angle_noise(env):
     env._scenario["agents"] = [
         {
             "agent_name": "uav0",
-            "agent_type": "UavAgent",
+            "agent_type": "TurtleAgent",
             "sensors": [
                 {
                     "sensor_type": "OpticalModemSensor",
@@ -260,7 +260,7 @@ def test_angle_noise(env):
         },
         {
             "agent_name": "uav1",
-            "agent_type": "UavAgent",
+            "agent_type": "TurtleAgent",
             "sensors": [
                 {
                     "sensor_type": "OpticalModemSensor",
