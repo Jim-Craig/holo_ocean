@@ -297,7 +297,7 @@ class UavAgent(HoloOceanAgent):
     __MAX_YAW_RATE = .8
     __MIN_YAW_RATE = -__MAX_YAW_RATE
 
-    __MAX_FORCE = 59.844
+    __MAX_FORCE = 5984.4
     __MIN_FORCE = -__MAX_FORCE
 
     agent_type = "UAV"

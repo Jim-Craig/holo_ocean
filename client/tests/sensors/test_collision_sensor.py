@@ -54,9 +54,9 @@ def test_collision_sensor_uav_falling():
             assert env.tick()["CollisionSensor"][0], "The UAV stopped colliding!"
 
         # Make sure it resets to not collided after shooting it up in the air
-        env.step([0, 0, 0, 100])
+        env.step([0, 0, 0, 1000])
 
         for _ in range(50):
-            env.tick()
-
+            env.step([0, 0, 0, 1000])
+            
         assert not env.tick()["CollisionSensor"][0], "The UAV is still colliding?"

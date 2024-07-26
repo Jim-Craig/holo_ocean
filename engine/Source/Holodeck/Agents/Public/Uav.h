@@ -11,7 +11,7 @@ const float UAV_MU = 1;
 const float UAV_MAX_ROLL = 6.5080;
 const float UAV_MAX_PITCH = 5.087;
 const float UAV_MAX_YAW_RATE = .8;
-const float UAV_MAX_FORCE = 59.844;
+const float UAV_MAX_FORCE = 5984.4;
 
 UCLASS()
 /**
