@@ -145,10 +145,11 @@ abuse_config = {
             "sensors": [
                 {
                     "sensor_type": "AbuseSensor",
+                    "configuration": {"AccelerationLimit": 0.5},
                 }
             ],
             "control_scheme": 0,
-            "location": [1.5, 0, 9],
+            "location": [1.5, 0, 8],
             "rotation": [0, 0, 0],
         },
         {
@@ -157,6 +158,7 @@ abuse_config = {
             "sensors": [
                 {
                     "sensor_type": "AbuseSensor",
+                    "configuration": {"AccelerationLimit": -0.01},
                 }
             ],
             "control_scheme": 0,

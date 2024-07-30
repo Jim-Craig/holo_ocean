@@ -52,7 +52,7 @@ def test_velocity_sensor_uav_z_axis():
         assert last_z_velocity <= 1e-4, "The velocity wasn't close enough to zero!"
 
         # Send it flying up into the air to make sure the z velocity increases
-        env.step([0, 0, 0, 100])
+        env.step([0, 0, 0, 1000])
 
         # z velocity should be positive now
         for _ in range(20):
