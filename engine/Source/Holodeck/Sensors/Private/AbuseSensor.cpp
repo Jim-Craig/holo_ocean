@@ -41,7 +41,7 @@ void UAbuseSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FAc
 			Abused = 1;
 		}
 
-		if (!Abused && AccelerationLimit != -1) {
+		if (!(Abused == 1) && AccelerationLimit != -1) {
 			FVector CurrentSpeed = Agent->GetVelocity();
 			
 			// a = (delta v / delta t)

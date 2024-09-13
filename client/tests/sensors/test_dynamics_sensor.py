@@ -158,7 +158,7 @@ def test_velocity(env):
     assert last_z_velocity <= 1e-4, "The velocity wasn't close enough to zero!"
 
     # Send it flying up into the air to make sure the z velocity increases
-    env.act("uav0", [0, 0, 0, 100])
+    env.act("uav0", [0, 0, 0, 1000])
     env.tick()
 
     # z velocity should be positive now

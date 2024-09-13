@@ -7,10 +7,10 @@ ue4 setroot /home/ue4/UnrealEngine
 packagename="$1"
 commit="$2"
 
-if [ $packagename != "TestWorlds" ] && [ $packagename != "Ocean" ]
+if [ $packagename != "TestWorlds" ] && [ $packagename != "Ocean" ] && [ $packagename != "SonarTest" ]
 then
     echo "ERROR: Invalid package name: " $packagename
-    echo "Unable to proceed. Valid package names are: TestWorlds, Ocean"
+    echo "Unable to proceed. Valid package names are: TestWorlds, Ocean, SonarTest"
     exit 1
 fi
 
