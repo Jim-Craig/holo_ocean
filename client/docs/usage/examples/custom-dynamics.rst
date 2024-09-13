@@ -31,7 +31,7 @@ Here is an example of this in action, implementing gravity, buoyancy, and dampin
                         }
                     },
                 ],
-                "control_scheme": 2, # this is the custom dynamics control scheme
+                "control_scheme": 1, # this is the custom dynamics control scheme
                 "location": [0,0,-10],
                 "rotation": [20,20,90]
             }
