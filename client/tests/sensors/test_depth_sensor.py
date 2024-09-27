@@ -2,38 +2,48 @@ import holoocean
 import uuid
 from copy import deepcopy
 import numpy as np
+import pytest
 
 from tests.utils.equality import almost_equal
 
-uav_config = {
-    "name": "test_depth_sensor",
-    "world": "TestWorld",
-    "main_agent": "uav0",
-    "frames_per_sec": False,
-    "agents": [
-        {
-            "agent_name": "uav0",
-            "agent_type": "UavAgent",
-            "sensors": [
-                {
-                    "sensor_type": "DepthSensor",
-                },
-                {
-                    "sensor_type": "DepthSensor",
-                    "sensor_name": "noise",
-                    "configuration": {"Sigma": 10},
-                },
-            ],
-            "control_scheme": 0,
-            "location": [0.95, -1.75, 0.5],
-        }
-    ],
-}
+
+@pytest.fixture(scope="module")
+def cfg():  # vehicle_type="UavAgent"):
+    uav_config = {
+        "name": "test_depth_sensor",
+        "world": "TestWorld",
+        "main_agent": "uav0",
+        "frames_per_sec": False,
+        "agents": [
+            {
+                "agent_name": "uav0",
+                "agent_type": "UavAgent",  # vehicle_type,
+                "sensors": [
+                    {
+                        "sensor_type": "DepthSensor",
+                    },
+                    {
+                        "sensor_type": "DepthSensor",
+                        "sensor_name": "noise",
+                        "configuration": {"Sigma": 10},
+                    },
+                ],
+                "control_scheme": 0,
+                "location": [0.95, -1.75, 0.5],
+            }
+        ],
+    }
+    yield uav_config
 
 
-def test_depth_sensor_falling():
+@pytest.mark.parametrize(
+    "cfg",
+    ["UavAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
+def test_depth_sensor_falling(cfg):
     """Makes sure that the depth sensor updates as the UAV falls, and after it comes to a rest"""
-    cfg = deepcopy(uav_config)
+    cfg = deepcopy(cfg)
 
     # Spawn the UAV 10 meters up
     cfg["agents"][0]["location"] = [0, 0, 20]
@@ -69,10 +79,15 @@ def test_depth_sensor_falling():
         ), "The UAV did not seem to settle!"
 
 
-def test_depth_sensor_noise():
+@pytest.mark.parametrize(
+    "cfg",
+    ["UavAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
+def test_depth_sensor_noise(cfg):
     """Make sure turning on noise actually turns it on"""
 
-    config = deepcopy(uav_config)
+    config = deepcopy(cfg)
 
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
 

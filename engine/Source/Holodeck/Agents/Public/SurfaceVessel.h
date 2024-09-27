@@ -7,8 +7,8 @@
 #include "HolodeckBuoyantAgent.h"
 #include "SurfaceVessel.generated.h"
 
-const float SV_MAX_LIN_ACCEL = 20;
 const float SV_MAX_ANG_ACCEL = 2;
+const float SV_MAX_LIN_ACCEL = 20;
 const float SV_MAX_THRUST = 1500;
 
 UCLASS()

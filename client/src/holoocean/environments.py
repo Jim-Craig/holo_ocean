@@ -144,14 +144,14 @@ class HoloOceanEnvironment:
         if ticks_per_sec is not None:
             self._ticks_per_sec = ticks_per_sec
         # otherwise use one in scenario
-        elif "ticks_per_sec" in scenario:
+        elif scenario is not None and "ticks_per_sec" in scenario:
             self._ticks_per_sec = scenario["ticks_per_sec"]
         # default to 30
         else:
             self._ticks_per_sec = 30
 
         # If one wasn't passed in, use one in scenario
-        if frames_per_sec is None and "frames_per_sec" in scenario:
+        if frames_per_sec is None and scenario is not None and "frames_per_sec" in scenario:
             frames_per_sec = scenario["frames_per_sec"]
         # default to true
         else:
@@ -298,6 +298,7 @@ class HoloOceanEnvironment:
                     "existing": False,
                     "Hz": self._ticks_per_sec,
                     "lcm_channel": None,
+                    "ros_publish": False,
                 }
                 # Overwrite the default values with what is defined in the scenario config
                 sensor_config.update(sensor)
@@ -338,6 +339,12 @@ class HoloOceanEnvironment:
                 if sensor_config["lcm_channel"] is not None and self._lcm is None:
                     globals()["lcm"] = __import__("lcm")
                     self._lcm = lcm.LCM(self._scenario["lcm_provider"])
+
+                #Update the scenario of the enviornment to match the sensor_config with defaults applied
+                sensor.update(sensor_config)
+                #Check ROS launch:
+                # if (sensor_config["ros_publish"] == True) and not self.ros_init:
+                #     HoloOceanException("To use ROS envionment should started from launch file")
 
             # Default values for an agent
             agent_config = {
@@ -423,12 +430,12 @@ class HoloOceanEnvironment:
                 sensor.reset()
 
         self.tick(
-            publish=False
+            publish=False,tick_clock=False
         )  # Must tick once to send reset before sending spawning commands
         self.tick(
-            publish=False
+            publish=False,tick_clock=False
         )  # Bad fix to potential race condition. See issue BYU-PCCL/holodeck#224
-        self.tick(publish=False)
+        self.tick(publish=False,tick_clock=False)
         # Clear command queue
         if self._command_center.queue_size > 0:
             print(
@@ -455,7 +462,7 @@ class HoloOceanEnvironment:
             self._default_state_fn = self._get_full_state
 
         for _ in range(self._pre_start_steps + 1):
-            self.tick(publish=False)
+            self.tick(publish=False, tick_clock=False)
 
         return self._default_state_fn()
 
@@ -521,7 +528,7 @@ class HoloOceanEnvironment:
         """
         return self.agents[agent_name].get_joint_constraints(joint_name)
 
-    def tick(self, num_ticks=1, publish=True):
+    def tick(self, num_ticks=1, publish=True, tick_clock=True):
         """Ticks the environment once. Normally used for multi-agent environments.
 
         Args:
@@ -547,9 +554,11 @@ class HoloOceanEnvironment:
             self._client.acquire(self._timeout)
 
             state = self._default_state_fn()
-
-            self._tick_sensor()
-            self._num_ticks += 1
+            
+            #Clock will not advance if the tick_clock is false (pre_start_steps in reset() so clock starts at 0)
+            if tick_clock:
+                self._tick_sensor()
+                self._num_ticks += 1
 
             if publish and self._lcm is not None:
                 self._publish(state)
@@ -575,7 +584,7 @@ class HoloOceanEnvironment:
                     self._lcm.publish(
                         sensor.lcm_msg.channel, sensor.lcm_msg.msg.encode()
                     )
-
+     
     def _enqueue_command(self, command_to_send):
         self._command_center.enqueue_command(command_to_send)
 
@@ -958,6 +967,7 @@ class HoloOceanEnvironment:
                         state[sensor_name] = data
 
                 state["t"] = self._num_ticks / self._ticks_per_sec
+                #Time is calculated on client (python) side and not neccesarily in sync with engine when running live
 
             else:
                 state = self._state_dict[self._agent.name]

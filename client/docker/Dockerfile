@@ -7,11 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git libglib2.0-dev software-properties-common
 
 # OpenCV's runtime dependencies (and other dependencies)
-RUN apt-get install -y libglib2.0-0 libsm6 libxrender-dev libxext6
+RUN apt-get install -y libglib2.0-0 libsm6 libxrender-dev libxext6 libxrandr2 x11-xserver-utils 
 
 # Install all python versions to test on
-RUN apt-get update && apt-get install -y python3-dev python3-pip
-RUN pip3 install setuptools wheel tox posix_ipc numpy
+RUN apt-get update && apt-get install -y python3-dev python3-pip 
+RUN pip3 install setuptools wheel tox posix_ipc numpy==1.26 scipy matplotlib
 
 # Setup user
 USER ue4

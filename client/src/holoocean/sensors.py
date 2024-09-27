@@ -1170,7 +1170,7 @@ class DVLSensor(HoloOceanSensor):
         super(DVLSensor, self).__init__(
             client, agent_name, agent_type, name=name, config=config
         )
-
+    
     @property
     def dtype(self):
         return np.float32

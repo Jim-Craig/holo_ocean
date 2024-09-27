@@ -1,0 +1,15 @@
+#Currently only supported on Linux
+#Ensure you follow the Nvidia Container Toolkit installation instructions 
+
+services:
+  my_service:
+    image: #imageName
+    container_name: holoocean
+    runtime: nvidia
+    environment:
+      - DISPLAY=$DISPLAY
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.local/share/holoocean:/home/ue4/.local/share/holoocean
+    tty: true
+    privileged: true

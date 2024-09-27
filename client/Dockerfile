@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git libglib2.0-dev software-properties-common
 
 # OpenCV's runtime dependencies (and other dependencies)
-RUN apt-get install -y libglib2.0-0 libsm6 libxrender-dev libxext6
+RUN apt-get install -y libglib2.0-0 libsm6 libxrender-dev libxext6 libxrandr2 x11-xserver-utils 
 
 # Install all python versions to test on
 RUN add-apt-repository ppa:deadsnakes/ppa
@@ -20,8 +20,21 @@ RUN apt-get update && apt-get install -y python3-dev python3-pip \
 
 RUN pip3 install setuptools wheel tox posix_ipc numpy
 
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+RUN apt-get install git-lfs
+
 
 # Setup user
 USER ue4
 
-CMD /bin/bash
+WORKDIR /home/ue4/source/holoocean/
+
+# This should be COPY ../ but docker doesn't allow copying files outside the context
+# To copy the project files either run the build command in this directory with the
+# previous directory as the context: docker build -t frostlab/holoocean[:tag] -f ./Dockerfile ..
+# or run it from the parent directory and provide the docker file location
+# docker build -t frostlab/holoocean[:tag] -f ./docker/Dockerfile .
+COPY --chown=ue4 ./ .
+RUN pip3 install .
+
+CMD ["/bin/bash"]

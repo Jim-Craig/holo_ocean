@@ -5,7 +5,7 @@ import pytest
 
 
 @pytest.fixture(scope="module")
-def env():
+def env(vehicle_type="SphereAgent"):
     scenario = {
         "name": "test_rotation_sensor",
         "world": "TestWorld",
@@ -36,6 +36,11 @@ def env():
         yield env
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["SphereAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 @pytest.mark.parametrize("num", range(3))
 def test_rotation_sensor_after_teleport(env, num):
     """Make sure that the rotation sensor correctly updates after using a teleport command to

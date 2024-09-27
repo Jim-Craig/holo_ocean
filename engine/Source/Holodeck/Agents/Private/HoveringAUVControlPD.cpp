@@ -45,9 +45,14 @@ void UHoveringAUVControlPD::Execute(void* const CommandArray, void* const InputC
 	FVector LinAccel, AngAccel;
 	for(int i=0; i<3; i++){
 		LinAccel[i] = PositionController.ComputePIDDirect(DesiredPosition[i], Position[i], LinearVelocity[i], DeltaSeconds);
+		//Would Suggest Removing these clamps to prevent unwated behaviour
+		//Or adding a warning would be ideal
 		LinAccel[i] = FMath::Clamp(LinAccel[i], -AUV_CONTROL_MAX_LIN_ACCEL, AUV_CONTROL_MAX_LIN_ACCEL);
 
+		
 		AngAccel[i] = RotationController.ComputePIDDirect(DesiredOrientation[i], Orientation[i], AngularVelocity[i], DeltaSeconds, true, true);
+		//Would Suggest Removing these clamps to prevent unwated behaviour
+		//Or adding a warning would be ideal
 		AngAccel[i] = FMath::Clamp(AngAccel[i], -AUV_CONTROL_MAX_ANG_ACCEL, AUV_CONTROL_MAX_ANG_ACCEL);
 	}
 

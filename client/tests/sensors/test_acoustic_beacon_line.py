@@ -5,7 +5,7 @@ import pytest
 
 
 @pytest.fixture(scope="module")
-def env():
+def env(vehicle_type="HoveringAUV"):
     scenario = {
         "name": "PerfectAUV",
         "world": "TestWorld",
@@ -14,7 +14,7 @@ def env():
         "agents": [
             {
                 "agent_name": "auv0",
-                "agent_type": "HoveringAUV",
+                "agent_type": vehicle_type,
                 "sensors": [
                     {
                         "sensor_type": "AcousticBeaconSensor",
@@ -28,7 +28,7 @@ def env():
             },
             {
                 "agent_name": "auv1",
-                "agent_type": "HoveringAUV",
+                "agent_type": vehicle_type,
                 "sensors": [
                     {
                         "sensor_type": "AcousticBeaconSensor",
@@ -54,6 +54,11 @@ def env():
         yield env
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_within_max_distance(env):
     "Tests to make sure that two sensors that are not within max distance do not transmit."
 
@@ -98,6 +103,11 @@ def test_within_max_distance(env):
         ), "Receiving beacon received data when it should not have done so."
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_obstructed_view(env):
     """Tests to ensure that modem is unable to transmit when there is an obstruction between modems."""
     env._scenario["agents"] = [
@@ -139,6 +149,11 @@ def test_obstructed_view(env):
         ), "Receiving beacon received data when it should not have done so."
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_distance_noise(env):
     """Tests to ensure that noise generation for max distance is functional"""
     num_tests = 50

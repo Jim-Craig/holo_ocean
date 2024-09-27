@@ -273,6 +273,12 @@ class DebugDrawCommand(Command):
         super(DebugDrawCommand, self).__init__()
         self._command_type = "DebugDraw"
 
+        #Check type of variable is not numpy array
+        variables = [start, end, color]
+        for variable in variables:
+            if not isinstance(variable, list):
+                raise TypeError(f"Expected a list, but got {type(variable).__name__}")
+
         self.add_number_parameters(draw_type)
         self.add_number_parameters(start)
         self.add_number_parameters(end)

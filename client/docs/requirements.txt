@@ -4,3 +4,4 @@ posix_ipc
 sphinx_rtd_theme
 doc8
 sphinx-copybutton
+scipy
