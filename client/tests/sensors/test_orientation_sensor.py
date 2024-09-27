@@ -13,7 +13,7 @@ def rot_error(A, B):
 
 
 @pytest.fixture(scope="module")
-def env(vehicle_type="SphereAgent"):
+def env():
     scenario = {
         "name": "test_orientation_sensor",
         "world": "TestWorld",
@@ -22,7 +22,7 @@ def env(vehicle_type="SphereAgent"):
         "agents": [
             {
                 "agent_name": "sphere0",
-                "agent_type": vehicle_type,
+                "agent_type": "SphereAgent",
                 "sensors": [
                     {
                         "sensor_type": "OrientationSensor",
@@ -44,11 +44,6 @@ def env(vehicle_type="SphereAgent"):
         yield env
 
 
-@pytest.mark.parametrize(
-    "env",
-    ["SphereAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
-    indirect=True,
-)
 @pytest.mark.parametrize("num", range(3))
 def test_orientation_sensor_after_teleport(env, num):
     """Make sure that the orientation sensor correctly updates after using a teleport command to

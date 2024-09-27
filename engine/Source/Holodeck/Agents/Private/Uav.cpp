@@ -30,7 +30,6 @@ void AUav::Tick(float DeltaTime) {
 }
 
 void AUav::ApplyForces() {
-	//Would suggest removing the clamps or providing warnings
 	float RollTorqueToApply = FMath::Clamp(GetRollTorqueToApply(), -UAV_MAX_ROLL, UAV_MAX_ROLL);
 	float PitchTorqueToApply = FMath::Clamp(GetPitchTorqueToApply(), -UAV_MAX_PITCH, UAV_MAX_PITCH);
 	float YawTorqueToApply = FMath::Clamp(GetYawTorqueToApply(), -UAV_MAX_YAW_RATE, UAV_MAX_YAW_RATE);

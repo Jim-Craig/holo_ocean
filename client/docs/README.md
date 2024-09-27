@@ -6,7 +6,7 @@ GitHub.
 
 ### Prerequisites
 
-`pip install sphinx sphinx-copybutton autodocsumm sphinx_rtd_theme doc8`
+`pip install sphinx autodocsumm sphinx_rtd_theme doc8`
 
 ### Building
 

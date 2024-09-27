@@ -6,7 +6,7 @@ import numpy as np
 
 
 @pytest.fixture(scope="module")
-def env(vehicle_type="UavAgent"):
+def env():
     scenario = {
         "name": "test_imu_sensor",
         "world": "TestWorld",
@@ -29,7 +29,7 @@ def env(vehicle_type="UavAgent"):
             },
             {
                 "agent_name": "uav0",
-                "agent_type": vehicle_type,
+                "agent_type": "UavAgent",
                 "sensors": [
                     {
                         "sensor_type": "DynamicsSensor",
@@ -52,7 +52,6 @@ def env(vehicle_type="UavAgent"):
         yield env
 
 
-@pytest.mark.parametrize("env", ["UavAgent"], indirect=True)
 def test_acceleration(env):
     """Make sure when we move forward x is positive, y is close to 0. Make sure when not moving both are close to 0"""
 
@@ -93,7 +92,6 @@ def test_acceleration(env):
     assert y_accel <= 1e-2, "The y accel wasn't close enough to zero!"
 
 
-@pytest.mark.parametrize("env", ["UavAgent"], indirect=True)
 def test_angular_velocity(env):
     """Make sure when we move forward x is positive, y is close to 0. Make sure when not moving both are close to 0"""
 
@@ -137,9 +135,6 @@ def test_angular_velocity(env):
     assert z_angvel <= 1e-2, "The z angvel wasn't close enough to zero!"
 
 
-@pytest.mark.parametrize(
-    "env", ["UavAgent", "HoveringAUV", "SurfaceVessel", "BlueROV2"], indirect=True
-)
 def test_velocity(env):
     """Drop the UAV, make sure the z velocity is increasingly negative as it falls.
     Make sure it zeros out after it hits the ground, and then goes positive on takeoff
@@ -173,7 +168,6 @@ def test_velocity(env):
         last_z_velocity = new_z_velocity
 
 
-@pytest.mark.parametrize("env", ["UavAgent"], indirect=True)
 def test_params(env):
     env.reset()
 

@@ -103,8 +103,3 @@ holoocean.egg-info/
 pip-wheel-metadata
 **/*.egg-info
 !tests/worlds
-
-docs
-holoocean-docs
-holoocean-docs/*
-!client/docs

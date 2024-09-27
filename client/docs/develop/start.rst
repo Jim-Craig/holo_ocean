@@ -65,7 +65,7 @@ Open and prep a python script similar to the following
 
 .. code:: python
 
-   import holoocean
+   from holoocean.environments import HoloOceanEnvironment
 
    config = {
          "name": "test",
@@ -87,9 +87,9 @@ Open and prep a python script similar to the following
       }
 
    command = [0, 0, 0, 0, 0, 0, 0, 0]
-   with holoocean.make(scenario_cfg=config, start_world=False) as env:
+   with HoloOceanEnvironment(scenario=config, start_world=False) as env:
       for _ in range(1000):
-         state, reward = env.step(command)
+         state, reward, terminal, _ = env.step(command)
 
 Tweak it to put the sensors/agents you need in as you see fit.
 

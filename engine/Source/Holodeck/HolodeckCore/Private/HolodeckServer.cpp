@@ -19,7 +19,6 @@ void UHolodeckServer::Start() {
         UE_LOG(LogHolodeck, Warning, TEXT("HolodeckServer is already running! Bringing it down and up"));
         Kill();
     }
-    Memory = std::map<std::string, TSharedPtr<HolodeckSharedMemory>>();
 
     if (!FParse::Value(FCommandLine::Get(), TEXT("HolodeckUUID="), UUID))
         UUID = "";
@@ -84,15 +83,11 @@ void UHolodeckServer::Kill() {
 }
 
 void* UHolodeckServer::Malloc(const std::string& Key, unsigned int BufferSize) {
-    // If this key doesn't already exist, or the buffer size has changed, allocate the memory.`
-     
-    if (!Memory.count(Key) || Memory[Key]->Size() != BufferSize)
-    {
+    // If this key doesn't already exist, or the buffer size has changed, allocate the memory.
+    if (!Memory.count(Key) || Memory[Key]->Size() != BufferSize) {
         UE_LOG(LogHolodeck, Log, TEXT("Mallocing %u bytes for key %s"), BufferSize, UTF8_TO_TCHAR(Key.c_str()));
-        Memory[Key] = MakeShared<HolodeckSharedMemory>(HolodeckSharedMemory(Key, BufferSize, TCHAR_TO_UTF8(*UUID)));
-        UE_LOG(LogHolodeck, Warning, TEXT("Was not Memory[Key] MakeShared"));
+        Memory[Key] = std::unique_ptr<HolodeckSharedMemory>(new HolodeckSharedMemory(Key, BufferSize, TCHAR_TO_UTF8(*UUID)));
     }
-    
     return Memory[Key]->GetPtr();
 }
 
