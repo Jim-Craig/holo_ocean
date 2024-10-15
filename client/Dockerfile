@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y python3-dev python3-pip \
 
 RUN pip3 install setuptools wheel tox posix_ipc numpy
 
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+RUN apt-get install git-lfs
 
 # Setup user
 USER ue4

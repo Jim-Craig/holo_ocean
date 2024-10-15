@@ -21,7 +21,7 @@ class GL_VERSION:
 
 
 def make(scenario_name="", scenario_cfg=None, gl_version=GL_VERSION.OPENGL4, window_res=None, verbose=False,
-         show_viewport=True, ticks_per_sec=None, frames_per_sec=None, copy_state=True):
+         show_viewport=True, ticks_per_sec=None, frames_per_sec=None, copy_state=True, start_world=True):
     """Creates a HoloOcean environment
 
     Args:
@@ -57,6 +57,10 @@ def make(scenario_name="", scenario_cfg=None, gl_version=GL_VERSION.OPENGL4, win
         copy_state (:obj:`bool`, optional):
             If the state should be copied or passed as a reference when returned. Defaults to True
 
+        start_world (:obj:`bool`, optional):
+            If the world should be started immediately. Defaults to True
+            Set to false if you are running the environment in the editor as play as standalone.
+
     Returns:
         :class:`~holoocean.environments.HoloOceanEnvironment`: A holoocean environment instantiated
             with all the settings necessary for the specified world, and other supplied arguments.
@@ -66,38 +70,47 @@ def make(scenario_name="", scenario_cfg=None, gl_version=GL_VERSION.OPENGL4, win
     param_dict = dict()
     binary_path = None
 
-    if scenario_name != "":
-        scenario = get_scenario(scenario_name)
-        binary_path = get_binary_path_for_scenario(scenario_name)
-    elif scenario_cfg is not None:
-        scenario = scenario_cfg
-        binary_path = get_binary_path_for_package(scenario["package_name"])
+    if start_world:
+        if scenario_name != "":
+            scenario = get_scenario(scenario_name)
+            binary_path = get_binary_path_for_scenario(scenario_name)
+        elif scenario_cfg is not None:
+            scenario = scenario_cfg
+            binary_path = get_binary_path_for_package(scenario["package_name"])
+        else:
+            raise HoloOceanException("You must specify scenario_name or scenario_config")
+        # Get pre-start steps
+        package_config = get_package_config_for_scenario(scenario)
+        world = [world for world in package_config["worlds"] if world["name"] == scenario["world"]][0]
+        param_dict["pre_start_steps"] = world["pre_start_steps"]
+        if "env_min" not in scenario and "env_min" in world:
+            scenario["env_min"] = world["env_min"]
+            scenario["env_max"] = world["env_max"]
+        param_dict["ticks_per_sec"] = ticks_per_sec
+        param_dict["frames_per_sec"] = frames_per_sec
+        param_dict["scenario"] = scenario
+        param_dict["binary_path"] = binary_path
+        param_dict["start_world"] = True
+        param_dict["uuid"] = str(uuid.uuid4())
+        param_dict["gl_version"] = gl_version
+        param_dict["verbose"] = verbose
+        param_dict["show_viewport"] = show_viewport
+        param_dict["copy_state"] = copy_state
+        if window_res is not None:
+            param_dict["window_size"] = window_res
     else:
-        raise HoloOceanException("You must specify scenario_name or scenario_config")
+        scenario = scenario_cfg
+        param_dict["scenario"] = scenario
+        param_dict["start_world"] = False
+        param_dict["gl_version"] = gl_version
+        param_dict["verbose"] = verbose
+        param_dict["show_viewport"] = show_viewport
+        param_dict["copy_state"] = copy_state
 
-    # Get pre-start steps
-    package_config = get_package_config_for_scenario(scenario)
-    world = [world for world in package_config["worlds"] if world["name"] == scenario["world"]][0]
-    param_dict["pre_start_steps"] = world["pre_start_steps"]
-
-    if "env_min" not in scenario and "env_min" in world:
-        scenario["env_min"] = world["env_min"]
-        scenario["env_max"] = world["env_max"]
-
-    param_dict["ticks_per_sec"] = ticks_per_sec
-    param_dict["frames_per_sec"] = frames_per_sec
-
-    param_dict["scenario"] = scenario
-    param_dict["binary_path"] = binary_path
-
-    param_dict["start_world"] = True
-    param_dict["uuid"] = str(uuid.uuid4())
-    param_dict["gl_version"] = gl_version
-    param_dict["verbose"] = verbose
-    param_dict["show_viewport"] = show_viewport
-    param_dict["copy_state"] = copy_state
-
-    if window_res is not None:
-        param_dict["window_size"] = window_res
+        print("Warning: start_world is set to False. The world will not be started automatically.")
+        print("If the arguments given to the environment in the UE editor do not match your settings,")
+        print("your simulation will not run as expected.")
+        print("Double check that the arguments in the UE editor match the arguments given to this function.")
+        print("Specifically, ticks_per_sec, frames_per_sec, and env min and max.")
 
     return HoloOceanEnvironment(**param_dict)

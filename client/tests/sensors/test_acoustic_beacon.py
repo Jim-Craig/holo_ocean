@@ -5,7 +5,7 @@ import pytest
 
 
 @pytest.fixture(scope="module")
-def env():
+def env(vehicle_type="HoveringAUV"):
     scenario = {
         "name": "PerfectAUV",
         "world": "TestWorld",
@@ -14,7 +14,7 @@ def env():
         "agents": [
             {
                 "agent_name": "auv0",
-                "agent_type": "HoveringAUV",
+                "agent_type": vehicle_type,
                 "sensors": [
                     {
                         "sensor_type": "AcousticBeaconSensor",
@@ -53,6 +53,11 @@ def env():
         yield env
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_sending(env):
     """Make sure our sensor rates are working properly"""
     env.reset()
@@ -65,6 +70,11 @@ def test_sending(env):
     assert state["One"] == ["OWAY", 0, "my_message"]
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 @pytest.mark.parametrize("num", range(5))
 def test_timing(env, num):
     # do random distance
@@ -85,6 +95,11 @@ def test_timing(env, num):
     assert state["Two"] == ["OWAY", 0, "my_message"]
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 @pytest.mark.parametrize("num", range(5))
 def test_distance(env, num):
     # do random distance
@@ -111,6 +126,11 @@ def test_distance(env, num):
     assert np.isclose(state["Zero"][5], dist)
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_all_to_one(env):
     env._scenario["agents"][0]["sensors"][2]["location"] = [0, 100, 0]
 
@@ -128,6 +148,11 @@ def test_all_to_one(env):
     assert env.beacons_status == ["Idle"] * 3
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_one_to_all(env):
     env._scenario["agents"][0]["sensors"][2]["location"] = [0, 100, 0]
 
@@ -153,6 +178,11 @@ def test_one_to_all(env):
 
 
 @pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
+@pytest.mark.parametrize(
     "data",
     zip(
         [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1]],
@@ -174,6 +204,11 @@ def test_azimuth(env, data):
         assert np.isclose(state["Zero"][3], angle)
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 @pytest.mark.parametrize(
     "data",
     zip([[1, 0], [1, 1], [1, -1], [-1, -1]], [0, np.pi / 4, -np.pi / 4, -np.pi / 4]),

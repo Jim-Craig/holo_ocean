@@ -5,7 +5,7 @@ import numpy as np
 
 
 @pytest.fixture(scope="module")
-def env():
+def env(vehicle_type="SphereAgent"):
     scenario = {
         "name": "test_location_sensor",
         "world": "TestWorld",
@@ -14,7 +14,7 @@ def env():
         "agents": [
             {
                 "agent_name": "sphere",
-                "agent_type": "SphereAgent",
+                "agent_type": vehicle_type,
                 "sensors": [{"sensor_type": "GPSSensor", "configuration": {}}],
                 "control_scheme": 0,
                 "location": [0, 0, 0],
@@ -33,6 +33,11 @@ def env():
         yield env
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["SphereAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 @pytest.mark.parametrize("num", range(3))
 def test_setting_depth(env, num):
     """Make sure if it's above the depth we receive data, and if below we don't"""
@@ -54,6 +59,11 @@ def test_setting_depth(env, num):
     assert "GPSSensor" not in state
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["SphereAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 @pytest.mark.parametrize("num", range(3))
 def test_random_depth(env, num):
     """Make sure the depth is changing according to the noise we put in"""

@@ -12,7 +12,7 @@ very small, while the world packages ("binaries") can be several gigabytes.
 Requirements
 ============
 
-- >= Python 3.6
+- >= Python 3.7
 - Several gigabytes of storage
 - pip3
 - Linux or Windows 64bit
@@ -28,18 +28,34 @@ For the build-essential package for Linux, you can run the following console com
 Stable Installation
 =====================
 
-To align ourselves with the Unreal Engine EULA, we no longer offer HoloOcean through pypi. However, 
-installing HoloOcean is still fairly simple, but requires a few more steps. First, follow the steps 
-here to link your github account with Unreal: https://www.unrealengine.com/en-US/ue-on-github 
-Note: The account web page may have been updated, currently the label for connections is named 
-"Apps and Accounts". This requires you to accept their EULA.
+In accordance with the Unreal Engine EULA we can no longer offer HoloOcean through pypi. However,
+installing HoloOcean is still fairly simple, but requires a few more steps.
 
-To install, like with the Beta installation, clone the repo, and pip install with the local version as
-described below:
+First, follow the steps here to link your github account with Unreal: https://www.unrealengine.com/en-US/ue-on-github 
+Note: The account web page may have been updated, currently the label for connections is named "Apps and 
+Accounts". 
+This requires you accept their EULA.
+
+.. raw:: html
+   
+   <h4>Notice: Epic games is in the process of changing their github organization structure. If you've linked your account after June 10th and are on their mirror organization, the appropriate link is now 
+        <a href="https://www.github.com/byu-holoocean-mirror/HoloOcean"> github.com/byu-holoocean-mirror/HoloOcean</a> and git clone is<br></h4>
+::
+   git clone git@github.com:byu-holoocean-mirror/HoloOcean.git holoocean
+**Please let us know if you have any further issues.**
+
+Then, download or clone our repo at: https://github.com/byu-holoocean/HoloOcean
+**Note**: If you get a Page Not Found Error, it's because you didn't link your github account to your Epic Games account. Please refer to the previous paragraph, and link the accounts.
+
+We suggest cloning it with lowercase naming, as our example code uses, like so:
+::
+
+   git clone git@github.com:byu-holoocean/HoloOcean.git holoocean
+
+From the cloned repo, do the following:
 
 ::
 
-   git clone https://bitbucket.org/frostlab/holoocean/
    cd holoocean/client
    pip install .
 
@@ -55,13 +71,13 @@ Then run the python command in that python shell
 ::
 
    import holoocean
-   holoocean.install("Ocean", branch="develop")
+   holoocean.install("Ocean")
 
 Or as a single console command,
 
 ::
 
-   python -c `import holoocean; holoocean.install("Ocean", branch="develop")`
+   python -c `import holoocean; holoocean.install("Ocean")`
 
 
 
@@ -78,20 +94,11 @@ Beta Installation
    then you will need to uninstall the binary by running ``holoocean.remove("Ocean")`` before proceeding. 
    Failure to do so may result in unpredictable behavior.
 
-To use the latest version of HoloOcean, you can install and use HoloOcean simply
-by cloning the `bitbucket.org/frostlab/holoocean`_, and ensuring it is on your
-``sys.path``.
-
-.. _`bitbucket.org/frostlab/holoocean`: https://bitbucket.org/frostlab/holoocean/
-
-The ``master`` branch is kept in sync with the pip repository, the ``develop``
-branch is the bleeding edge of development.
-
 To install the develop branch, simply run
 
 ::
 
-   git clone https://bitbucket.org/frostlab/holoocean/
+   git clone https://github.com/byu-holoocean/HoloOcean.
    cd holoocean/client
    git checkout develop
    pip install .
@@ -133,7 +140,7 @@ Install a Package Automatically
    >>> packagemanager.install("Ocean")
    Installing Ocean ver. 0.1.0 from https://robots.et.byu.edu/holo/Ocean/v0.1.0/Linux.zip
    File size: 1.55 GB
-   |████████████████████████| 100%
+   |â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ| 100%
    Unpacking worlds...
    Finished.
    >>> packagemanager.installed_packages()

@@ -144,14 +144,14 @@ class HoloOceanEnvironment:
         if ticks_per_sec is not None:
             self._ticks_per_sec = ticks_per_sec
         # otherwise use one in scenario
-        elif "ticks_per_sec" in scenario:
+        elif scenario is not None and "ticks_per_sec" in scenario:
             self._ticks_per_sec = scenario["ticks_per_sec"]
         # default to 30
         else:
             self._ticks_per_sec = 30
 
         # If one wasn't passed in, use one in scenario
-        if frames_per_sec is None and "frames_per_sec" in scenario:
+        if frames_per_sec is None and scenario is not None and "frames_per_sec" in scenario:
             frames_per_sec = scenario["frames_per_sec"]
         # default to true
         else:

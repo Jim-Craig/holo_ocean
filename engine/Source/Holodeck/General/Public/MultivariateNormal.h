@@ -55,13 +55,13 @@ public:
     */
     void initCov(float cov){
         for(int i=0;i<N;i++){
-            sqrtCov[i][i] = FMath::Sqrt(cov);
+            sqrtCov[i][i] = UKismetMathLibrary::Sqrt(cov);
         }
         uncertain = true;
     }
     void initCov(std::array<float,N> cov){
         for(int i=0;i<N;i++){
-            sqrtCov[i][i] = FMath::Sqrt(cov[i]);
+            sqrtCov[i][i] = UKismetMathLibrary::Sqrt(cov[i]);
         }
         uncertain = true;
     }
@@ -95,7 +95,7 @@ public:
         }
         else{
             for(int i=0;i<N;i++){
-                sqrtCov[i][i] = FMath::Sqrt(cov[i]->AsNumber());
+                sqrtCov[i][i] = UKismetMathLibrary::Sqrt(cov[i]->AsNumber());
             }
         }
         uncertain = true;
@@ -183,7 +183,7 @@ public:
                         // Not positive definite (rounding?)
                         return false;
                     }
-                    A[I][J] = FMath::Sqrt(Sum);
+                    A[I][J] = UKismetMathLibrary::Sqrt(Sum);
                 }
                 else{
                     A[J][I] = Sum / A[I][I];

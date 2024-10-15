@@ -4,7 +4,7 @@ import pytest
 
 
 @pytest.fixture(scope="module")
-def env(vechile_type="TurtleAgent"):
+def env(vehicle_type="TurtleAgent"):
     scenario = {
         "name": "test",
         "world": "TestWorld",
@@ -13,7 +13,7 @@ def env(vechile_type="TurtleAgent"):
         "agents": [
             {
                 "agent_name": "uav0",
-                "agent_type": vechile_type,
+                "agent_type": vehicle_type,
                 "sensors": [{"sensor_type": "OpticalModemSensor"}],
                 "control_scheme": 1,
                 "location": [-10, 10, 0.25],
@@ -21,7 +21,7 @@ def env(vechile_type="TurtleAgent"):
             },
             {
                 "agent_name": "uav1",
-                "agent_type": vechile_type,
+                "agent_type": vehicle_type,
                 "sensors": [{"sensor_type": "OpticalModemSensor"}],
                 "control_scheme": 1,
                 "location": [-10, 7, 0.25],
@@ -44,7 +44,7 @@ def env(vechile_type="TurtleAgent"):
 
 @pytest.mark.parametrize(
     "env",
-    ["TurtleAgent", "HoveringAUV"],
+    ["TurtleAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
     indirect=True,
 )
 def test_transmittable(env):
@@ -63,6 +63,11 @@ def test_transmittable(env):
         ), "Wrong message received."
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["TurtleAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_within_max_distance(env):
     "Tests to make sure that two sensors that are not within max distance do not transmit."
 
@@ -148,6 +153,11 @@ def test_not_oriented(env):
         ), "Receiving modem received data when it should not have done so."
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["TurtleAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_obstructed_view(env):
     """Tests to ensure that modem is unable to transmit when there is an obstruction between modems."""
     env._scenario["agents"] = [
@@ -189,6 +199,11 @@ def test_obstructed_view(env):
         ), "Receiving modem received data when it should not have done so."
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["TurtleAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_distance_noise(env):
     """Tests to ensure that noise generation for max distance is functional"""
     num_tests = 50
@@ -239,6 +254,11 @@ def test_distance_noise(env):
     ), "All messages failed when some should have passed due to noise variation."
 
 
+@pytest.mark.parametrize(
+    "env",
+    ["TurtleAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
 def test_angle_noise(env):
     """Tests to ensure that noise generation for max distance is functional"""
     num_tests = 80

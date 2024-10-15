@@ -61,11 +61,16 @@ To avoid having to package the project anytime you want to see changes to your c
 
    These are all in meters. Tweak them as you need, they're all pretty self-explanatory.
 
+   .. note::
+      If you using the dynamics sensor, or expect certain tick per second rate, make sure to set -TicksPerSec=<val> as one of these arguments, so you get the simulation rate and behavior you expect..
+      The -FramesPerSec=<val> command controls how fast it runs on your computer. See https://byu-holoocean.github.io/holoocean-docs/v1.0.0/usage/scenarios.html#frame-rates.
+      In addition, the -log parameter is useful for being able to close the game window easily, as well as for seeing log messages for debugging purposes. 
+      
 Open and prep a python script similar to the following
 
 .. code:: python
 
-   from holoocean.environments import HoloOceanEnvironment
+   import holoocean
 
    config = {
          "name": "test",
@@ -87,9 +92,9 @@ Open and prep a python script similar to the following
       }
 
    command = [0, 0, 0, 0, 0, 0, 0, 0]
-   with HoloOceanEnvironment(scenario=config, start_world=False) as env:
+   with holoocean.make(scenario_cfg=config, start_world=False) as env:
       for _ in range(1000):
-         state, reward, terminal, _ = env.step(command)
+         state, reward = env.step(command)
 
 Tweak it to put the sensors/agents you need in as you see fit.
 

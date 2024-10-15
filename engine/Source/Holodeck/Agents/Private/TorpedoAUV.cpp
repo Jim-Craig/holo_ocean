@@ -73,7 +73,7 @@ void ATorpedoAUV::ApplyFin(int i, float command){
 	double u2 = velFin.Z*velFin.Z + velFin.X*velFin.X;
 	// TODO: Verify these coefficients
 	// I've just adjusted these until they seem to behave correctly
-	double sin = -FMath::Sin(angle*3.14/180);
+	double sin = -UKismetMathLibrary::Sin(angle*3.14/180);
 	double drag = 0.5 * u2 * sin*sin / 400;
 	double lift = 0.5 * u2 * sin*sin*sin / 10;
 	// Sometimes they get out of hand, clamp them

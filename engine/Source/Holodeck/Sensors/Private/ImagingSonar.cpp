@@ -375,7 +375,7 @@ void UImagingSonar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FA
 			for(int j=0; j<AzimuthBins; j++){
 				// Scale along azimuth to recreat lobe shape
 				azimuth = j*AzimuthRes - Azimuth/2;
-				scale_total = scale_range*(1 + FMath::Exp(-azimuth*azimuth/std)*0.5);
+				scale_total = scale_range*(1 + UKismetMathLibrary::Exp(-azimuth*azimuth/std)*0.5);
 
 				if(!ScaleNoise) scale_total = 1;
 

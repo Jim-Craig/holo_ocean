@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Containers/Array.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Pawn.h"
 #include "HolodeckBuoyantAgent.h"
 #include "TorpedoAUV.generated.h"

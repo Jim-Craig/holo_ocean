@@ -31,7 +31,7 @@ void UGPSSensor::ParseSensorParms(FString ParmsJson) {
 
 		if (JsonParsed->HasTypedField<EJson::Number>("Depth")) {
 			// Take absolute value in case people put it in as a negative (ie depth is down)
-			GPSDepth = FMath::Abs(JsonParsed->GetNumberField("Depth"));
+			GPSDepth = UKismetMathLibrary::Abs(JsonParsed->GetNumberField("Depth"));
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Number>("DepthSigma")) {

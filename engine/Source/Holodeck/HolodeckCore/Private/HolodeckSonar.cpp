@@ -304,7 +304,7 @@ void UHolodeckSonar::shadowLeaves(){
 
 			// diff = FVector::Dist(jth->loc, binLeafs.GetData()[j+1]->loc);
 			if(j != binLeafs.Num()-1){
-				diff = FMath::Abs(jth->locSpherical.X - binLeafs.GetData()[j+1]->locSpherical.X);
+				diff = UKismetMathLibrary::Abs(jth->locSpherical.X - binLeafs.GetData()[j+1]->locSpherical.X);
 				if(diff > ShadowEpsilon){
 					binLeafs.RemoveAt(j+1,binLeafs.Num()-j-1);
 					break;

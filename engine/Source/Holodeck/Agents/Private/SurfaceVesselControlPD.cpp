@@ -14,7 +14,7 @@ void USurfaceVesselControlPD::Execute(void* const CommandArray, void* const Inpu
 		}
 		
 		SurfaceVessel->EnableDamping();
-		d = FMath::Abs(SurfaceVessel->thrusterLocations[0].Y) / 100;
+		d = UKismetMathLibrary::Abs(SurfaceVessel->thrusterLocations[0].Y) / 100;
 	}
 
 	// Apply gravity & buoyancy
@@ -41,7 +41,7 @@ void USurfaceVesselControlPD::Execute(void* const CommandArray, void* const Inpu
 	
 	// Get desired information
 	FVector DesiredPosition = FVector(InputCommandFloat[0], InputCommandFloat[1], 0);
-	float DesiredYaw = FMath::Atan2(Position.Y-DesiredPosition.Y, Position.X-DesiredPosition.X);
+	float DesiredYaw = UKismetMathLibrary::Atan2(Position.Y-DesiredPosition.Y, Position.X-DesiredPosition.X);
 	DesiredYaw = FMath::RadiansToDegrees(DesiredYaw) + 180.0;
 
 	// Compute force & torque to apply
