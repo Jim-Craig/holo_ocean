@@ -24,18 +24,16 @@ void ATorpedoAUV::InitializeAgent() {
 	Super::InitializeAgent();
 }
 
-// Called every frame
+// Called every frame when custom dynamics control scheme is active
 void ATorpedoAUV::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 
 	// Convert linear acceleration to force
 	FVector linAccel = FVector(CommandArray[0], CommandArray[1], CommandArray[2]);
-	linAccel = ClampVector(linAccel, -FVector(TAUV_MAX_LIN_ACCEL), FVector(TAUV_MAX_LIN_ACCEL));
 	linAccel = ConvertLinearVector(linAccel, ClientToUE);
 
 	// Convert angular acceleration to torque
 	FVector angAccel = FVector(CommandArray[3], CommandArray[4], CommandArray[5]);
-	angAccel = ClampVector(angAccel, -FVector(TAUV_MAX_ANG_ACCEL), FVector(TAUV_MAX_ANG_ACCEL));
 	angAccel = ConvertAngularVector(angAccel, NoScale);
 
 

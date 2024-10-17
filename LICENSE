@@ -34,6 +34,14 @@ This includes the files listed below:
 - 3D models of vehicles found in engine/Content/HolodeckContent/Agents.
 
 
+Fossen Dynamic Simulation Code 
+
+The code in the following folders are derived from Thor Fossens Python Dynamics Simulation 
+https://github.com/cybergalactic/PythonVehicleSimulator and is released under the MIT license 
+and the following copyright (Copyright (c) 2018 The Python Packaging Authority):
+- client/src/holoocean/vehicle_dynamics
+- client/src/holoocean/dynamics_controls
+
 
 Required Attribution
 

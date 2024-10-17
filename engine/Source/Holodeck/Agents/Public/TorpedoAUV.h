@@ -12,8 +12,6 @@ const float TAUV_MAX_THRUST = 100;
 const float TAUV_MIN_FIN = -45;
 const float TAUV_MAX_FIN = 45;
 
-const float TAUV_MAX_LIN_ACCEL = 10;
-const float TAUV_MAX_ANG_ACCEL = 2;
 
 UCLASS()
 /**
