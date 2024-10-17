@@ -58,6 +58,9 @@ void AHoveringAUV::Tick(float DeltaSeconds) {
 
 	RootMesh->GetBodyInstance()->AddForce(linAccel, true, true);
 	RootMesh->GetBodyInstance()->AddTorqueInRadians(angAccel, true, true);
+
+	UE_LOG(LogTemp, Warning, TEXT("HoveringAUV linAccel %f, %f, %f"),linAccel[0],linAccel[1],linAccel[2]);
+	UE_LOG(LogTemp, Warning, TEXT("HoveringAUV commandArray %f, %f, %f,%f, %f, %f"),CommandArray[0], CommandArray[1], CommandArray[2], CommandArray[3], CommandArray[4], CommandArray[5]);
 }
 
 // For empty dynamics, damping is disabled

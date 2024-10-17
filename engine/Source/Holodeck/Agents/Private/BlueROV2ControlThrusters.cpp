@@ -7,8 +7,8 @@ UBlueROV2ControlThrusters::UBlueROV2ControlThrusters(const FObjectInitializer& O
 void UBlueROV2ControlThrusters::Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) {
 	if (BlueROV2 == nullptr) {
 		BlueROV2 = static_cast<ABlueROV2*>(BlueROV2Controller->GetPawn());
-		
-        if (BlueROV2 == nullptr) {
+		if (BlueROV2 == nullptr) {
+
 			UE_LOG(LogHolodeck, Error, TEXT("UBlueROV2ControlThrusters couldn't get BlueROV2 reference"));
 			return;
 		}
@@ -18,8 +18,8 @@ void UBlueROV2ControlThrusters::Execute(void* const CommandArray, void* const In
 
 	float* InputCommandFloat = static_cast<float*>(InputCommand);
 	float* CommandArrayFloat = static_cast<float*>(CommandArray);
-	
-    BlueROV2->ApplyBuoyantForce();
+
+	BlueROV2->ApplyBuoyantForce();
 	BlueROV2->ApplyThrusters(InputCommandFloat);
 
 	// Zero out the physics based controller

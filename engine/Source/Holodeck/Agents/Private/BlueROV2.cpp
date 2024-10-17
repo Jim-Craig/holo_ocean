@@ -9,6 +9,7 @@ ABlueROV2::ABlueROV2() {
 	// Set the defualt controller
 	AIControllerClass = LoadClass<AController>(NULL, TEXT("/Script/Holodeck.BlueROV2Controller"), NULL, LOAD_None, NULL);
 	AutoPossessAI = EAutoPossessAI::PlacedInWorld;
+
 	// This values are all pulled from the solidworks file
 	this->Volume = .03554577;	
 	this->CenterBuoyancy = FVector(-5.96, 0.29, -1.85); 
@@ -20,12 +21,14 @@ ABlueROV2::ABlueROV2() {
 // Sets all values that we need
 void ABlueROV2::InitializeAgent() {
 	RootMesh = Cast<UStaticMeshComponent>(RootComponent);
+
 	if(Perfect){
 		this->CenterMass = (thrusterLocations[0] + thrusterLocations[2]) / 2;
 		this->CenterMass.Z = thrusterLocations[7].Z;
 		
 		this->CenterBuoyancy = CenterMass;
 		this->CenterBuoyancy.Z += 5;
+
 		this->Volume = MassInKG / WaterDensity;
 	}
 
@@ -33,6 +36,7 @@ void ABlueROV2::InitializeAgent() {
 	for(int i=0;i<8;i++){
 		thrusterLocations[i] += OffsetToOrigin;
 	}
+
 	Super::InitializeAgent();
 }
 
@@ -49,6 +53,7 @@ void ABlueROV2::Tick(float DeltaSeconds) {
 	FVector angAccel = FVector(CommandArray[3], CommandArray[4], CommandArray[5]);
 	angAccel = ClampVector(angAccel, -FVector(BR_MAX_ANG_ACCEL), FVector(BR_MAX_ANG_ACCEL));
 	angAccel = ConvertAngularVector(angAccel, NoScale);
+
 	RootMesh->GetBodyInstance()->AddForce(linAccel, true, true);
 	RootMesh->GetBodyInstance()->AddTorqueInRadians(angAccel, true, true);
 }
@@ -66,8 +71,10 @@ void ABlueROV2::ApplyThrusters(float* const ThrusterArray){
 		float force = FMath::Clamp(ThrusterArray[i], -BR_MAX_THRUST, BR_MAX_THRUST);
 		FVector LocalForce = FVector(0, 0, force);
 		LocalForce = ConvertLinearVector(LocalForce, ClientToUE);
+
 		RootMesh->AddForceAtLocationLocal(LocalForce, thrusterLocations[i]);
 	}
+
 	// Iterate through angled thrusters
 	for(int i=4;i<8;i++){
 		float force = FMath::Clamp(ThrusterArray[i], -BR_MAX_THRUST, BR_MAX_THRUST);
@@ -80,4 +87,5 @@ void ABlueROV2::ApplyThrusters(float* const ThrusterArray){
 		LocalForce = ConvertLinearVector(LocalForce, ClientToUE);
 		RootMesh->AddForceAtLocationLocal(LocalForce, thrusterLocations[i]);
 	}
+
 }

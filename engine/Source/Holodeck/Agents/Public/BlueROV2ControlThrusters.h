@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Holodeck.h"
+
 #include "HolodeckPawnController.h"
 #include "BlueROV2.h"
 #include "HolodeckControlScheme.h"
@@ -16,12 +17,13 @@ UCLASS()
 class HOLODECK_API UBlueROV2ControlThrusters : public UHolodeckControlScheme {
 public:
 	GENERATED_BODY()
-	
-    UBlueROV2ControlThrusters(const FObjectInitializer& ObjectInitializer);
-	
-    void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) override;
-	
-    /** NOTE: These go counter-clockwise, starting in front right
+
+	UBlueROV2ControlThrusters(const FObjectInitializer& ObjectInitializer);
+
+	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) override;
+
+	/** NOTE: These go counter-clockwise, starting in front right
+
 	* 0: Vertical Front Starboard Thruster
 	* 1: Vertical Front Port Thruster
 	* 2: Vertical Back  Port Thruster
@@ -31,15 +33,15 @@ public:
 	* 6: Angled   Back  Port Thruster
 	* 7: Angled   Back  Starboard Thruster
 	*/
-	
-    unsigned int GetControlSchemeSizeInBytes() const override {
+	unsigned int GetControlSchemeSizeInBytes() const override {
 		return 8 * sizeof(float);
 	}
-	
-    void SetController(AHolodeckPawnController* const Controller) { BlueROV2Controller = Controller; };
+
+	void SetController(AHolodeckPawnController* const Controller) { BlueROV2Controller = Controller; };
 
 private:
 	AHolodeckPawnController* BlueROV2Controller;
-
 	ABlueROV2* BlueROV2;
+
 };
+

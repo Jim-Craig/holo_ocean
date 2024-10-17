@@ -26,21 +26,22 @@ UCLASS()
 class HOLODECK_API UBlueROV2ControlPD : public UHolodeckControlScheme {
 public:
 	GENERATED_BODY()
-	
-    UBlueROV2ControlPD(const FObjectInitializer& ObjectInitializer);
-	
-    void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) override;
-	
-    unsigned int GetControlSchemeSizeInBytes() const override {
+
+	UBlueROV2ControlPD(const FObjectInitializer& ObjectInitializer);
+
+	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) override;
+
+	unsigned int GetControlSchemeSizeInBytes() const override {
 		return 8 * sizeof(float);
 	}
-	
-    void SetController(AHolodeckPawnController* const Controller) { BlueROV2Controller = Controller; };
+
+	void SetController(AHolodeckPawnController* const Controller) { BlueROV2Controller = Controller; };
+
 
 private:
 	AHolodeckPawnController* BlueROV2Controller;
 	ABlueROV2* BlueROV2;
-	
-    SimplePID PositionController;
+	SimplePID PositionController;
 	SimplePID RotationController;
 };
+

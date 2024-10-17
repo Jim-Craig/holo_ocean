@@ -21,7 +21,7 @@ UCLASS()
 class HOLODECK_API ABlueROV2 : public AHolodeckBuoyantAgent
 {
 	GENERATED_BODY()
-    
+
 public:
 	/**
 	* Default Constructor.
@@ -64,4 +64,5 @@ public:
 private:
 	// Accelerations
 	float CommandArray[8];
+
 };

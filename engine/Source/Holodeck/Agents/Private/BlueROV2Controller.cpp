@@ -9,3 +9,4 @@ ABlueROV2Controller::ABlueROV2Controller(const FObjectInitializer& ObjectInitial
 }
 
 ABlueROV2Controller::~ABlueROV2Controller() {}
+
