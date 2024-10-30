@@ -1694,7 +1694,8 @@ class CameraSensor(HoloOceanSensor):
         
 
 class RGBDCamera(HoloOceanSensor):
-    """Captures agent's view.
+    """ ***WIP: need to fully test this sensor***
+    Captures agent's view.
 
     The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
     The resolution can be increased, but will significantly impact performance.
@@ -1798,21 +1799,27 @@ class RGBDCamera(HoloOceanSensor):
         # self._sensor_data_buffer[..., 1] = np.zeros(shape=(self.shape[0], self.shape[1]))
         
         # print(np.concatenate((self._sensor_data_buffer, np.zeros(shape=(self.shape[0], self.shape[1], 1))), axis=2).shape)
+        
+        data = {}
+        data["image"] = self._sensor_data_buffer
+
 
         if (self.config["convertToDistance"]):
-            distances = np.zeros(shape=(self.shape[0], self.shape[1], 1), dtype=np.uint16)
+            distances = []
             alpha_channel = self._sensor_data_buffer[..., 3]
 
             for i in range(len(alpha_channel)):
-                for j in range(len(alpha_channel[i])): 
-                    distances[i][j] = int((alpha_channel[i][j] / 255.0) * 1000)
+                distances.append([])
+                for j in range(len(alpha_channel[i])):
+                    distances[i].append(int((alpha_channel[i][j] * 1000) / 255.0)) 
+                    # distances[i][j] = 
+            data["depth"] = distances
 
-            return np.concatenate((self._sensor_data_buffer, distances), axis=2, dtype=np.uint16)
-        else:
-            return self._sensor_data_buffer
+        return data
 
 class SemanticSegmentationCamera(HoloOceanSensor):
-    """Captures agent's view.
+    """ ***WIP: need to fully test this senssor***
+    Captures agent's view.
 
     The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
     The resolution can be increased, but will significantly impact performance.
@@ -1877,7 +1884,8 @@ class SemanticSegmentationCamera(HoloOceanSensor):
         self.tick_every = ticks_per_capture
 
 class RaycastLidar(HoloOceanSensor):
-    """Runs Agent's Lidar
+    """ ***WIP: need to fully test this senssor***
+    Runs Agent's Lidar
 
     **Configuration**
 
@@ -1906,7 +1914,9 @@ class RaycastLidar(HoloOceanSensor):
     def __init__(self, client, agent_name, agent_type, name="RaycastLidar", config=None):
         self.config = {} if config is None else config
 
-        self.shape = [20000]
+        self.shape = [30000]
+
+        self.previous_frame = []
 
         super(RaycastLidar, self).__init__(
             client, agent_name, agent_type, name=name, config=config
@@ -1922,11 +1932,28 @@ class RaycastLidar(HoloOceanSensor):
 
     @property
     def sensor_data(self):
-        return np.reshape(self._sensor_data_buffer, (-1, 4))
+        reshaped_data = np.reshape(self._sensor_data_buffer, (-1, 4))
+        num_points = (int)(reshaped_data[0][0])
+
+        data_this_frame = reshaped_data[1:num_points, :]
+
+        # Subtract 1, since we removed the first point
+        i = len(data_this_frame) - 1
+
+        if i < len(self.previous_frame) and i >= 0:
+            while (data_this_frame[i] == self.previous_frame[i]).all() and i > 0:
+                i -= 1
+        elif i < 0:
+            i = 0
+        self.previous_frame = data_this_frame
+
+        # Need to remove the num_points that is being sent along with everything. Also convert to meters
+        return data_this_frame[:i, :] / 100
 
 
 class RaycastSemanticLidar(HoloOceanSensor):
-    """Runs Agent's Lidar
+    """ ***WIP: need to fully test this senssor***
+    Runs Agent's Lidar
 
     **Configuration**
 
@@ -1958,6 +1985,8 @@ class RaycastSemanticLidar(HoloOceanSensor):
 
         self.shape = [60000]
 
+        self.previous_frame = []
+
         super(RaycastSemanticLidar, self).__init__(
             client, agent_name, agent_type, name=name, config=config
         )
@@ -1972,7 +2001,25 @@ class RaycastSemanticLidar(HoloOceanSensor):
 
     @property
     def sensor_data(self):
-        return np.reshape(self._sensor_data_buffer, (-1, 6))
+        reshaped_data = np.reshape(self._sensor_data_buffer, (-1, 6))
+        num_points = (int)(reshaped_data[0][0])
+
+        data_this_frame = reshaped_data[1:num_points, :]
+
+        # Subtract 1, since we removed the first point
+        i = len(data_this_frame) - 1
+
+        if i < len(self.previous_frame) and i >= 0:
+            while (data_this_frame[i] == self.previous_frame[i]).all() and i > 0:
+                i -= 1
+        elif i < 0:
+            i = 0
+        self.previous_frame = data_this_frame
+
+        # TODO: Need to only convert the X, Y, Z. Not the angle, object tag or object instance
+        # Also convert to meters
+        return data_this_frame[:i, :]
+
 
 ######################################################################################
 class SensorDefinition:

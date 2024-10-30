@@ -54,7 +54,7 @@ void ATagger::TagActor(const AActor& Actor, bool bShouldTagForSemanticSegmentati
 		if (Actor.Tags.Num() > 0)
 		{
 			auto Label = GetLabelByFolderName(Actor.Tags[0].ToString());
-			UE_LOG(LogHolodeck, Error, TEXT("TAG FOUND!: %s"), *Actor.Tags[0].ToString());
+			//UE_LOG(LogHolodeck, Error, TEXT("TAG FOUND!: %s"), *Actor.Tags[0].ToString());
 			SetStencilValue(*Component, Label, bShouldTagForSemanticSegmentation);
 
 			if (!Component->IsVisible() || !Component->GetStaticMesh())
@@ -123,7 +123,7 @@ FString ATagger::GetTagAsString(holoocean::ObjectLabel Tag)
 
 		HOLOOCEAN_GET_LABEL_STR(Any)
 
-	#undef CARLA_GET_LABEL_STR
+	#undef HOLOOCEAN_GET_LABEL_STR
 	  }
 }
 

@@ -71,6 +71,7 @@ namespace holoocean
 			SemanticLidarData(float* buffer, uint32_t ChannelCount = 0u)
 			{
 				Buffer = buffer;
+				channelCount = ChannelCount;
 			}
 
 			SemanticLidarData& operator=(SemanticLidarData &&) = default;
@@ -78,15 +79,15 @@ namespace holoocean
 			virtual ~SemanticLidarData() {}
 
 			float GetHorizontalAngle() const {
-				return reinterpret_cast<const float &>(_header[Index::HorizontalAngle]);
+				return horizontalAngle;
 			}
 
 			void SetHorizontalAngle(float angle) {
-				std::memcpy(&_header[Index::HorizontalAngle], &angle, sizeof(uint32_t));
+				this->horizontalAngle = angle;
 			}
 
 			uint32_t GetChannelCount() const {
-				return _header[Index::ChannelCount];
+				return channelCount;
 			}
 
 			virtual void ResetMemory(std::vector<uint32_t> points_per_channel) {
@@ -96,9 +97,14 @@ namespace holoocean
 					std::accumulate(points_per_channel.begin(), points_per_channel.end(), 0));
 
 				_ser_points.clear();
-				_ser_points.reserve(total_points * 6);
+				_ser_points.reserve(total_points);
+
+				points.clear();
+				points.reserve(total_points * 6);
+				
 				LastFrameMaxPoints = NumPoints;
-				NumPoints = 0;
+				NumPoints = 1;
+				Buffer[0] = static_cast<float>(total_points);
 			}
 
 			virtual void WriteChannelCount(std::vector<uint32_t> points_per_channel) {
@@ -109,12 +115,19 @@ namespace holoocean
 			virtual void WritePointSync(SemanticLidarDetection &detection) {
 				//_ser_points.emplace_back(detection);
 
-				Buffer[6 * NumPoints] = detection.point.X;
-				Buffer[6 * NumPoints + 1] = detection.point.Y;
-				Buffer[6 * NumPoints + 2] = detection.point.Z;
+				points.emplace_back(detection.point.X);
+				points.emplace_back(detection.point.Y);
+				points.emplace_back(detection.point.Z);
+				points.emplace_back(detection.cos_inc_angle);
+				points.emplace_back(static_cast<float>(detection.object_idx));
+				points.emplace_back(static_cast<float>(detection.object_tag));
+
+				Buffer[6 * NumPoints] = detection.point.X / 100;
+				Buffer[6 * NumPoints + 1] = detection.point.Y / 100;
+				Buffer[6 * NumPoints + 2] = detection.point.Z / 100;
 				Buffer[6 * NumPoints + 3] = detection.cos_inc_angle;
-				Buffer[6 * NumPoints + 4] = detection.object_idx;
-				Buffer[6 * NumPoints + 5] = detection.object_tag;
+				Buffer[6 * NumPoints + 4] = static_cast<float>(detection.object_idx);
+				Buffer[6 * NumPoints + 5] = static_cast<float>(detection.object_tag);
 
 				NumPoints++;
 			}
@@ -130,9 +143,13 @@ namespace holoocean
 
 		private:
 			std::vector<SemanticLidarDetection> _ser_points;
+			std::vector<float> points;
 			float* Buffer;
 			int NumPoints = 0;
 			int LastFrameMaxPoints = 0;
+
+			float horizontalAngle;
+			uint32_t channelCount;
 		};
 	}
 

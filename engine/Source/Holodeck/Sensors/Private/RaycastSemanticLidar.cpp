@@ -33,6 +33,8 @@ void URaycastSemanticLidar::ParseSensorParms(FString ParmsJson)
 		JsonParsed->TryGetNumberField("DropOffAtZeroIntensity", Description.DropOffAtZeroIntensity);
 		JsonParsed->TryGetBoolField("ShowDebugPoints", Description.ShowDebugPoints);
 		JsonParsed->TryGetNumberField("NoiseStdDev", Description.NoiseStdDev);
+
+		Description.Range *= 100; // We need to convert it to cm since that is what HoloOcean uses
 	}
 	
 	Set(Description);
@@ -45,13 +47,11 @@ void URaycastSemanticLidar::InitializeSensor()
 	if (ShouldInitialize)
 	{
 		ShouldInitialize = false;
-		this->SemanticLidarBuffer = static_cast<float*>(Super::Buffer);
-		this->SemanticLidarData = FSemanticLidarData(this->SemanticLidarBuffer);
+		this->SemanticLidarBuffer = static_cast<float*>(Buffer);
+		this->SemanticLidarData = FSemanticLidarData(this->SemanticLidarBuffer, Description.Channels);
 	}
 	
 	Parent = TUniquePtr<AActor>(this->GetAttachmentRootActor());
-	Description = FLidarDescription();
-	
 }
 
 void URaycastSemanticLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -62,7 +62,8 @@ void URaycastSemanticLidar::TickSensorComponent(float DeltaTime, ELevelTick Tick
 void URaycastSemanticLidar::Set(const FLidarDescription& LidarDescription)
 {
 	Description = LidarDescription;
-	SemanticLidarData = FSemanticLidarData(Description.Channels);
+	UE_LOG(LogHolodeck, Error, TEXT("Range: %f"), Description.Range)
+
 	CreateLasers();
 	PointsPerChannel.resize(Description.Channels);
 }
@@ -108,17 +109,13 @@ void URaycastSemanticLidar::SimulateLidar(const float DeltaTime)
 	ResetRecordedHits(ChannelCount, PointsToScanWithOneLaser);
 	PreprocessRays(ChannelCount, PointsToScanWithOneLaser);
 
-	// NOTE: The default physics engine changed between UE4 and UE5. It no longer uses PhysX, but uses Chaos.
-	// Thus, this function call no longer works. But Chaos *might* be async already.
-	//GetWorld()->GetPhysicsScene()->GetPxScene()->lockRead();
-	
 	{
 		SCOPE_CYCLE_COUNTER(STAT_ParallelForHoloocean)
 		ParallelFor(ChannelCount, [&](int32 idxChannel) {
 		  TRACE_CPUPROFILER_EVENT_SCOPE(STAT_ParallelFor);
-
+			
 			// TODO: Parent was "this" before, but since the sensors are not actors, it couldn't be. This might
-			// cause issues though if it gets garbase collected
+			// cause issues though if it gets garbage collected
 		  FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("Laser_Trace")), true, Parent.Get());
 		  TraceParams.bTraceComplex = true;
 		  TraceParams.bReturnPhysicalMaterial = false;
@@ -136,7 +133,6 @@ void URaycastSemanticLidar::SimulateLidar(const float DeltaTime)
 		  };
 		});
 	}
-	//GetWorld()->GetPhysicsScene()->GetPxScene()->unlockRead();
 
 	FTransform ActorTransf = Parent->GetTransform();
 	ComputeAndSaveDetections(ActorTransf);
@@ -183,7 +179,8 @@ void URaycastSemanticLidar::ComputeAndSaveDetections(const FTransform& SensorTra
 		PointsPerChannel[idxChannel] = RecordedHits[idxChannel].size();
 	}
 	SemanticLidarData.ResetMemory(PointsPerChannel);
-
+	
+	int PointCount = 0;
 	for (auto idxChannel = 0u; idxChannel < Description.Channels; ++idxChannel)
 	{
 		for (auto& hit : RecordedHits[idxChannel])
@@ -191,10 +188,10 @@ void URaycastSemanticLidar::ComputeAndSaveDetections(const FTransform& SensorTra
 			FSemanticDetection detection;
 			ComputeRawDetection(hit, SensorTransform, detection);
 			SemanticLidarData.WritePointSync(detection);
+			PointCount++;
 		}
 	}
-
-	//SemanticLidarData.WriteChannelCount(PointsPerChannel);
+	SemanticLidarBuffer[0] = PointCount;
 }
 
 
@@ -206,14 +203,8 @@ void URaycastSemanticLidar::ComputeRawDetection(const FHitResult& HitInfo, const
 	
 	const FVector VecInc = - (HitPoint - SensorTransf.GetLocation()).GetSafeNormal();
 	Detection.cos_inc_angle = FVector::DotProduct(VecInc, HitInfo.ImpactNormal);
-
 	
 	const AActor* actor = HitInfo.GetActor();
-
-	if (static_cast<uint32_t>(HitInfo.Component->CustomDepthStencilValue) != 0)
-	{
-		UE_LOG(LogHolodeck, Error, TEXT("%d hit"), static_cast<uint32_t>(HitInfo.Component->CustomDepthStencilValue))
-	}
 	
 	Detection.object_idx = 2;
 	Detection.object_tag = static_cast<uint32_t>(HitInfo.Component->CustomDepthStencilValue);
@@ -229,23 +220,20 @@ void URaycastSemanticLidar::ComputeRawDetection(const FHitResult& HitInfo, const
 bool URaycastSemanticLidar::ShootLaser(const float VerticalAngle, float HorizontalAngle, FHitResult& HitResult, FCollisionQueryParams& TraceParams) const
 {
 	FHitResult HitInfo(ForceInit);
-
 	FTransform ActorTransf = this->GetComponentTransform();
 	FVector LidarBodyLoc = ActorTransf.GetLocation();
-	//UE_LOG(LogHolodeck, Error, TEXT("%f, %f, %f"), LidarBodyLoc.X, LidarBodyLoc.Y, LidarBodyLoc.Z);
+
 	FRotator LidarBodyRot = ActorTransf.Rotator();
 
 	FRotator LaserRot(VerticalAngle, HorizontalAngle, 0); // float InPitch, float InYaw, float InRoll
 	FRotator ResultRot = UKismetMathLibrary::ComposeRotators(
 		LaserRot,
 		LidarBodyRot
-		);
+	);
 
 	const auto Range = Description.Range;
 	FVector EndTrace = Range * UKismetMathLibrary::GetForwardVector(ResultRot) + LidarBodyLoc;
 	
-	// TODO: This was parallel in Carla. UE5 is different though, would need to figure out the async.
-	// This is a major area for speed up in the future
 	GetWorld()->LineTraceSingleByChannel(
 		HitInfo,
 		LidarBodyLoc,

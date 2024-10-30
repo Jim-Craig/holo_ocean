@@ -23,7 +23,6 @@ void URaycastLidar::ParseSensorParms(FString ParmsJson)
 
 	TSharedPtr<FJsonObject> JsonParsed;
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
-	
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
 	{
 		JsonParsed->TryGetNumberField("Channels", Description.Channels);
@@ -40,8 +39,8 @@ void URaycastLidar::ParseSensorParms(FString ParmsJson)
 		JsonParsed->TryGetNumberField("DropOffAtZeroIntensity", Description.DropOffAtZeroIntensity);
 		JsonParsed->TryGetBoolField("ShowDebugPoints", Description.ShowDebugPoints);
 		JsonParsed->TryGetNumberField("NoiseStdDev", Description.NoiseStdDev);
+		Description.Range *= 100; // We need to convert it to cm since that is what HoloOcean uses
 	}
-	
 	Set(Description);
 	
 }
@@ -53,8 +52,7 @@ void URaycastLidar::InitializeSensor()
 	Super::InitializeSensor();
 
 	Parent = TUniquePtr<AActor>(this->GetAttachmentRootActor());
-
-
+	
 
 	this->Buffer = static_cast<float*>(Super::Buffer);
 	this->Data = FLidarData(this->Buffer);
@@ -68,7 +66,8 @@ void URaycastLidar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FA
 void URaycastLidar::Set(const FLidarDescription& LidarDescription)
 {
 	Description = LidarDescription;
-	
+	UE_LOG(LogHolodeck, Error, TEXT("Range: %f"), Description.Range)
+
 	CreateLasers();
 	PointsPerChannel.resize(Description.Channels);
 
@@ -82,7 +81,7 @@ float URaycastLidar::ComputeIntensity(const FSemanticDetection& RawDetection) co
 {
 	const FVector3f HitPoint = RawDetection.point;
 	const float Distance = HitPoint.Length();
-
+	UE_LOG(LogHolodeck, Error, TEXT("Compute Intensity Distance: %f"), Distance)
 	const float AttenAtm = Description.AtmospAttenRate;
 	const float AbsAtm = exp(-AttenAtm * Distance);
 
@@ -136,10 +135,8 @@ bool URaycastLidar::PostprocessDetection(FDetection& Detection) const
 	{
 		return true;
 	}
-	else
-	{
-		return RandomEngine->GetUniformFloat() < DropOffAlpha * Intensity + DropOffBeta;
-	}
+
+	return RandomEngine->GetUniformFloat() < DropOffAlpha * Intensity + DropOffBeta;
 }
 
 void URaycastLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
@@ -149,7 +146,7 @@ void URaycastLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
 		PointsPerChannel[idxChannel] = RecordedHits[idxChannel].size();
 	}
 	Data.ResetMemory(PointsPerChannel);
-	
+	int PointCount = 0;
 	for (auto idxChannel = 0u; idxChannel < Description.Channels; ++idxChannel)
 	{
 		for (auto& hit : RecordedHits[idxChannel])
@@ -158,6 +155,7 @@ void URaycastLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
 			if (PostprocessDetection(Detection))
 			{
 				Data.WritePointSync(Detection);
+				PointCount++;
 			}
 			else
 			{
@@ -165,6 +163,7 @@ void URaycastLidar::ComputeAndSaveDetections(const FTransform& SensorTransform)
 			}
 		}
 	}
+	Buffer[0] = PointCount;
 }
 
 

@@ -74,8 +74,10 @@ namespace holoocean
 
 				points.clear();
 				points.reserve(total_points * 4);
+
 				LastFrameMaxPoints = NumPoints;
-				NumPoints = 0;
+				NumPoints = 1;
+				Buffer[0] = static_cast<float>(total_points);
 			}
 
 			void WritePointSync(LidarDetection& detection)
