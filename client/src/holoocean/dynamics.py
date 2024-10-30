@@ -171,14 +171,16 @@ def check_scenario_configuration(scenario, vehicle_name):
     
     for sensor in sensors:
         if sensor.get("sensor_type") == "DynamicsSensor":
-            dynamics_sensor_found = True
-            config = sensor.get("configuration", {})
+            if not ("sensor_name" in sensor) or sensor.get("sensor_name") == "DynamicsSensor":
+                config = sensor.get("configuration", {})
+                
+                if not config.get("UseCOM"):
+                    raise ValueError(f"Agent {agent['agent_name']} DynamicsSensor must have 'UseCOM' set to True.")
+                
+                if config.get("UseRPY"):
+                    raise ValueError(f"Agent {agent['agent_name']} DynamicsSensor must have 'UseRPY' set to False.")
+                dynamics_sensor_found = True
             
-            if not config.get("UseCOM"):
-                raise ValueError(f"Agent {agent['agent_name']} DynamicsSensor must have 'UseCOM' set to True.")
-            
-            if config.get("UseRPY"):
-                raise ValueError(f"Agent {agent['agent_name']} DynamicsSensor must have 'UseRPY' set to False.")
     
     if not dynamics_sensor_found:
-        raise ValueError(f"Agent {agent['agent_name']} must have a 'DynamicsSensor' in its sensors.")
+        raise ValueError(f"Agent {agent['agent_name']} must have a 'DynamicsSensor' in its sensors that is named DynamicsSensor")

@@ -4,21 +4,24 @@ ROS2 Wrapper
 After installing holoocean, you can clone this ros package into your ros workspace:
 https://github.com/byu-holoocean/holoocean-ros
 
-NOTE: 
-- CURRENTLY ROS2 SETUP ONLY WORKS WITH SINGLE AGENT SCENARIOS
-- Running holoocean and ros2 in a virtual environment (ie. conda) may cause dependency issues
-- The speed of the simulation will max out which may cause timing errors.
+.. warning:: 
+
+    - CURRENTLY ROS2 SETUP ONLY WORKS WITH SINGLE AGENT SCENARIOS
+    - Running holoocean and ros2 in a virtual environment (ie. conda) may cause dependency issues
+    - The speed of the simulation will max out which may cause timing errors.
 
 ROS workspace for holoocean works with ros2 humble installation
 Follow the ROS2 installation tutorials: https://docs.ros.org/en/humble/Tutorials
 
 The example controller can be run after building the package in your ros workspace:
+
 .. code::
+
     source /opt/ros/humble/setup.bash
     colcon build
     source install/setup.bash
 
-    ros2 launch holoocean_main holoocean_launch.py
+    ros2 launch holoocean_main torpedo_launch.py
 
 Follow the ROS2 Documentation to build nodes to control the holoocean environment
 
@@ -43,17 +46,24 @@ Publishing your own sensor
 --------------------------
 
 After  implementing in your sensor Python and Cpp with the holoocean package:
-- Make msg file in holoocean_interfaces (ex. SensorData.msg)
-- Add msg file to Cmake list (ex. "msg/SesnorData.msg")
 
-- In sensor data converter file
-	Add an elif statement in convert_to_msg function
-	Add a Key to sensor_keys 
-	Import the message object in first line of the file (ex. from holoocean_interfaces.msg import SensorData)
-	Add function to encode the data into a ros message
+    - Make msg file in holoocean_interfaces (ex. SensorData.msg)
+    - Add msg file to Cmake list (ex. "msg/SesnorData.msg")
+
+    - In sensor data converter file: 
+        
+        - Add an elif statement in convert_to_msg function
+        
+        - Add a Key to sensor_keys 
+        
+        - Import the message object in first line of the file (ex. from holoocean_interfaces.msg import SensorData)
+        
+        - Add function to encode the data into a ros message
 	
 Run the following code to rebuild your ros2 workspace
+
 .. code::
+
     source /opt/ros/humble/setup.bash
     colcon build
     source install/setup.bash
@@ -63,10 +73,12 @@ Record your data
 ----------------
 
 To record sensor data or commands with ros2bag installed you can run a command like this
-from your ros2_ws folder 
+from your ros2_ws folder
+
 .. code::
+
     source install/setup.bash
     ros2 bag record /holoocean/desiredHSD /holoocean/RotationSensor /holoocean/LocationSensor -o /path/to/save_data
 
-You can read more on the ros2 Documentation here:
+You can read more on the ros2 Documentation here to record and play back ros2 bag data:
 https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Recording-And-Playing-Back-Data/Recording-And-Playing-Back-Data.html

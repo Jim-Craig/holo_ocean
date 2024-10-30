@@ -143,7 +143,7 @@ def editor_multi_agent_example():
 
 
 
-def custom_dynamics():
+def fossen_dynamics():
     """
     Example of how Thor Fossen models can be used in the HoloOcean simulator to model 
     the motion of the vehicle based on control surface commands. Uses the FossenDyanmics
@@ -165,9 +165,9 @@ def custom_dynamics():
     initial_rotation = [0,0,0] #Roll, pitch, Yaw in Euler angle order ZYX and in degrees NWU coordinate system
 
     scenario = {
-    "name": "hovering_dynamics",
-    "package_name": "TestWorlds",
-    "world": "ExampleLevel",
+    "name": "torpedo_dynamics",
+    "package_name": "Ocean",
+    "world": "OpenWater",
     "main_agent": "auv0",
     "ticks_per_sec": ticks_per_sec,
     "agents": [
@@ -235,9 +235,11 @@ def custom_dynamics():
                     }
                 },
             
-        }
-    ]
-}
+            }
+        ]
+    }
+
+    env = holoocean.make(scenario_cfg=scenario)
 
     #Create vehicle object attached to holoocean agent with dynamic parameters 
     vehicle = fourFinDep(scenario, 'auv0','manualControl')    
@@ -248,18 +250,17 @@ def custom_dynamics():
 
     accel = np.array(np.zeros(6),float)  #HoloOcean parameter input 
 
-    env = holoocean.make(scenario_cfg=scenario)
 
     pos_list = []
     time_list = []
 
     ############## MANUAL CONTROL EXAMPLE: ###########
     #Set control surfaces command
-    fins_degrees = np.array([5 , -5]) #Rudder and Stern Fin Deflection (degrees)
+    fins_degrees = np.array([5 , 5]) #Rudder and Stern Fin Deflection (degrees)
     fin_radians = np.radians(fins_degrees)
     thruster_rpm = 800
     u_control = np.append(fin_radians,thruster_rpm)  #[RudderAngle, SternAngle,Thruster]
-    vehicle.set_control_mode('manualControl') #In this mode PID controller calculates control commands (u_control)
+    vehicle.set_control_mode('manualControl')
     
     for i in range(numSteps):
         state = env.step(accel)
@@ -273,8 +274,10 @@ def custom_dynamics():
 
 
     ############ Depth Heading Control Example:  ############ 
+    env.reset()
+    numSteps = 800
 
-    depth = 15
+    depth = 13
     heading = 50    
     vehicle.set_goal(depth,heading,1525)     #Changes depth (positive depth), heading, thruster RPM goals for controller 
     vehicle.set_control_mode('depthHeadingAutopilot') #In this mode PID controller calculates control commands (u_control)

@@ -74,7 +74,67 @@ class TAUV:
         self.init_depth = False  #Set the LP filter inital state to current depth when false
 
     def configure_from_scenario(self, scenario, vehicle_name):
+        """
+        Dynamics Parameters:
+
+        :param float mass: Mass of vehicle in kilograms
+        :param float length: length of vehicle in meters
+        :param float rho: density of water in kg/m^3
+        :param float diam: diameter of vehicle in m
+        :param float r_bg: Center of gravity of the vehicle (x, y, z) in body frame x forward, y right, z down
+        :param float r_bb: Center of boyancy of the vehicle (x, y, z) in body frame x forward, y right, z down
+        :param float r44: 
+        :param float Cd: Coefficient of drag
+        :param float T_surge: 
+        :param float T_sway: 
+        :param float T_yaw: 
+        :param float zeta_roll: 
+        :param float zeta_ptich: 
+        :param float K_nomoto: 
+
+        Autopilot Paramters:
+            
+        - Depth
+
+        :param float wn_d_z: damped natural frequency for low pass filter for depth commands
+        :param float Kp_z: Portional gain for depth controller
+        :param float T_z:
+        :param float Kp_theta: Porportional gain for pitch angle for depth controller
+        :param float Ki_theta: Integral gain for pitch angle for depth controller
+        :param float Kd_theta: Derivative gain for pitch angle for depth controller
+        :param float K_w: 
+        :param float theta_max_deg: Max output of pitch controller inner loop
+
         
+        - Heading
+
+        :param float wn_d: Damped natural frequency of input commands for low pass filter
+        :param zeta_d: Damping coefficient 
+        :param r_max: 
+        :param lam:
+        :param phi_b:
+        :param K_d:
+        :param K_sigma:
+
+        - Surge
+
+        :param kp_surge: Porportional gain for surge
+        :param ki_surge: Integral gain for surge
+        :param kd_surge: Derivative gain for surge
+    
+        Acutator Parameters:
+
+        :param fin_area: Surface area of one side of a fin 
+        :param fin_center: Positive Z distance from center of mass to center of pressure
+        :param deltaMax_fin_deg: Max deflection of the fin (degrees)
+        :param nMax: Max rpm of the thruster
+        :param T_delta: Time constant for fin actuation. (s)
+        :param T_n: Time constant for thruster actuation. (s)
+        :param CL_delta_r: Coefficient of lift for rudder 
+        :param CL_delta_r: Coefficient of lift for stern 
+
+        """
+
         self._scenario = scenario
         self.agent_name = vehicle_name
         
@@ -151,16 +211,22 @@ class TAUV:
             dynamics = agent_dict.get('dynamics')
             if dynamics is not None:
                 self.set_vehicle_parameters(dynamics)
+            else:
+                self.set_vehicle_parameters(self.dynamic_parameters)
             
             # Set autopilot parameters from the agent's 'autopilot' if it exists
             autopilot_parameters = agent_dict.get('autopilot')
             if autopilot_parameters is not None:
                 self.set_autopilot_parameters(autopilot_parameters)
+            else:
+                self.set_autopilot_parameters(self.autopilot_parameters)
 
             # Set actuator parameters from the agent's 'actuator' if it exists
             actuator = agent_dict.get('actuator')
             if actuator is not None:
                 self.set_actuator_parameters(actuator)
+            else:
+                self.set_actuator_parameters(self.actuator_parameters)
 
     def set_vehicle_parameters(self, dynamics):
         """
@@ -328,6 +394,9 @@ class TAUV:
         if controlSystem == "depthHeadingAutopilot":
             self.controlDescription = "Depth and heading autopilots"
             self.init_depth = init_depth
+            self.z_int = 0
+            self.e_psi_int = 0 
+            self.u_int = 0
             print("Warning: Setting control mode resets controller so be careful to set control mode only when necessary")
         elif controlSystem == 'manualControl':
             self.controlDescription = 'Manual input control with set_u_control()'
@@ -344,6 +413,7 @@ class TAUV:
         :param float depth: Desired depth (m), positive downwards.
         :param float heading: Desired yaw angle (deg). (-180 to 180)
         :param float rpm: Desired propeller revolution (rpm).
+        :param float surge: Desired body frame x velocity (m/s).
 
         :returns: None
         """
@@ -603,7 +673,7 @@ class TAUV:
         """
         Set fin area limits, time constants, and lift coefficients for control surfaces
         """
-        self.actuator_parameters.update(actuator_parameters)
+        
 
         self.S_fin = self.actuator_parameters.get('fin_area')
         self.T_delta = self.actuator_parameters.get('T_delta')
@@ -619,6 +689,8 @@ class TAUV:
         #Lift Coefficients
         self.CL_delta_r = self.actuator_parameters.get('CL_delta_r')
         self.CL_delta_s = self.actuator_parameters.get('CL_delta_s')
+
+        #TODO: ADD THE x position parameter for the fins
 
     def stepInput(self, t):
         """
@@ -771,7 +843,7 @@ class fourFinDep(TAUV):
 
         # Stern-plane paramaters (double)
         self.A_s = 2 * self.S_fin        # stern-plane area (m2)
-        self.x_s = -self.a               # stern-plane z-position (m)
+        self.x_s = -self.a               # stern-plane x-position (m)
     
     def actuator_dynamics(self, u_actual, nu_r):
         
@@ -862,7 +934,7 @@ class fourFinInd(TAUV):
 
         # Stern-plane paramaters (double)
         self.A_s =  self.S_fin        # stern-plane area (m2)
-        self.x_s = -self.a 
+        self.x_s = -self.a             # Stern fin x position
 
     def actuator_dynamics(self, u_actual, nu_r):
         
