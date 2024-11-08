@@ -8,6 +8,10 @@ HoloOcean is installed in two portions: a client python library (``holoocean``)
 is installed first, which then downloads world packages. The python portion is
 very small, while the world packages ("binaries") can be several gigabytes.
 
+.. note::
+   
+   HoloOcean has updated from Unreal 4.27 to 5.3.
+
 
 Requirements
 ============
