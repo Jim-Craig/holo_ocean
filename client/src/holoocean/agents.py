@@ -340,7 +340,7 @@ class FixedWing(HoloOceanAgent):
     Inherits from :class:`HoloOceanAgent`.
 
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
-    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation. **
+    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
     **Instructions for implemeting parameters for Thor Fossen dynamics are given in the corresponding fossen dynamics documentation.**
         
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
@@ -751,7 +751,7 @@ class BlueROV2(HoloOceanAgent):
     Inherits from :class:`HoloOceanAgent`.
 
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
-    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation. **
+    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
     **Instructions for implemeting parameters for Thor Fossen dynamics are given in the corresponding fossen dynamics documentation.**
         
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
@@ -837,7 +837,7 @@ class CougUV(HoloOceanAgent):
     Inherits from :class:`HoloOceanAgent`.
     
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
-    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation. **
+    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
     **Instructions for implemeting parameters for Thor Fossen dynamics are given in the corresponding fossen dynamics documentation.**
     
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
@@ -902,7 +902,7 @@ class ScubaDiver(HoloOceanAgent):
 
 
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
-    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation. **
+    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
 
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
     :cvar water_density: (:obj:`float`): Water density in kg / m^3.
@@ -980,8 +980,8 @@ class HoveringAUV(HoloOceanAgent):
 
     Inherits from :class:`HoloOceanAgent`.
     
-    **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
-    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation. **
+    :strong:`These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.`
+    :strong:`If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.`
         
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
     :cvar water_density: (:obj:`float`): Water density in kg / m^3.
@@ -1061,7 +1061,7 @@ class SurfaceVessel(HoloOceanAgent):
     Inherits from :class:`HoloOceanAgent`.
     
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
-    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation. **
+    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
         
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
     :cvar water_density: (:obj:`float`): Water density in kg / m^3.
@@ -1120,7 +1120,7 @@ class TorpedoAUV(HoloOceanAgent):
 
     
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
-    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation. **
+    **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
     **Instructions for implemeting parameters for Thor Fossen dynamics are given in the corresponding fossen dynamics documentation.**
 
     Inherits from :class:`HoloOceanAgent`.

@@ -13,7 +13,7 @@ Changelog
 
 
 HoloOcean 2.0.0 PreRelease
-----------------
+----------------------------
 *11/8/2024*
 
 Updating from Unreal Engine 4.27 to 5.3

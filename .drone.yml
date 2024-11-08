@@ -332,7 +332,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       - git clone https://github.com/byu-holoocean/holoocean-docs.git
-      - pip3 install bs4 sphinx-build sphinx-rtd-theme sphinx-copybutton autodocsumm
+      - pip3 install bs4 sphinx-build sphinx-rtd-theme sphinx-copybutton autodocsumm scipy
       - export PATH="/home/ue4/.local/bin:$PATH"
       - python3 client/docmaker.py
       - python3 new_version.py ${DRONE_TAG}
@@ -358,7 +358,7 @@ steps:
     commands:
       - git lfs pull
       - git clone https://github.com/byu-holoocean/holoocean-docs.git
-      - pip3 install bs4 sphinx sphinx-rtd-theme sphinx-copybutton autodocsumm
+      - pip3 install bs4 sphinx sphinx-rtd-theme sphinx-copybutton autodocsumm scipy
       - export PATH="/home/ue4/.local/bin:$PATH"
       - python3 client/docmaker.py
       - rm -rf holoocean-docs/develop
