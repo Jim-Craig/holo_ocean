@@ -151,11 +151,12 @@ class HoloOceanEnvironment:
             self._ticks_per_sec = 30
 
         # If one wasn't passed in, use one in scenario
-        if frames_per_sec is None and scenario is not None and "frames_per_sec" in scenario:
-            frames_per_sec = scenario["frames_per_sec"]
-        # default to true
-        else:
-            frames_per_sec = True
+        if frames_per_sec is None :
+            if scenario is not None and "frames_per_sec" in scenario:
+                frames_per_sec = scenario["frames_per_sec"]
+            #  default to true
+            else:
+                frames_per_sec = True
 
         # parse frames_per_sec
         if frames_per_sec is True:
