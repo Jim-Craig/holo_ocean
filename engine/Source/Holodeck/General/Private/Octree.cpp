@@ -404,21 +404,21 @@ void Octree::fillMaterialProperties(FString mat){
 
 FString Octree::getMaterialName(FHitResult hit){
     // Get staticmesh material
-	UMaterialInterface* mat = hit.GetComponent()->GetMaterial(hit.ElementIndex);
-	if(mat != nullptr){
-		return mat->GetFName().ToString(); 
-	}
+	// UMaterialInterface* mat = hit.GetComponent()->GetMaterial(hit.ElementIndex);
+	// if(mat != nullptr){
+	// 	return mat->GetFName().ToString(); 
+	// }
 
-	// If not staticmesh, get landscape material
-	AActor* actor = hit.GetActor();
-	ALandscapeProxy* landscape = reinterpret_cast<ALandscapeProxy*>(actor);
-	mat = landscape->LandscapeMaterial;
+	// // If not staticmesh, get landscape material
+	// AActor* actor = hit.GetActor();
+	// ALandscapeProxy* landscape = reinterpret_cast<ALandscapeProxy*>(actor);
+	// mat = landscape->LandscapeMaterial;
 
-	if(mat != nullptr){
-		return mat->GetFName().ToString();
-	}
+	// if(mat != nullptr){
+	// 	return mat->GetFName().ToString();
+	// }
 
-	// If we have extra issues getting material
-    UE_LOG(LogHolodeck, Warning, TEXT("Octree: Couldn't get material name for an octree leaf, putting as MaterialNotFound"));
+	// // If we have extra issues getting material
+    // UE_LOG(LogHolodeck, Warning, TEXT("Octree: Couldn't get material name for an octree leaf, putting as MaterialNotFound"));
 	return "MaterialNotFound";
 }
