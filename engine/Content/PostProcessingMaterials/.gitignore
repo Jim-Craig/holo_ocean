@@ -6,3 +6,6 @@
 
 *
 !.gitignore
+!GTMaterial.uasset
+!LensDistortion.uasset
+!PhysicLensDistortion.uasset
