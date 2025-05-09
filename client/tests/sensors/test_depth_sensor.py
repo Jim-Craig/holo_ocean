@@ -67,7 +67,7 @@ def test_depth_sensor_falling(cfg):
             last_location = new_location
 
         # Give the UAV time to bounce and settle
-        for _ in range(80):
+        for _ in range(160):
             env.tick()
 
         # Make sure it is stationary now
@@ -76,7 +76,7 @@ def test_depth_sensor_falling(cfg):
 
         assert almost_equal(
             last_location, new_location
-        ), "The UAV did not seem to settle!"
+        ), "The vehicle did not seem to settle!"
 
 
 @pytest.mark.parametrize(

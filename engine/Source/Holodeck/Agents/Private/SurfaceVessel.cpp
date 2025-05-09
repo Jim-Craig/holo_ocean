@@ -11,18 +11,17 @@ ASurfaceVessel::ASurfaceVessel() {
 	AIControllerClass = LoadClass<AController>(NULL, TEXT("/Script/Holodeck.SurfaceVesselController"), NULL, LOAD_None, NULL);
 	AutoPossessAI = EAutoPossessAI::PlacedInWorld;
 
-	// This values are all pulled from the solidworks file
-	this->CenterBuoyancy = FVector(0, 0, 10); 
-	this->CenterMass = FVector(0, 0, 0);
+	// These values are all pulled from the solidworks file
 	this->MassInKG = 200;
-	this->OffsetToOrigin = FVector(0, 0, 20);
-	this->Volume = 6 * MassInKG / WaterDensity;	
+	this->Volume = 6 * MassInKG / WaterDensity;
+	this->CenterMass     = FVector(0,  0,  0); // in cm, relative to the origin of the root mesh
+	this->CenterBuoyancy = FVector(0,  0, 10); // in cm, relative to the origin of the root mesh
 	
 	this->BoundingBox = FBox(FVector(-250, -120, -25), FVector(250, 120, 25));
 
 	// Shift thruster locations by offset to the origin
 	for(int i=0;i<2;i++){
-		thrusterLocations[i] += this->OffsetToOrigin;
+		thrusterLocations[i] -= CenterMass;
 	}
 }
 
@@ -67,6 +66,9 @@ void ASurfaceVessel::ApplyThrusters(float* const ThrusterArray){
 		FVector LocalForce = FVector(force, 0, 0);
 		LocalForce = ConvertLinearVector(LocalForce, ClientToUE);
 
-		RootMesh->AddForceAtLocationLocal(LocalForce, thrusterLocations[i]);
+		FRotator bodyToWorld = this->GetActorRotation();
+		FVector WorldForce = bodyToWorld.RotateVector(LocalForce); // rotate force from body frame to global frame
+		FVector ThrusterWorld = RootMesh->GetCenterOfMass() + bodyToWorld.RotateVector(thrusterLocations[i]); // get thruster location in global frame
+		RootMesh->AddForceAtLocation(WorldForce, ThrusterWorld);
 	}
 }

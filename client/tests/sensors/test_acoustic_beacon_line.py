@@ -121,7 +121,8 @@ def test_obstructed_view(env):
                 }
             ],
             "control_scheme": 1,
-            "location": [-10, 10, 0.25],
+            # "location": [-10, 10, 0.25],
+            "location": [10,-30,0.1],
             "rotation": [0, 0, 0],
         },
         {
@@ -134,7 +135,8 @@ def test_obstructed_view(env):
                 }
             ],
             "control_scheme": 1,
-            "location": [-10, 2, 0.25],
+            # "location": [-10, 2, 0.25],
+            "location": [-6.5,-30,0.1],
             "rotation": [0, 0, 0],
         },
     ]

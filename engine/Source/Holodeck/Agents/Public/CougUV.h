@@ -50,14 +50,14 @@ public:
 
 	// Location of all forces to apply
 	FVector thruster = FVector(-120,0,0);
-	TArray<FVector> finTranslation{ FVector(-105,7.07,0),
-									FVector(-105,0,7.07),
-									FVector(-105,-7.07,0),
-									FVector(-105,0,-7.07) };
-	TArray<FRotator> finRotation{ 	FRotator(0,0,0),
-									FRotator(0,0,-90),
-									FRotator(0,0,-180),
-									FRotator(0,0,-270) };
+	TArray<FVector> finTranslation{ FVector(-105,  7.07, 0   ),
+									FVector(-105,  0,    7.07),
+									FVector(-105, -7.07, 0   ),
+									FVector(-105,  0,   -7.07) };
+	TArray<FRotator> finRotation{ 	FRotator(0, 0,  0  ),
+									FRotator(0, 0, -90 ),
+									FRotator(0, 0, -180),
+									FRotator(0, 0, -270) };
 
 	void ApplyFin(int i, float command);
 

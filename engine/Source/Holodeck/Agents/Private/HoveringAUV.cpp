@@ -11,12 +11,13 @@ AHoveringAUV::AHoveringAUV() {
 	AIControllerClass = LoadClass<AController>(NULL, TEXT("/Script/Holodeck.HoveringAUVController"), NULL, LOAD_None, NULL);
 	AutoPossessAI = EAutoPossessAI::PlacedInWorld;
 
-	// This values are all pulled from the solidworks file
-	this->Volume = .03554577;	
-	this->CenterBuoyancy = FVector(-5.96, 0.29, -1.85); 
-	this->CenterMass = FVector(-5.9, 0.46, -2.82);
+	// These values are all pulled from the solidworks file. They're accurate to the physical vehicle, 
+	// but don't make for a smooth simulation. We clean them up below for a better experience.
+	this->Volume = .03554577;
 	this->MassInKG = 31.02;
-	this->OffsetToOrigin = FVector(-0.7, -2, 32);
+	this->CenterMass 	 = FVector(-5.9 ,  0.46, -2.82); // vector from mesh origin to center of mass, expressed in body frame
+	this->CenterBuoyancy = FVector(-5.96,  0.29, -1.85); // vector from mesh origin to center of buoyancy, expressed in body frame
+	// this->OffsetToOrigin = FVector(-0.7 , -2   , 32	  ); // vector from UE body origin to mesh origin, expressed in UE body frame
 }
 
 // Sets all values that we need
@@ -33,9 +34,9 @@ void AHoveringAUV::InitializeAgent() {
 		this->Volume = MassInKG / WaterDensity;
 	}
 
-	// Apply OffsetToOrigin to all of our custom position vectors
+	// Convert thruster locations to be relative to the center of mass (in mesh frame)
 	for(int i=0;i<8;i++){
-		thrusterLocations[i] += OffsetToOrigin;
+		thrusterLocations[i] -= CenterMass;
 	}
 
 	Super::InitializeAgent();
@@ -55,12 +56,8 @@ void AHoveringAUV::Tick(float DeltaSeconds) {
 	angAccel = ClampVector(angAccel, -FVector(AUV_MAX_ANG_ACCEL), FVector(AUV_MAX_ANG_ACCEL));
 	angAccel = ConvertAngularVector(angAccel, NoScale);
 
-
 	RootMesh->GetBodyInstance()->AddForce(linAccel, true, true);
 	RootMesh->GetBodyInstance()->AddTorqueInRadians(angAccel, true, true);
-
-	UE_LOG(LogTemp, Warning, TEXT("HoveringAUV linAccel %f, %f, %f"),linAccel[0],linAccel[1],linAccel[2]);
-	UE_LOG(LogTemp, Warning, TEXT("HoveringAUV commandArray %f, %f, %f,%f, %f, %f"),CommandArray[0], CommandArray[1], CommandArray[2], CommandArray[3], CommandArray[4], CommandArray[5]);
 }
 
 // For empty dynamics, damping is disabled
@@ -72,28 +69,25 @@ void AHoveringAUV::EnableDamping(){
 
 void AHoveringAUV::ApplyThrusters(float* const ThrusterArray){
 	// Iterate through vertical thrusters
-	for(int i=0;i<4;i++){
+	for(int i = 0; i < 8; i++){
 		float force = FMath::Clamp(ThrusterArray[i], -AUV_MAX_THRUST, AUV_MAX_THRUST);
 
-		FVector LocalForce = FVector(0, 0, force);
-		LocalForce = ConvertLinearVector(LocalForce, ClientToUE);
-
-		RootMesh->AddForceAtLocationLocal(LocalForce, thrusterLocations[i]);
-	}
-
-	// Iterate through angled thrusters
-	for(int i=4;i<8;i++){
-		float force = FMath::Clamp(ThrusterArray[i], -AUV_MAX_THRUST, AUV_MAX_THRUST);
-
-		// 4 + 6 have negative y
-		FVector LocalForce = FVector(0, 0, 0);
-		if(i % 2 == 0) 	
+		// Calculate force
+		FVector LocalForce = FVector(0, 0, 0); // Newtons
+		if(i < 4)
+			LocalForce = FVector(0, 0, force);
+		else if(i % 2 == 0) // applying force in UE body frame (LHS)
 			LocalForce = FVector(force/UKismetMathLibrary::Sqrt(2), force/UKismetMathLibrary::Sqrt(2), 0);
 		else	
 			LocalForce = FVector(force/UKismetMathLibrary::Sqrt(2), -force/UKismetMathLibrary::Sqrt(2), 0);
-		LocalForce = ConvertLinearVector(LocalForce, ClientToUE);
+		
+		LocalForce = ConvertLinearVector(LocalForce, ClientToUE); // convert Newtons to cN, reverses y axis
+		// except UE actually does force in N, so we don't need to convert, so we're scaling up our force arbitrarily... need to go check how often forces use this conversion, and fix all those instances. 
 
-		RootMesh->AddForceAtLocationLocal(LocalForce, thrusterLocations[i]);
+		// Apply force in global frame at thruster location
+		FRotator bodyToWorld = this->GetActorRotation();
+		FVector WorldForce = bodyToWorld.RotateVector(LocalForce); // rotate force from body frame to global frame
+		FVector ThrusterWorld = RootMesh->GetCenterOfMass() + bodyToWorld.RotateVector(thrusterLocations[i]); // get thruster location in global frame
+		RootMesh->AddForceAtLocation(WorldForce, ThrusterWorld);
 	}
-
 }

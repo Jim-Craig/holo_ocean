@@ -44,14 +44,14 @@ public:
 	float GetAccelerationLimit() override { return 400; }
 
 	// Location of all thrusters
-	TArray<FVector> thrusterLocations{ FVector(18.18, 22.14, -4), 
-											FVector(18.18, -22.14, -4),
-											FVector(-31.43, -22.14, -4),
-											FVector(-31.43, 22.14, -4),
-											FVector(7.39, 18.23, -0.21),
-											FVector(7.39, -18.23, -0.21),
-											FVector(-20.64, -18.23, -0.21),
-											FVector(-20.64, 18.23, -0.21) };
+	TArray<FVector> thrusterLocations{  FVector( 18.18,  22.14, -4), 
+										FVector( 18.18, -22.14, -4),
+										FVector(-31.43, -22.14, -4),
+										FVector(-31.43,  22.14, -4),
+										FVector(  7.39,  18.23, -0.21),
+										FVector(  7.39, -18.23, -0.21),
+										FVector(-20.64, -18.23, -0.21),
+										FVector(-20.64,  18.23, -0.21) };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BuoyancySettings)
 		bool Perfect= true;

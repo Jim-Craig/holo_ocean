@@ -11,12 +11,13 @@ AFixedWing::AFixedWing() {
 	AIControllerClass = LoadClass<AController>(NULL, TEXT("/Script/Holodeck.FixedWingController"), NULL, LOAD_None, NULL);
 	AutoPossessAI = EAutoPossessAI::PlacedInWorld;
 
-	// This values are all pulled from the solidworks file
+	// These values are all pulled from the HoveringAUV solidworks file and are not accurate to the FixedWing.
 	this->Volume = .03554577;	
-	this->CenterBuoyancy = FVector(-5.96, 0.29, -1.85); 
-	this->CenterMass = FVector(-5.9, 0.46, -2.82);
 	this->MassInKG = 31.02;
-	this->OffsetToOrigin = FVector(-0.7, -2, 32);
+	this->CenterMass 	 = FVector(-5.9 ,  0.46, -2.82); // vector from mesh origin to center of mass, expressed in mesh frame
+	this->CenterBuoyancy = FVector(-5.96,  0.29, -1.85); // vector from mesh origin to center of buoyancy, expressed in mesh frame
+	// this->OffsetToOrigin = FVector(-0.7 , -2   , 32	  ); // vector from UE body origin to mesh origin, expressed in UE body frame
+	
 }
 
 // Sets all values that we need
@@ -33,9 +34,9 @@ void AFixedWing::InitializeAgent() {
 		this->Volume = MassInKG / WaterDensity;
 	}
 
-	// Apply OffsetToOrigin to all of our custom position vectors
+	// Convert thruster locations to be relative to the center of mass (in mesh frame)
 	for(int i=0;i<8;i++){
-		thrusterLocations[i] += OffsetToOrigin;
+		thrusterLocations[i] -= CenterMass;
 	}
 
 	Super::InitializeAgent();
@@ -68,29 +69,25 @@ void AFixedWing::EnableDamping(){
 }
 
 void AFixedWing::ApplyThrusters(float* const ThrusterArray){
-	// Iterate through vertical thrusters
-	for(int i=0;i<4;i++){
+	/// Iterate through vertical thrusters
+	for(int i = 0; i < 8; i++){
 		float force = FMath::Clamp(ThrusterArray[i], -FW_MAX_THRUST, FW_MAX_THRUST);
 
-		FVector LocalForce = FVector(0, 0, force);
-		LocalForce = ConvertLinearVector(LocalForce, ClientToUE);
-
-		RootMesh->AddForceAtLocationLocal(LocalForce, thrusterLocations[i]);
-	}
-
-	// Iterate through angled thrusters
-	for(int i=4;i<8;i++){
-		float force = FMath::Clamp(ThrusterArray[i], -FW_MAX_THRUST, FW_MAX_THRUST);
-
-		// 4 + 6 have negative y
-		FVector LocalForce = FVector(0, 0, 0);
-		if(i % 2 == 0) 	
+		// Calculate force
+		FVector LocalForce = FVector(0, 0, 0); // Newtons
+		if(i < 4)
+			LocalForce = FVector(0, 0, force);
+		else if(i % 2 == 0) 	
 			LocalForce = FVector(force/UKismetMathLibrary::Sqrt(2), force/UKismetMathLibrary::Sqrt(2), 0);
 		else	
 			LocalForce = FVector(force/UKismetMathLibrary::Sqrt(2), -force/UKismetMathLibrary::Sqrt(2), 0);
-		LocalForce = ConvertLinearVector(LocalForce, ClientToUE);
+		
+		LocalForce = ConvertLinearVector(LocalForce, ClientToUE); // convert Newtons to cN, reverses y axis
 
-		RootMesh->AddForceAtLocationLocal(LocalForce, thrusterLocations[i]);
+		// Apply force in global frame at thruster location
+		FRotator bodyToWorld = this->GetActorRotation();
+		FVector WorldForce = bodyToWorld.RotateVector(LocalForce); // rotate force from body frame to global frame
+		FVector ThrusterWorld = RootMesh->GetCenterOfMass() + bodyToWorld.RotateVector(thrusterLocations[i]); // get thruster location in global frame
+		RootMesh->AddForceAtLocation(WorldForce, ThrusterWorld);
 	}
-
 }

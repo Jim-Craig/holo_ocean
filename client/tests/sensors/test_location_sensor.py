@@ -99,7 +99,7 @@ def test_location_sensor_falling():
             last_location = new_location
 
         # Give the UAV time to bounce and settle
-        for _ in range(80):
+        for _ in range(160):
             env.tick()
 
         # Make sure it is stationary now

@@ -45,16 +45,16 @@ public:
 	// Allows agent to fall up to ~8 meters
 	float GetAccelerationLimit() override { return 200; }
 
-	// Location of all forces to apply
+	// Location of all forces to apply. All in cm (unreal units)
 	FVector thruster = FVector(-120,0,0);
-	TArray<FVector> finTranslation{ FVector(-105,7.07,0),
-									FVector(-105,0,7.07),
-									FVector(-105,-7.07,0),
-									FVector(-105,0,-7.07) };
-	TArray<FRotator> finRotation{ 	FRotator(0,0,0),
-									FRotator(0,0,-90),
-									FRotator(0,0,-180),
-									FRotator(0,0,-270) };
+	TArray<FVector> finTranslation{ FVector(-105,  7.07, 0   ),
+									FVector(-105,  0,    7.07),
+									FVector(-105, -7.07, 0   ),
+									FVector(-105,  0,   -7.07) };
+	TArray<FRotator> finRotation{ 	FRotator(0, 0,  0  ), // Rotator objects use the convention (pitch, yaw, roll), and we want roll for these
+									FRotator(0, 0, -90 ),
+									FRotator(0, 0, -180),
+									FRotator(0, 0, -270) };
 
 	void ApplyFin(int i, float command);
 

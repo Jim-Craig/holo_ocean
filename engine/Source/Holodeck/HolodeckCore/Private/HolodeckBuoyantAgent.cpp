@@ -8,14 +8,12 @@ void AHolodeckBuoyantAgent::InitializeAgent(){
 
 	// Get GravityVectority from world
 	AWorldSettings* WorldSettings = GetWorld()->GetWorldSettings(false, false);
-	Gravity = WorldSettings->GetGravityZ() / -100;
+	Gravity = WorldSettings->GetGravityZ() / -100; // this converts gravity from cm/s^2 (unreal) to m/s^2
 
 	// Set Mass
 	RootMesh->SetMassOverrideInKg("", MassInKG);
-	// Set COM (have to do some calculation since it sets an offset)
-	FVector COM_curr = GetActorRotation().UnrotateVector( RootMesh->GetCenterOfMass() - GetActorLocation() );
-	RootMesh->SetCenterOfMass( CenterMass + OffsetToOrigin - COM_curr );
-
+	RootMesh->SetCenterOfMass(CenterMass); // set the center of mass in the body frame
+	
 	// Set Bounding Box (if it hasn't been set by hand)
 	if(BoundingBox.GetExtent() == FVector(0, 0, 0))
 		BoundingBox = RootMesh->GetStaticMesh()->GetBoundingBox();
@@ -24,8 +22,7 @@ void AHolodeckBuoyantAgent::InitializeAgent(){
 	if(SurfacePoints.Num() == 0){
 		for(int i=0;i<NumSurfacePoints;i++){
 			FVector random = UKismetMathLibrary::RandomPointInBoundingBox(FVector(0,0,0), BoundingBox.GetExtent());
-			// We pre-add all offsets to reduce computation during simulation
-			SurfacePoints.Add( random + OffsetToOrigin + CenterVehicle );
+			SurfacePoints.Add(random);
 		}
 	}
 	// Otherwise make sure our count is correct (we'll use it later)
@@ -48,8 +45,10 @@ void AHolodeckBuoyantAgent::BeginDestroy() {
 
 void AHolodeckBuoyantAgent::ApplyBuoyantForce(){
     //Get all the values we need once
-    FVector ActorLocation = GetActorLocation();
-	FRotator ActorRotation = GetActorRotation();
+    FVector ActorLocation = GetActorLocation(); // transformation from body to global UE frame, expressed in global UE frame
+	FRotator ActorRotation = GetActorRotation(); // rotation from body to global UE frame
+	FVector COM = RootMesh->GetCenterOfMass(); // COM in global UE frame
+	FVector COB = COM + ActorRotation.RotateVector(CenterBuoyancy - CenterMass); // COB in global frame
 
 	// Check to see how underwater we are
 	FVector* points = SurfacePoints.GetData();
@@ -61,20 +60,24 @@ void AHolodeckBuoyantAgent::ApplyBuoyantForce(){
 	}
 	float ratio = count*1.0 / NumSurfacePoints;
 
-    // Get and apply Buoyant Force
+	// Gravity
+	FVector GravityVector = FVector(0, 0, -Gravity*MassInKG); //Newtons
+	GravityVector = ConvertLinearVector(GravityVector, ClientToUE); // converts Newtons to centiNewtons
+	RootMesh->AddForceAtLocation(GravityVector, COM);
+
+	// Buoyant Force (Applied at COM)
 	float BuoyantForce = Volume * Gravity * WaterDensity * ratio;
-	FVector BuoyantVector = FVector(0, 0, BuoyantForce);
-	BuoyantVector = ConvertLinearVector(BuoyantVector, ClientToUE);
+	FVector BuoyantVector = FVector(0, 0, BuoyantForce); //Newtons, in global frame
+	BuoyantVector = ConvertLinearVector(BuoyantVector, ClientToUE); // converts Newtons to centiNewtons
+	RootMesh->AddForceAtLocation(BuoyantVector, COB); 
 
-    FVector COB_World = ActorLocation + ActorRotation.RotateVector(CenterBuoyancy + OffsetToOrigin);
-	RootMesh->AddForceAtLocation(BuoyantVector, COB_World);
-
-	FVector GravityVector = ConvertLinearVector(FVector(0, 0, -Gravity*MassInKG), ClientToUE);
-	RootMesh->AddForceAtLocation(GravityVector, RootMesh->GetCenterOfMass());
+	// Draw Debug Lines
+	// DrawDebugLine(GetWorld(), COM, COM + GravityVector*0.1, FColor::Green, false, .1, ECC_WorldStatic, 2.f);
+	// DrawDebugLine(GetWorld(), COB, COB + BuoyantVector*0.1, FColor::Blue , false, .1, ECC_WorldStatic, 2.f);
 }
 
 void AHolodeckBuoyantAgent::ShowBoundingBox(float DeltaTime){
-	FVector location = GetActorLocation() + GetActorRotation().RotateVector(OffsetToOrigin + CenterVehicle);
+	FVector location = GetActorLocation();
 	DrawDebugBox(GetWorld(), location, BoundingBox.GetExtent(), GetActorQuat(), FColor::Red, false, DeltaTime, 0, 1);
 }
 

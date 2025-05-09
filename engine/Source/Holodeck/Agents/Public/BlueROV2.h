@@ -14,7 +14,7 @@ const float BR_MAX_THRUST = BR_MAX_LIN_ACCEL*11.5 / 4;
 UCLASS()
 /**
 * BlueROV2
-* Inherits from the HolodeckAgent class
+* Inherits from the HolodeckAgent class.
 * On any tick this object will apply the given forces.
 * Desired values must be set by a controller.
 */
@@ -35,7 +35,6 @@ public:
 	* Called each frame.
 	* @param DeltaSeconds the time since the last tick.
 	*/
-
 	void Tick(float DeltaSeconds) override;
 
 	unsigned int GetRawActionSizeInBytes() const override { return 8 * sizeof(float); };
@@ -44,15 +43,15 @@ public:
 	// Allows agent to fall up to ~8 meters
 	float GetAccelerationLimit() override { return 400; }
 
-	// Location of all thrusters
-	TArray<FVector> thrusterLocations{ FVector(18.18, 22.14, -4), 
-											FVector(18.18, -22.14, -4),
-											FVector(-31.43, -22.14, -4),
-											FVector(-31.43, 22.14, -4),
-											FVector(7.39, 18.23, -0.21),
-											FVector(7.39, -18.23, -0.21),
-											FVector(-20.64, -18.23, -0.21),
-											FVector(-20.64, 18.23, -0.21) };
+	// Location of all thrusters relative to mesh origin in UE units (cm, LHS)
+	TArray<FVector> thrusterLocations{  FVector( 12.00,  21.81,  7.09), 
+										FVector( 12.00, -21.81,  7.09),
+										FVector(-12.00, -21.81,  7.09),
+										FVector(-12.00,  21.81,  7.09),
+										FVector( 15.62,   9.88, -1.00),
+										FVector( 15.62,  -9.88, -1.00),
+										FVector(-15.62,  -9.88, -1.00),
+										FVector(-15.62,   9.88, -1.00) };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BuoyancySettings)
 		bool Perfect= true;

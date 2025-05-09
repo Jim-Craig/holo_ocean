@@ -2,7 +2,13 @@
 #include "BlueROV2ControlPD.h"
 
 UBlueROV2ControlPD::UBlueROV2ControlPD(const FObjectInitializer& ObjectInitializer) :
-		Super(ObjectInitializer), PositionController(BR_POS_P, 0, BR_POS_D), RotationController(BR_ROT_P, 0, BR_ROT_D) { }
+		Super(ObjectInitializer), 
+		PositionController_X(BR_POS_P_X, BR_POS_I_X, BR_POS_D_X), 
+		PositionController_Y(BR_POS_P_Y, BR_POS_I_Y, BR_POS_D_Y),
+		PositionController_Z(BR_POS_P_Z, BR_POS_I_Z, BR_POS_D_Z),
+		RotationController_R(BR_ROT_P_R, BR_ROT_I_R, BR_ROT_D_R),
+		RotationController_P(BR_ROT_P_P, BR_ROT_I_P, BR_ROT_D_P),
+		RotationController_Y(BR_ROT_P_Y, BR_ROT_I_Y, BR_ROT_D_Y) { }
 
 void UBlueROV2ControlPD::Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) {
 	if (BlueROV2 == nullptr) {
@@ -41,15 +47,21 @@ void UBlueROV2ControlPD::Execute(void* const CommandArray, void* const InputComm
 
 
 	// Compute accelerations to apply
-
 	FVector LinAccel, AngAccel;
-	for(int i=0; i<3; i++){
-		LinAccel[i] = PositionController.ComputePIDDirect(DesiredPosition[i], Position[i], LinearVelocity[i], DeltaSeconds);
-		LinAccel[i] = FMath::Clamp(LinAccel[i], -BR_CONTROL_MAX_LIN_ACCEL, BR_CONTROL_MAX_LIN_ACCEL);
-
-		AngAccel[i] = RotationController.ComputePIDDirect(DesiredOrientation[i], Orientation[i], AngularVelocity[i], DeltaSeconds, true, true);
-		AngAccel[i] = FMath::Clamp(AngAccel[i], -BR_CONTROL_MAX_ANG_ACCEL, BR_CONTROL_MAX_ANG_ACCEL);
-	}
+	
+	LinAccel[0] = PositionController_X.ComputePIDDirect(DesiredPosition[0], Position[0], LinearVelocity[0], DeltaSeconds);
+	LinAccel[0] = FMath::Clamp(LinAccel[0], -BR_CONTROL_MAX_LIN_ACCEL, BR_CONTROL_MAX_LIN_ACCEL);
+	LinAccel[1] = PositionController_Y.ComputePIDDirect(DesiredPosition[1], Position[1], LinearVelocity[1], DeltaSeconds);
+	LinAccel[1] = FMath::Clamp(LinAccel[1], -BR_CONTROL_MAX_LIN_ACCEL, BR_CONTROL_MAX_LIN_ACCEL);
+	LinAccel[2] = PositionController_Z.ComputePIDDirect(DesiredPosition[2], Position[2], LinearVelocity[2], DeltaSeconds);
+	LinAccel[2] = FMath::Clamp(LinAccel[2], -BR_CONTROL_MAX_LIN_ACCEL, BR_CONTROL_MAX_LIN_ACCEL);
+	
+	AngAccel[0] = RotationController_R.ComputePIDDirect(DesiredOrientation[0], Orientation[0], AngularVelocity[0], DeltaSeconds, true, true);
+	AngAccel[0] = FMath::Clamp(AngAccel[0], -BR_CONTROL_MAX_ANG_ACCEL, BR_CONTROL_MAX_ANG_ACCEL);
+	AngAccel[1] = RotationController_P.ComputePIDDirect(DesiredOrientation[1], Orientation[1], AngularVelocity[1], DeltaSeconds, true, true);
+	AngAccel[1] = FMath::Clamp(AngAccel[1], -BR_CONTROL_MAX_ANG_ACCEL, BR_CONTROL_MAX_ANG_ACCEL);
+	AngAccel[2] = RotationController_Y.ComputePIDDirect(DesiredOrientation[2], Orientation[2], AngularVelocity[2], DeltaSeconds, true, true);
+	AngAccel[2] = FMath::Clamp(AngAccel[2], -BR_CONTROL_MAX_ANG_ACCEL, BR_CONTROL_MAX_ANG_ACCEL);
 
 	// Feedback linearize torque with buoyancy torque
 	FRotator rotation = BlueROV2->GetActorRotation();
