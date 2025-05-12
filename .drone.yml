@@ -367,7 +367,7 @@ steps:
       - git add .
       # - git commit -m "Update to develop"
       # - git reset --soft HEAD~2
-      - git commit --allow-empty -m "${DRONE_COMMIT_MESSAGE}"
+      - git commit --allow-empty -m "${DRONE_COMMIT_MESSAGE//\"/\\\""}"
       - git push -f
     depends_on:
       - build_docker
