@@ -15,6 +15,7 @@ from holoocean.exceptions import HoloOceanConfigurationException
 from holoocean.lcm import SensorData
 from copy import deepcopy
 
+
 class HoloOceanSensor:
     """Base class for a sensor
 
@@ -84,6 +85,7 @@ class HoloOceanSensor:
         """Rotate the sensor. It will be applied in approximately three ticks.
         :meth:`~holoocean.environments.HoloOceanEnvironment.step` or
         :meth:`~holoocean.environments.HoloOceanEnvironment.tick`.)
+        Multiple rotations do not accumulate.
 
         This will not persist after a call to reset(). If you want a persistent rotation for a sensor,
         specify it in your scenario configuration.
@@ -98,119 +100,7 @@ class HoloOceanSensor:
         pass
 
 
-class DistanceTask(HoloOceanSensor):
-    sensor_type = "DistanceTask"
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [2]
-
-
-class LocationTask(HoloOceanSensor):
-    sensor_type = "LocationTask"
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [2]
-
-
-class FollowTask(HoloOceanSensor):
-    sensor_type = "FollowTask"
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [2]
-
-
-class AvoidTask(HoloOceanSensor):
-    sensor_type = "AvoidTask"
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [2]
-
-
-class CupGameTask(HoloOceanSensor):
-    sensor_type = "CupGameTask"
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [2]
-
-    def start_game(self, num_shuffles, speed=3, seed=None):
-        """Start the cup game and set its configuration. Do not call if the config file contains a cup task configuration
-        block, as it will override the configuration and cause undefined behavior.
-
-        Args:
-            num_shuffles (:obj:`int`): Number of shuffles
-            speed (:obj:`int`): Speed of the shuffle. Works best between 1-10
-            seed (:obj:`int`): Seed to rotate the cups the same way every time. If none is given, a seed will not be used.
-        """
-        use_seed = seed is not None
-        if seed is None:
-            seed = 0  # have to pass a value
-        config_command = CustomCommand(
-            "CupGameConfig", num_params=[speed, num_shuffles, int(use_seed), seed]
-        )
-        start_command = CustomCommand("StartCupGame")
-        self._client.command_center.enqueue_command(config_command)
-        self._client.command_center.enqueue_command(start_command)
-
-
-class CleanUpTask(HoloOceanSensor):
-    sensor_type = "CleanUpTask"
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [2]
-
-    def start_task(self, num_trash, use_table=False):
-        """Spawn trash around the trash can. Do not call if the config file contains a clean up task configuration
-        block.
-
-        Args:
-            num_trash (:obj:`int`): Amount of trash to spawn
-            use_table (:obj:`bool`, optional): If True a table will spawn next to the trash can, all trash will be on
-                the table, and the trash can lid will be absent. This makes the task significantly easier. If False,
-                all trash will spawn on the ground. Defaults to False.
-        """
-
-        if self.config is not None or self.config is not {}:
-            raise HoloOceanConfigurationException(
-                "Called CleanUpTask start_task when configuration block already \
-                specified. Must remove configuration block before calling."
-            )
-
-        config_command = CustomCommand(
-            "CleanUpConfig", num_params=[num_trash, int(use_table)]
-        )
-        self._client.command_center.enqueue_command(config_command)
-
-
+########################### ORIGINAL HOLODECK SENSORS ################################
 class ViewportCapture(HoloOceanSensor):
     """Captures what the viewport is seeing.
 
@@ -220,7 +110,7 @@ class ViewportCapture(HoloOceanSensor):
 
     It may be useful
     to position the camera with
-    :meth:`~holoocean.environments.HoloOceanEnvironment.teleport_camera`.
+    :meth:`~holoocean.environments.HoloOceanEnvironment.move_viewport`.
 
     **Configuration**
 
@@ -268,72 +158,6 @@ class ViewportCapture(HoloOceanSensor):
     @property
     def data_shape(self):
         return self.shape
-
-
-class RGBCamera(HoloOceanSensor):
-    """Captures agent's view.
-
-    The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
-    The resolution can be increased, but will significantly impact performance.
-
-    **Configuration**
-
-    The ``configuration`` block (see :ref:`configuration-block`) accepts the following
-    options:
-
-    - ``CaptureWidth``: Width of captured image
-    - ``CaptureHeight``: Height of captured image
-
-    """
-
-    sensor_type = "RGBCamera"
-
-    def __init__(self, client, agent_name, agent_type, name="RGBCamera", config=None):
-        self.config = {} if config is None else config
-
-        width = 256
-        height = 256
-
-        if "CaptureHeight" in self.config:
-            height = self.config["CaptureHeight"]
-
-        if "CaptureWidth" in self.config:
-            width = self.config["CaptureWidth"]
-
-        self.shape = (height, width, 4)
-
-        super(RGBCamera, self).__init__(
-            client, agent_name, agent_type, name=name, config=config
-        )
-
-    @property
-    def dtype(self):
-        return np.uint8
-
-    @property
-    def data_shape(self):
-        return self.shape
-
-    def set_ticks_per_capture(self, ticks_per_capture):
-        """Sets this RGBCamera to capture a new frame every ticks_per_capture.
-
-        The sensor's image will remain unchanged between captures.
-
-        This method must be called after every call to env.reset.
-
-        Args:
-            ticks_per_capture (:obj:`int`): The amount of ticks to wait between camera captures.
-        """
-        if not isinstance(ticks_per_capture, int) or ticks_per_capture < 1:
-            raise HoloOceanConfigurationException(
-                "Invalid ticks_per_capture value " + str(ticks_per_capture)
-            )
-
-        command_to_send = RGBCameraRateCommand(
-            self.agent_name, self.name, ticks_per_capture
-        )
-        self._client.command_center.enqueue_command(command_to_send)
-        self.tick_every = ticks_per_capture
 
 
 class OrientationSensor(HoloOceanSensor):
@@ -428,110 +252,6 @@ class IMUSensor(HoloOceanSensor):
     @property
     def data_shape(self):
         return self.shape
-
-
-class JointRotationSensor(HoloOceanSensor):
-    """Returns the state of the :class:`~holoocean.agents.AndroidAgent`'s or the
-    :class:`~holoocean.agents.HandAgent`'s joints.
-
-    """
-
-    sensor_type = "JointRotationSensor"
-
-    def __init__(self, client, agent_name, agent_type, name="RGBCamera", config=None):
-        if holoocean.agents.AndroidAgent.agent_type in agent_type:
-            # Should match AAndroid::TOTAL_DOF
-            self.elements = 94
-        elif agent_type == holoocean.agents.HandAgent.agent_type:
-            # AHandAgent::TOTAL_JOINT_DOF
-            self.elements = 23
-        else:
-            raise HoloOceanConfigurationException(
-                "Attempting to use JointRotationSensor with unsupported"
-                "agent type '{}'!".format(agent_type)
-            )
-
-        super(JointRotationSensor, self).__init__(
-            client, agent_name, agent_type, name, config
-        )
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [self.elements]
-
-
-class PressureSensor(HoloOceanSensor):
-    """For each joint on the :class:`~holoocean.agents.AndroidAgent` or the
-    :class:`~holoocean.agents.HandAgent`, returns the pressure on the
-    joint.
-
-    For each joint, returns ``[x_loc, y_loc, z_loc, force]``.
-
-    """
-
-    sensor_type = "PressureSensor"
-
-    def __init__(self, client, agent_name, agent_type, name="RGBCamera", config=None):
-        if holoocean.agents.AndroidAgent.agent_type in agent_type:
-            # Should match AAndroid::NUM_JOINTS
-            self.elements = 48
-        elif agent_type == holoocean.agents.HandAgent.agent_type:
-            # AHandAgent::NUM_JOINTS
-            self.elements = 16
-        else:
-            raise HoloOceanConfigurationException(
-                "Attempting to use PressureSensor with unsupported"
-                "agent type '{}'!".format(agent_type)
-            )
-
-        super(PressureSensor, self).__init__(
-            client, agent_name, agent_type, name, config
-        )
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [self.elements * (3 + 1)]
-
-
-class RelativeSkeletalPositionSensor(HoloOceanSensor):
-    """Gets the position of each bone in a skeletal mesh as a quaternion.
-
-    Returns a numpy array with four entries for each bone.
-    """
-
-    def __init__(self, client, agent_name, agent_type, name="RGBCamera", config=None):
-        if holoocean.agents.AndroidAgent.agent_type in agent_type:
-            # Should match AAndroid::NumBones
-            self.elements = 60
-        elif agent_type == holoocean.agents.HandAgent.agent_type:
-            # AHandAgent::NumBones
-            self.elements = 17
-        else:
-            raise HoloOceanConfigurationException(
-                "Attempting to use RelativeSkeletalPositionSensor with unsupported"
-                "agent type {}!".format(agent_type)
-            )
-        super(RelativeSkeletalPositionSensor, self).__init__(
-            client, agent_name, agent_type, name, config
-        )
-
-    sensor_type = "RelativeSkeletalPositionSensor"
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [self.elements, 4]
 
 
 class LocationSensor(HoloOceanSensor):
@@ -646,32 +366,9 @@ class DynamicsSensor(HoloOceanSensor):
         return self.shape
 
 
-class CollisionSensor(HoloOceanSensor):
-    """Returns true if the agent is colliding with anything (including the ground)."""
-
-    sensor_type = "CollisionSensor"
-
-    @property
-    def dtype(self):
-        return np.bool_
-
-    @property
-    def data_shape(self):
-        return [1]
-
-
 class RangeFinderSensor(HoloOceanSensor):
     """Returns distances to nearest collisions in the directions specified by
-    the parameters. For example, if an agent had two range sensors at different
-    angles with 24 lasers each, the LaserDebug traces would look something like
-    this:
-
-    .. image:: ../../docs/images/UAVRangeFinder.PNG
-    
-    That is, for 1 laser, you'd have 1 laser facing forward, for 3, you'd have one forward,
-    with the other 2 distributed evenly along the circle, at 120 degree intervals, and for
-    24, you'd have a laser spaced every 15 degrees.
-    
+    the parameters. 
 
     **Configuration**
 
@@ -703,10 +400,241 @@ class RangeFinderSensor(HoloOceanSensor):
         return [self.laser_count]
 
 
+######################### HOLODECK SENSORS WE DON'T USE ##############################
+class DistanceTask(HoloOceanSensor):
+    sensor_type = "DistanceTask"
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [2]
+
+
+class LocationTask(HoloOceanSensor):
+    sensor_type = "LocationTask"
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [2]
+
+
+class FollowTask(HoloOceanSensor):
+    sensor_type = "FollowTask"
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [2]
+
+
+class AvoidTask(HoloOceanSensor):
+    sensor_type = "AvoidTask"
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [2]
+
+
+class CupGameTask(HoloOceanSensor):
+    sensor_type = "CupGameTask"
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [2]
+
+    def start_game(self, num_shuffles, speed=3, seed=None):
+        """Start the cup game and set its configuration. Do not call if the config file contains a cup task configuration
+        block, as it will override the configuration and cause undefined behavior.
+
+        Args:
+            num_shuffles (:obj:`int`): Number of shuffles
+            speed (:obj:`int`): Speed of the shuffle. Works best between 1-10
+            seed (:obj:`int`): Seed to rotate the cups the same way every time. If none is given, a seed will not be used.
+        """
+        use_seed = seed is not None
+        if seed is None:
+            seed = 0  # have to pass a value
+        config_command = CustomCommand(
+            "CupGameConfig", num_params=[speed, num_shuffles, int(use_seed), seed]
+        )
+        start_command = CustomCommand("StartCupGame")
+        self._client.command_center.enqueue_command(config_command)
+        self._client.command_center.enqueue_command(start_command)
+
+
+class CleanUpTask(HoloOceanSensor):
+    sensor_type = "CleanUpTask"
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [2]
+
+    def start_task(self, num_trash, use_table=False):
+        """Spawn trash around the trash can. Do not call if the config file contains a clean up task configuration
+        block.
+
+        Args:
+            num_trash (:obj:`int`): Amount of trash to spawn
+            use_table (:obj:`bool`, optional): If True a table will spawn next to the trash can, all trash will be on
+                the table, and the trash can lid will be absent. This makes the task significantly easier. If False,
+                all trash will spawn on the ground. Defaults to False.
+        """
+
+        if self.config is not None or self.config is not {}:
+            raise HoloOceanConfigurationException(
+                "Called CleanUpTask start_task when configuration block already \
+                specified. Must remove configuration block before calling."
+            )
+
+        config_command = CustomCommand(
+            "CleanUpConfig", num_params=[num_trash, int(use_table)]
+        )
+        self._client.command_center.enqueue_command(config_command)
+
+
+class JointRotationSensor(HoloOceanSensor):
+    """Returns the state of the :class:`~holoocean.agents.AndroidAgent`'s or the
+    :class:`~holoocean.agents.HandAgent`'s joints.
+
+    """
+
+    sensor_type = "JointRotationSensor"
+
+    def __init__(self, client, agent_name, agent_type, name="RGBCamera", config=None):
+        if holoocean.agents.AndroidAgent.agent_type in agent_type:
+            # Should match AAndroid::TOTAL_DOF
+            self.elements = 94
+        elif agent_type == holoocean.agents.HandAgent.agent_type:
+            # AHandAgent::TOTAL_JOINT_DOF
+            self.elements = 23
+        else:
+            raise HoloOceanConfigurationException(
+                "Attempting to use JointRotationSensor with unsupported"
+                "agent type '{}'!".format(agent_type)
+            )
+
+        super(JointRotationSensor, self).__init__(
+            client, agent_name, agent_type, name, config
+        )
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [self.elements]
+
+
+class PressureSensor(HoloOceanSensor):
+    """For each joint on the :class:`~holoocean.agents.AndroidAgent` or the
+    :class:`~holoocean.agents.HandAgent`, returns the pressure on the
+    joint.
+
+    For each joint, returns ``[x_loc, y_loc, z_loc, force]``.
+
+    """
+
+    sensor_type = "PressureSensor"
+
+    def __init__(self, client, agent_name, agent_type, name="RGBCamera", config=None):
+        if holoocean.agents.AndroidAgent.agent_type in agent_type:
+            # Should match AAndroid::NUM_JOINTS
+            self.elements = 48
+        elif agent_type == holoocean.agents.HandAgent.agent_type:
+            # AHandAgent::NUM_JOINTS
+            self.elements = 16
+        else:
+            raise HoloOceanConfigurationException(
+                "Attempting to use PressureSensor with unsupported"
+                "agent type '{}'!".format(agent_type)
+            )
+
+        super(PressureSensor, self).__init__(
+            client, agent_name, agent_type, name, config
+        )
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [self.elements * (3 + 1)]
+
+
+class RelativeSkeletalPositionSensor(HoloOceanSensor):
+    """Gets the position of each bone in a skeletal mesh as a quaternion.
+
+    Returns a numpy array with four entries for each bone.
+    """
+
+    def __init__(self, client, agent_name, agent_type, name="RGBCamera", config=None):
+        if holoocean.agents.AndroidAgent.agent_type in agent_type:
+            # Should match AAndroid::NumBones
+            self.elements = 60
+        elif agent_type == holoocean.agents.HandAgent.agent_type:
+            # AHandAgent::NumBones
+            self.elements = 17
+        else:
+            raise HoloOceanConfigurationException(
+                "Attempting to use RelativeSkeletalPositionSensor with unsupported"
+                "agent type {}!".format(agent_type)
+            )
+        super(RelativeSkeletalPositionSensor, self).__init__(
+            client, agent_name, agent_type, name, config
+        )
+
+    sensor_type = "RelativeSkeletalPositionSensor"
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [self.elements, 4]
+
+
+class CollisionSensor(HoloOceanSensor):
+    """Returns true if the agent is colliding with anything (including the ground)."""
+
+    sensor_type = "CollisionSensor"
+
+    @property
+    def dtype(self):
+        return np.bool_
+
+    @property
+    def data_shape(self):
+        return [1]
+
+
 class WorldNumSensor(HoloOceanSensor):
     """Returns any numeric value from the world corresponding to a given key. This is
     world specific.
-
     """
 
     sensor_type = "WorldNumSensor"
@@ -763,13 +691,106 @@ class AbuseSensor(HoloOceanSensor):
         return [1]
 
 
+class RGBCamera(HoloOceanSensor):
+    """Captures agent's view.
+
+    The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
+    The resolution can be increased, but will significantly impact performance.
+
+    **Configuration**
+
+    The ``configuration`` block (see :ref:`configuration-block`) accepts the following
+    options:
+
+    - ``CaptureWidth``: Width of captured image
+    - ``CaptureHeight``: Height of captured image
+
+    """
+
+    sensor_type = "RGBCamera"
+
+    def __init__(self, client, agent_name, agent_type, name="RGBCamera", config=None):
+        self.config = {} if config is None else config
+
+        width = 256
+        height = 256
+
+        if "CaptureHeight" in self.config:
+            height = self.config["CaptureHeight"]
+
+        if "CaptureWidth" in self.config:
+            width = self.config["CaptureWidth"]
+
+        self.shape = (height, width, 4)
+
+        super(RGBCamera, self).__init__(
+            client, agent_name, agent_type, name=name, config=config
+        )
+
+    @property
+    def dtype(self):
+        return np.uint8
+
+    @property
+    def data_shape(self):
+        return self.shape
+
+    def set_ticks_per_capture(self, ticks_per_capture):
+        """Sets this RGBCamera to capture a new frame every ticks_per_capture.
+
+        The sensor's image will remain unchanged between captures.
+
+        This method must be called after every call to env.reset.
+
+        Args:
+            ticks_per_capture (:obj:`int`): The amount of ticks to wait between camera captures.
+        """
+        if not isinstance(ticks_per_capture, int) or ticks_per_capture < 1:
+            raise HoloOceanConfigurationException(
+                "Invalid ticks_per_capture value " + str(ticks_per_capture)
+            )
+
+        command_to_send = RGBCameraRateCommand(
+            self.agent_name, self.name, ticks_per_capture
+        )
+        self._client.command_center.enqueue_command(command_to_send)
+        self.tick_every = ticks_per_capture
+
+
 ######################## HOLOOCEAN CUSTOM SENSORS ###########################
 # Make sure to also add your new sensor to SensorDefinition below
+
+class PoseSensor(HoloOceanSensor):
+    """Gets the forward, right, and up vector for the agent.
+    Note that this is based on the sensor's frame, not the agent's frame so in the IMU socket, 
+    it will be NED, and in COM socket it will NWU. Our provided configurations have the sensor in the IMU socket.
+    
+    Returns a 2D numpy array of
+
+    ::
+
+       [ [R, p],
+         [0, 1] ]
+
+    where R is the rotation matrix (See OrientationSensor) and p is the robot world location (see LocationSensor)
+    """
+
+    sensor_type = "PoseSensor"
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [4, 4]
 
 
 class SidescanSonar(HoloOceanSensor):
     """Simulates a sidescan sonar. See :ref:`configure-octree` for more on
     how to configure the octree that is used.
+
+    **Configuration**
 
     The ``configuration`` block (see :ref:`configuration-block`) accepts any of
     the options in the following sections.
@@ -863,6 +884,8 @@ class SidescanSonar(HoloOceanSensor):
 class ImagingSonar(HoloOceanSensor):
     """Simulates an imaging sonar. See :ref:`configure-octree` for more on
     how to configure the octree that is used.
+
+    **Configuration**
 
     The ``configuration`` block (see :ref:`configuration-block`) accepts any of
     the options in the following sections.
@@ -969,9 +992,6 @@ class SinglebeamSonar(HoloOceanSensor):
 
     **Configuration**
 
-    The ``configuration`` block (see :ref:`configuration-block`) accepts the following
-    options:
-
     The ``configuration`` block (see :ref:`configuration-block`) accepts any of
     the options in the following sections.
 
@@ -1067,6 +1087,8 @@ class ProfilingSonar(ImagingSonar):
     """Simulates a multibeam profiling sonar. This is largely based off of the imaging sonar (:class:`~holoocean.sensors.ImagingSonar`), just with
     different defaults. See :ref:`configure-octree` for more on how to configure the octree that is used.
 
+    **Configuration**
+
     The ``configuration`` block (see :ref:`configuration-block`) accepts any of
     the options in the following sections.
 
@@ -1087,6 +1109,7 @@ class ProfilingSonar(ImagingSonar):
     - ``ClusterSize``: Size of cluster when multipath is enabled. Defaults to 5.
     - ``ScaleNoise``: Whether to scale the returned intensities or not. Defaults to False.
     - ``AzimuthStreaks``: What sort of azimuth artifacts to introduce. -1 is a removal artifact, 0 is no artifact, and 1 is increased gain artifact. Defaults to 0.
+    - ``RangeSigma``: Additive noise std from an exponential distribution that will be added to the range measurements, and the intensities will be scaled by the pdf. Needs to be a float. Defaults to 0, or off.
 
     **Advanced Configuration**
 
@@ -1130,7 +1153,6 @@ class DVLSensor(HoloOceanSensor):
     Returns a 1D numpy array of::
 
        [velocity_x, velocity_y, velocity_z, range_x_forw, range_y_forw, range_x_back, range_y_back]
-
 
     With the range potentially not returning if ``ReturnRange`` is set to false.
 
@@ -1178,164 +1200,6 @@ class DVLSensor(HoloOceanSensor):
     @property
     def data_shape(self):
         return self.shape
-
-
-class DepthSensor(HoloOceanSensor):
-    """Pressure/Depth Sensor.
-
-    Returns a 1D numpy array of::
-
-       [position_z]
-
-
-    **Configuration**
-
-    The ``configuration`` block (see :ref:`configuration-block`) accepts the
-    following options:
-
-    - ``Sigma``/``Cov``: Covariance/Std to be applied, a scalar. Defaults to 0 => no noise.
-
-    """
-
-    sensor_type = "DepthSensor"
-
-    def __init__(self, client, agent_name, agent_type, name="DepthSensor", config=None):
-        self.config = {} if config is None else config
-
-        if "Sigma" in self.config and "Cov" in self.config:
-            raise ValueError(
-                "Can't set both Sigma and Cov in DepthSensor, use one of them in your configuration"
-            )
-
-        super(DepthSensor, self).__init__(
-            client, agent_name, agent_type, name=name, config=config
-        )
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [1]
-
-
-class GPSSensor(HoloOceanSensor):
-    """Gets the location of the agent in the world if the agent is close enough to the surface.
-
-    Returns coordinates in ``[x, y, z]`` format (see :ref:`coordinate-system`)
-
-    **Configuration**
-
-    The ``configuration`` block (see :ref:`configuration-block`) accepts the
-    following options:
-
-    - ``Sigma``/``Cov``: Covariance/Std of measurement. Can be scalar, 3-vector or 3x3-matrix. Set one or the other. Defaults to 0 => no noise.
-    - ``Depth``: How deep in the water we can still receive GPS messages in meters. Defaults to 2m.
-    - ``DepthSigma``/``DepthCov``: Covariance/Std of depth. Must be a scalar. Set one or the other. Defaults to 0 => no noise.
-
-    """
-
-    sensor_type = "GPSSensor"
-
-    def __init__(self, client, agent_name, agent_type, name="GPSSensor", config=None):
-        self.config = {} if config is None else config
-
-        if "Sigma" in self.config and "Cov" in self.config:
-            raise ValueError(
-                "Can't set both Sigma and Cov in GPSSensor, use one of them in your configuration"
-            )
-
-        if "DepthSigma" in self.config and "DepthCov" in self.config:
-            raise ValueError(
-                "Can't set both DepthSigma and DepthCov in GPSSensor, use one of them in your configuration"
-            )
-
-        super(GPSSensor, self).__init__(
-            client, agent_name, agent_type, name=name, config=config
-        )
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [3]
-
-    @property
-    def sensor_data(self):
-        if (
-            ~np.any(np.isnan(self._sensor_data_buffer))
-            and self.tick_count == self.tick_every
-        ):
-            return self._sensor_data_buffer
-        else:
-            return None
-
-
-class MagnetometerSensor(HoloOceanSensor):
-    """Gets the global x-axis (or given vector) in the local frame.
-
-    **Configuration**
-
-    The ``configuration`` block (see :ref:`configuration-block`) accepts the
-    following options:
-
-    - ``Sigma``/``Cov``: Covariance/Std of measurement. Can be scalar, 3-vector or 3x3-matrix. Set one or the other. Defaults to 0 => no noise.
-    - ``MagneticVector``: The given 3-vector to measure in the global frame. Defaults to [1,0,0].
-
-    """
-
-    sensor_type = "MagnetometerSensor"
-
-    def __init__(
-        self, client, agent_name, agent_type, name="MagnetometerSensor", config=None
-    ):
-        self.config = {} if config is None else config
-
-        if "Sigma" in self.config and "Cov" in self.config:
-            raise ValueError(
-                "Can't set both Sigma and Cov in MagnetometerSensor, use one of them in your configuration"
-            )
-
-        super(MagnetometerSensor, self).__init__(
-            client, agent_name, agent_type, name=name, config=config
-        )
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [3]
-
-
-class PoseSensor(HoloOceanSensor):
-    """Gets the forward, right, and up vector for the agent.
-    Note that this is based on the sensor's frame, not the agent's frame so in the IMU socket, 
-    it will be NED, and in COM socket it will NWU. Our provided configurations have the sensor in the IMU socket.
-    
-    Returns a 2D numpy array of
-
-    ::
-
-       [ [R, p],
-         [0, 1] ]
-
-    where R is the rotation matrix (See OrientationSensor) and p is the robot world location (see LocationSensor)
-    """
-
-    sensor_type = "PoseSensor"
-
-    @property
-    def dtype(self):
-        return np.float32
-
-    @property
-    def data_shape(self):
-        return [4, 4]
 
 
 class AcousticBeaconSensor(HoloOceanSensor):
@@ -1596,6 +1460,138 @@ class OpticalModemSensor(HoloOceanSensor):
     def reset(self):
         self.__class__.instances = dict()
 
+
+class DepthSensor(HoloOceanSensor):
+    """Pressure/Depth Sensor.
+
+    Returns a 1D numpy array of::
+
+       [position_z]
+
+    **Configuration**
+
+    The ``configuration`` block (see :ref:`configuration-block`) accepts the
+    following options:
+
+    - ``Sigma``/``Cov``: Covariance/Std to be applied, a scalar. Defaults to 0 => no noise.
+
+    """
+
+    sensor_type = "DepthSensor"
+
+    def __init__(self, client, agent_name, agent_type, name="DepthSensor", config=None):
+        self.config = {} if config is None else config
+
+        if "Sigma" in self.config and "Cov" in self.config:
+            raise ValueError(
+                "Can't set both Sigma and Cov in DepthSensor, use one of them in your configuration"
+            )
+
+        super(DepthSensor, self).__init__(
+            client, agent_name, agent_type, name=name, config=config
+        )
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [1]
+
+
+class GPSSensor(HoloOceanSensor):
+    """Gets the location of the agent in the world if the agent is close enough to the surface.
+
+    Returns coordinates in ``[x, y, z]`` format (see :ref:`coordinate-system`)
+
+    **Configuration**
+
+    The ``configuration`` block (see :ref:`configuration-block`) accepts the
+    following options:
+
+    - ``Sigma``/``Cov``: Covariance/Std of measurement. Can be scalar, 3-vector or 3x3-matrix. Set one or the other. Defaults to 0 => no noise.
+    - ``Depth``: How deep in the water we can still receive GPS messages in meters. Defaults to 2m.
+    - ``DepthSigma``/``DepthCov``: Covariance/Std of depth. Must be a scalar. Set one or the other. Defaults to 0 => no noise.
+
+    """
+
+    sensor_type = "GPSSensor"
+
+    def __init__(self, client, agent_name, agent_type, name="GPSSensor", config=None):
+        self.config = {} if config is None else config
+
+        if "Sigma" in self.config and "Cov" in self.config:
+            raise ValueError(
+                "Can't set both Sigma and Cov in GPSSensor, use one of them in your configuration"
+            )
+
+        if "DepthSigma" in self.config and "DepthCov" in self.config:
+            raise ValueError(
+                "Can't set both DepthSigma and DepthCov in GPSSensor, use one of them in your configuration"
+            )
+
+        super(GPSSensor, self).__init__(
+            client, agent_name, agent_type, name=name, config=config
+        )
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [3]
+
+    @property
+    def sensor_data(self):
+        if (
+            ~np.any(np.isnan(self._sensor_data_buffer))
+            and self.tick_count == self.tick_every
+        ):
+            return self._sensor_data_buffer
+        else:
+            return None
+
+
+class MagnetometerSensor(HoloOceanSensor):
+    """Gets the global x-axis (or given vector) in the local frame.
+
+    **Configuration**
+
+    The ``configuration`` block (see :ref:`configuration-block`) accepts the
+    following options:
+
+    - ``Sigma``/``Cov``: Covariance/Std of measurement. Can be scalar, 3-vector or 3x3-matrix. Set one or the other. Defaults to 0 => no noise.
+    - ``MagneticVector``: The given 3-vector to measure in the global frame. Defaults to [1,0,0].
+
+    """
+
+    sensor_type = "MagnetometerSensor"
+
+    def __init__(
+        self, client, agent_name, agent_type, name="MagnetometerSensor", config=None
+    ):
+        self.config = {} if config is None else config
+
+        if "Sigma" in self.config and "Cov" in self.config:
+            raise ValueError(
+                "Can't set both Sigma and Cov in MagnetometerSensor, use one of them in your configuration"
+            )
+
+        super(MagnetometerSensor, self).__init__(
+            client, agent_name, agent_type, name=name, config=config
+        )
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [3]
+
+
 class CameraSensor(HoloOceanSensor):
     """Captures agent's view.
 
@@ -1626,11 +1622,11 @@ class CameraSensor(HoloOceanSensor):
     - ``FilmShoulder`` (float): Overrides the base Film Shoulder (default: disabled, min: 0.0, max: 1.0)
     - ``FilmBlackClip`` (float): Overrides the baseFilm Black Clip (default: disabled, min: 0.0, max: 1.0)
     - ``FilmWhiteClip`` (float): Overrides the baseFile White Clip (default: disabled, min: 0.0, max: 1.0)
-    - ``ExposureMinBrightness (float): Auto-Exposure minimum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
-    - ``ExposureMaxBrightness (float):  Auto-Exposure maximum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureMinBrightness`` (float): Auto-Exposure minimum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureMaxBrightness`` (float):  Auto-Exposure maximum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
     - ``ExposureSpeedDown`` (float): Overrides base auto exposure speed down (default: disabled, min: 0.02, max: 20.0)
     - ``ExposureSpeedUp`` (float): Overrides base auto exposure speed up (default: disabled, min: 0.02, max: 20.0)
-    - ``MotionBlurIntensity`` (float): /** Strength of motion blur, 0:off */ (default: disabled, min: 0.0, max: 1.0)
+    - ``MotionBlurIntensity`` (float): **Strength of motion blur, 0:off** (default: disabled, min: 0.0, max: 1.0)
     - ``MotionBlurMaxDistortion`` (float): max distortion caused by motion blur, in percent of the screen width, 0:off  (default: disabled, min: 0.0, max: 1.0)
     - ``MotionBlurMinObjectScreenSize`` (float): The minimum projected screen radius for a primitive to be drawn in the velocity pass, percentage of screen width. smaller numbers cause more draw calls, default: 4% (default: 2, min: 0.0, max: 100.0)
     - ``LensFlareIntensity`` (float): Brightness scale of the image cased lens flares (linear) (default: disabled, min: 0.0, max: 16.0)
@@ -1692,7 +1688,6 @@ class CameraSensor(HoloOceanSensor):
         self.tick_every = ticks_per_capture
 
         
-
 class RGBDCamera(HoloOceanSensor):
     """ ***WIP: need to fully test this sensor***
     Captures agent's view.
@@ -1705,7 +1700,7 @@ class RGBDCamera(HoloOceanSensor):
     The ``configuration`` block (see :ref:`configuration-block`) accepts the following
     options:
 
-- ``CaptureWidth`` (int): Width of captured image
+    - ``CaptureWidth`` (int): Width of captured image
     - ``CaptureHeight`` (int): Height of captured image
     - ``FovAngle`` (float): FOV of the Camera (default: 90, min: 0.001, max: 360.0)
     - ``TargetGamma`` (float): Target Gamma of the Camera (default: 1.0)
@@ -1724,11 +1719,11 @@ class RGBDCamera(HoloOceanSensor):
     - ``FilmShoulder`` (float): Overrides the base Film Shoulder (default: disabled, min: 0.0, max: 1.0)
     - ``FilmBlackClip`` (float): Overrides the baseFilm Black Clip (default: disabled, min: 0.0, max: 1.0)
     - ``FilmWhiteClip`` (float): Overrides the baseFile White Clip (default: disabled, min: 0.0, max: 1.0)
-    - ``ExposureMinBrightness (float): Auto-Exposure minimum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
-    - ``ExposureMaxBrightness (float):  Auto-Exposure maximum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureMinBrightness`` (float): Auto-Exposure minimum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
+    - ``ExposureMaxBrightness`` (float):  Auto-Exposure maximum adaptation. Eye Adaptation is disabled if Min = Max. (default: disabled, min: -10.0, max: 20.0)
     - ``ExposureSpeedDown`` (float): Overrides base auto exposure speed down (default: disabled, min: 0.02, max: 20.0)
     - ``ExposureSpeedUp`` (float): Overrides base auto exposure speed up (default: disabled, min: 0.02, max: 20.0)
-    - ``MotionBlurIntensity`` (float): /** Strength of motion blur, 0:off */ (default: disabled, min: 0.0, max: 1.0)
+    - ``MotionBlurIntensity`` (float): **Strength of motion blur, 0:off** (default: disabled, min: 0.0, max: 1.0)
     - ``MotionBlurMaxDistortion`` (float): max distortion caused by motion blur, in percent of the screen width, 0:off  (default: disabled, min: 0.0, max: 1.0)
     - ``MotionBlurMinObjectScreenSize`` (float): The minimum projected screen radius for a primitive to be drawn in the velocity pass, percentage of screen width. smaller numbers cause more draw calls, default: 4% (default: 2, min: 0.0, max: 100.0)
     - ``LensFlareIntensity`` (float): Brightness scale of the image cased lens flares (linear) (default: disabled, min: 0.0, max: 16.0)
@@ -1817,8 +1812,9 @@ class RGBDCamera(HoloOceanSensor):
 
         return data
 
+
 class SemanticSegmentationCamera(HoloOceanSensor):
-    """ ***WIP: need to fully test this senssor***
+    """ ***WIP: need to fully test this sensor***
     Captures agent's view.
 
     The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
@@ -1883,8 +1879,9 @@ class SemanticSegmentationCamera(HoloOceanSensor):
         self._client.command_center.enqueue_command(command_to_send)
         self.tick_every = ticks_per_capture
 
+
 class RaycastLidar(HoloOceanSensor):
-    """ ***WIP: need to fully test this senssor***
+    """ ***WIP: need to fully test this sensor***
     Runs Agent's Lidar
 
     **Configuration**
@@ -1952,7 +1949,7 @@ class RaycastLidar(HoloOceanSensor):
 
 
 class RaycastSemanticLidar(HoloOceanSensor):
-    """ ***WIP: need to fully test this senssor***
+    """ ***WIP: need to fully test this sensor***
     Runs Agent's Lidar
 
     **Configuration**

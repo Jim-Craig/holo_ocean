@@ -6,12 +6,11 @@
  [![Build Status](https://robots.et.byu.edu:4144/api/badges/byu-holoocean/HoloOcean/status.svg?ref=refs/heads/develop)](https://robots.et.byu.edu:4144/byu-holoocean/HoloOcean)
 
 
-
 HoloOcean is a high-fidelity simulator develped by the [Field Robotic Systems Lab (FRostLab)](https://frostlab.byu.edu) at [Brigham Young University](https://byu.edu).
 
 Built upon Unreal Engine (by Epic Games) and Holodeck (developed by the BYU PCCL Lab), HoloOcean enables easy simulation of marine robotics and autonomy with a wide variety of sensors, agents, and features.
 
-## Important Note: Our current develop branch of HoloOcean has updated from Unreal Engine 4.27 to 5.3. Our documentation has been updated to reflect this change.
+HoloOcean 2.0, the latest release of HoloOcean, incorporates new features such as ROS integration, high-fidelity vehicle dynamics, and improved rendering with Unreal Engine 5.
 
 ## Features
  - 3+ rich worlds with various infrastructure for generating data or testing underwater algorithms
@@ -25,12 +24,14 @@ Built upon Unreal Engine (by Epic Games) and Holodeck (developed by the BYU PCCL
  - Run headless or watch your agents learn
  - Linux and Windows support
 
+ ## Important Note: The latest release, HoloOcean 2.0, updates from Unreal Engine 4.27 to 5.3. Our documentation has been updated to reflect this.
+
 ## Installation
 Clone the repo, then
 `cd client`
 `pip install .`
 
-(requires >= Python 3.6)
+(requires Python >= 3.7)
 
 See [Installation](https://byu-holoocean.github.io/holoocean-docs/usage/installation.html) for complete instructions (including Docker).
 
@@ -46,10 +47,9 @@ See [Installation](https://byu-holoocean.github.io/holoocean-docs/usage/installa
 ## Usage Overview
 HoloOcean's interface is similar to OpenAI's gym.
 
-We try and provide a batteries included approach to let you jump right into using HoloOcean, with minimal
-fiddling required.
+We try and provide a batteries included approach to let you jump right into using HoloOcean, with minimal fiddling required.
 
-To demonstrate, here is a quick example using the `DefaultWorlds` package:
+To demonstrate, here is a quick example using the `Ocean` package:
 
 ```python
 import holoocean
@@ -69,8 +69,7 @@ for i in range(30):
 
 - `state`: dict of sensor name to the sensor's value (nparray).
 
-If you want to access the data of a specific sensor, import sensors and
-retrieve the correct value from the state dictionary:
+If you want to access the data of a specific sensor, import sensors and retrieve the correct value from the state dictionary:
 
 ```python
 print(state["DVLSensor"])

@@ -3,17 +3,26 @@ from holoocean.exceptions import HoloOceanException
 
 
 class WeatherController:
-    """Controller for dynamically changing weather and time in an environment
+    """Controller for dynamically changing weather and time in an environment. 
 
     Args:
-        send_world_command (function): Callback for sending commands to a world
+        send_world_command (function): Callback for sending commands to a world.   
     """
+# JSON configuration format:
+# "weather": {
+#     "hour": 12,
+#     "type": "'sunny' or 'cloudy' or 'rain'",
+#     "fog_density": 0,
+#     "day_cycle_length": 86400
+# },
+
+
     def __init__(self, send_world_command):
         self._send_command = send_world_command
         self.cur_weather = "sunny"
 
     def set_fog_density(self, density):
-        """Change the fog density.
+        """Change the fog density. This controls the VolumetricFog object in Unreal.
 
         The change will occur when :meth:`tick` or :meth:`step` is called next.
 
@@ -81,16 +90,15 @@ class WeatherController:
         The new weather will be applied when :meth:`tick` or :meth:`step` is called next.
 
         By the next tick, the lighting, skysphere, fog, and relevant particle systems will be
-        updated and/or spawned
-        to the given weather.
+        updated and/or spawned to the given weather.
 
         If there is no skysphere, skylight, or directional source light in the world, this command
         will exit the environment.
 
         .. note::
             Because this command can affect the fog density, any changes made by a
-            ``change_fog_density`` command before a set_weather command called will be undone. It is
-            recommended to call ``change_fog_density`` after calling set weather if you wish to
+            ``set_fog_density`` command before a set_weather command called will be undone. It is
+            recommended to call ``set_fog_density`` after calling ``set_weather`` if you wish to
             apply your specific changes.
 
         In all downloadable worlds, the weather is sunny by default.

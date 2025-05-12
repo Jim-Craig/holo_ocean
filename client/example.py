@@ -3,8 +3,8 @@ import numpy as np
 
 import holoocean
 from holoocean.environments import *
-from holoocean.vehicle_dynamics import *
-from holoocean.dynamics import *
+from holoocean.fossen_dynamics.dynamics import *
+from holoocean.fossen_dynamics.torpedo import *
 
 def hovering_example():
     """A basic example of how to use the HoveringAUV agent."""
@@ -54,17 +54,17 @@ def torpedo_example():
 
 
 def editor_example():
-    """This editor example shows how to interact with holodeck worlds while they are being built
-    in the Unreal Engine Editor. Most people that use holodeck will not need this.
+    """This editor example shows how to interact with HoloOcean worlds while they are being built
+    in the Unreal Engine Editor. Most people that use HoloOcean will not need this.
 
     This example uses a custom scenario, see 
     https://holoocean.readthedocs.io/en/latest/usage/examples/custom-scenarios.html
 
-    Note: When launching Holodeck from the editor, press the down arrow next to "Play" and select
+    Note: When launching HoloOcean from the editor, press the down arrow next to "Play" and select
     "Standalone Game", otherwise the editor will lock up when the client stops ticking it.
     """
 
-    config = {
+    scenario = {
         "name": "test",
         "world": "ExampleLevel",
         "main_agent": "auv0",
@@ -89,7 +89,7 @@ def editor_example():
         ]
     }
 
-    env = HoloOceanEnvironment(scenario=config, start_world=False)
+    env = HoloOceanEnvironment(scenario=scenario, start_world=False)
     command = [0, 0, 10, 50]
 
     for i in range(10):
@@ -99,13 +99,13 @@ def editor_example():
 
 
 def editor_multi_agent_example():
-    """This editor example shows how to interact with holodeck worlds that have multiple agents.
+    """This editor example shows how to interact with HoloOcean worlds that have multiple agents.
     This is specifically for when working with UE4 directly and not a prebuilt binary.
 
-    Note: When launching Holodeck from the editor, press the down arrow next to "Play" and select
+    Note: When launching HoloOcean from the editor, press the down arrow next to "Play" and select
     "Standalone Game", otherwise the editor will lock up when the client stops ticking it.
     """
-    config = {
+    scenario = {
         "name": "test_handagent",
         "world": "ExampleLevel",
         "main_agent": "auv0",
@@ -129,7 +129,7 @@ def editor_multi_agent_example():
         ]
     }
 
-    env = HoloOceanEnvironment(scenario=config, start_world=False)
+    env = HoloOceanEnvironment(scenario=scenario, start_world=False)
 
     cmd0 = np.array([0, 0, -2, 10])
     cmd1 = np.array([0, 0, 5, 10])
@@ -165,32 +165,32 @@ def fossen_dynamics():
     initial_rotation = [0,0,0] #Roll, pitch, Yaw in Euler angle order ZYX and in degrees NWU coordinate system
 
     scenario = {
-    "name": "torpedo_dynamics",
-    "package_name": "Ocean",
-    "world": "OpenWater",
-    "main_agent": "auv0",
-    "ticks_per_sec": ticks_per_sec,
-    "agents": [
-        {
-            "agent_name": "auv0",
-            "agent_type": "TorpedoAUV",
-            "sensors": [
-                {
-                    "sensor_type": "DynamicsSensor",
-                    "configuration": {
-                        "UseCOM": True,
-                        "UseRPY": False  # Use quaternion for dynamics
-                    }
-                },
-            ],
-            "control_scheme": 1,  # Control scheme 1 is how custom dynamics are applied to TAUV
-            "location": initial_location,
-            "rotation": initial_rotation,
-            "dynamics": 
-                {
+        "name": "torpedo_dynamics",
+        "package_name": "Ocean",
+        "world": "OpenWater",
+        "main_agent": "auv0",
+        "ticks_per_sec": ticks_per_sec,
+        "agents": [
+            {
+                "agent_name": "auv0",
+                "agent_type": "TorpedoAUV",
+                "sensors": [
+                    {
+                        "sensor_type": "DynamicsSensor",
+                        "configuration": {
+                            "UseCOM": True,
+                            "UseRPY": False  # Use quaternion for dynamics
+                        }
+                    },
+                ],
+                "control_scheme": 1,  # Control scheme 1 is how custom dynamics are applied to TAUV
+                "location": initial_location,
+                "rotation": initial_rotation,
+                "dynamics": {
+                    "rho": 1026,
+                    "sampleTime": 1/ticks_per_sec,
                     "mass": 16,
                     "length": 1.6,
-                    "rho": 1026,
                     "diam": 0.19,
                     "r_bg": [0, 0, 0.02],
                     "r_bb": [0, 0, 0],
@@ -201,26 +201,25 @@ def fossen_dynamics():
                     "zeta_roll": 0.3,
                     "zeta_pitch": 0.8,
                     "T_yaw": 1,
-                    "K_nomoto": 5.0 / 20.0
+                    "K_nomoto": 0.25
                 },
-            "actuator": 
-                {
-                    "fin_area": 0.00665,
-                    "deltaMax_fin_deg": 15,
-                    "nMax": 1525,
+                "actuator": {
+                    "fin_area": 0.00697,
+                    "deltaMax_fin_deg": 20,
+                    "nMax": 2000,
                     "T_delta": 0.1,
                     "T_n": 0.1,
                     "CL_delta_r": 0.5,
                     "CL_delta_s": 0.7
                 },
-            "autopilot": 
+                "autopilot": 
                 {
                     'depth': {
                         'wn_d_z': 0.2,
                         'Kp_z': 0.08,
                         'T_z': 100,
                         'Kp_theta': 4.0,
-                        'Kd_theta': 2.3,
+                        'Kd_theta': 2.4,
                         'Ki_theta': 0.3,
                         'K_w':  5.0,
                     },
@@ -233,54 +232,51 @@ def fossen_dynamics():
                         'K_d': 0.5,
                         'K_sigma': 0.05,
                     }
-                },
-            
+                }
             }
         ]
     }
 
     env = holoocean.make(scenario_cfg=scenario)
 
-    #Create vehicle object attached to holoocean agent with dynamic parameters 
-    vehicle = fourFinDep(scenario, 'auv0','manualControl')    
+    # Create vehicle object attached to holoocean agent with dynamic parameters 
+    vehicle = threeFinInd(scenario, 'auv0', 'manualControl')   
 
-    period = 1.0/ticks_per_sec
-    #Create dynamics object passing in the vehicle created
-    torpedo_dynamics = FossenDynamics(vehicle,period)  
+    # sample_period = 1 / ticks_per_sec
+    # Create dynamics object passing in the vehicle created
+    torpedo_dynamics = FossenDynamics(vehicle)  
 
-    accel = np.array(np.zeros(6),float)  #HoloOcean parameter input 
-
+    accel = np.array(np.zeros(6),float)  # HoloOcean parameter input 
 
     pos_list = []
     time_list = []
 
-    ############## MANUAL CONTROL EXAMPLE: ###########
-    #Set control surfaces command
-    fins_degrees = np.array([5 , 5]) #Rudder and Stern Fin Deflection (degrees)
+    ############## Manual Control Example ###########
+    # Set control surfaces command
+    fins_degrees = np.array([5, 5, 5]) # Rudder and Stern Fin Deflection (degrees)
     fin_radians = np.radians(fins_degrees)
     thruster_rpm = 800
-    u_control = np.append(fin_radians,thruster_rpm)  #[RudderAngle, SternAngle,Thruster]
+    u_control = np.append(fin_radians, thruster_rpm)  # [RudderAngle, SternAngle, Thruster]
     vehicle.set_control_mode('manualControl')
-    
+
     for i in range(numSteps):
         state = env.step(accel)
-        torpedo_dynamics.set_u_control_rad(u_control) #If desired you can change control command here
-        accel = torpedo_dynamics.update(state) #Calculate accelerations to be applied to HoloOcean agent
-
-        #For Plotting
+        torpedo_dynamics.set_u_control_rad(u_control) # If desired you can change control command here
+        accel = torpedo_dynamics.update(state) # Calculate accelerations to be applied to HoloOcean agent
+        # For Plotting
         pos = state['DynamicsSensor'][6:9]  # [x, y, z]
         pos_list.append(pos)
         time_list.append(state['t'])
 
 
-    ############ Depth Heading Control Example:  ############ 
+    ############ Depth Heading Control Example ############ 
     env.reset()
     numSteps = 800
 
     depth = 13
     heading = 50    
-    vehicle.set_goal(depth,heading,1525)     #Changes depth (positive depth), heading, thruster RPM goals for controller 
-    vehicle.set_control_mode('depthHeadingAutopilot') #In this mode PID controller calculates control commands (u_control)
+    vehicle.set_goal(depth, heading, 1525) # Changes depth (positive depth), heading, thruster RPM goals for controller 
+    vehicle.set_control_mode('depthHeadingAutopilot') # In this mode PID controller calculates control commands (u_control)
     for i in range(numSteps):
         state = env.step(accel)
         accel = torpedo_dynamics.update(state)
@@ -300,9 +296,9 @@ def fossen_dynamics():
             color = [255,0,0]
 
         env.draw_arrow(pos.tolist(), end=[x_end, y_end, -depth], color=color, thickness=5, lifetime=0.03)
-    
 
-    ################ Plot vehicle State ###################
+
+    ################ Plot Vehicle State ###################
     plot = True
 
     if plot:
@@ -311,10 +307,10 @@ def fossen_dynamics():
         pos_array = np.array(pos_list)
 
         # Extract x, y, and z positions
-        x_positions = pos_array[:, 0] #North Position
-        y_positions = pos_array[:, 1]  #West Position
-        east_positions = [-y for y in y_positions] #Convert from west to east
-        z_positions = pos_array[:, 2]   #Depth
+        x_positions = pos_array[:, 0] # North Position
+        y_positions = pos_array[:, 1] # West Position
+        east_positions = [-y for y in y_positions] # Convert from west to east
+        z_positions = pos_array[:, 2] # Depth
 
         # Plot x and y positions
         plt.figure()

@@ -348,7 +348,7 @@ class RemoveSensorCommand(Command):
         self.add_string_parameters(sensor)
 
 class RotateSensorCommand(Command):
-    """Rotate a sensor on the agent
+    """Rotate a sensor on the agent. Multiple rotations do not accumulate, but rather sets to the last rotation.
 
     Args:
         agent (:obj:`str`): Name of agent

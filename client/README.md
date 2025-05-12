@@ -2,24 +2,15 @@
 
 ![HoloOcean Image](client/docs/images/inspect_plane.jpg)
 
-[![Documentation Status](https://readthedocs.org/projects/holoocean/badge/?version=latest)](https://holoocean.readthedocs.io/en/latest/?badge=latest)
- [![Build Status](https://robots.et.byu.edu:4000/api/badges/frostlab/holoocean/status.svg?ref=refs/heads/develop)](https://robots.et.byu.edu:4000/frostlab/holoocean)
+[![pages-build-deployment](https://github.com/byu-holoocean/holoocean-docs/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/byu-holoocean/holoocean-docs/actions/workflows/pages/pages-build-deployment)
+ [![Build Status](https://robots.et.byu.edu:4144/api/badges/byu-holoocean/HoloOcean/status.svg?ref=refs/heads/develop)](https://robots.et.byu.edu:4144/byu-holoocean/HoloOcean)
 
 
-HoloOcean is a high-fidelity simulator for underwater robotics built on top of Unreal Engine 4, and forked from Holodeck by BYU's PCCL Lab.
+HoloOcean is a high-fidelity simulator develped by the [Field Robotic Systems Lab (FRostLab)](https://frostlab.byu.edu) at [Brigham Young University](https://byu.edu).
 
-If you use HoloOcean for your research, please cite our ICRA publication;
+Built upon Unreal Engine (by Epic Games) and Holodeck (developed by the BYU PCCL Lab), HoloOcean enables easy simulation of marine robotics and autonomy with a wide variety of sensors, agents, and features.
 
-```
-@inproceedings{Potokar22icra,
-  author = {E. Potokar and S. Ashford and M. Kaess and J. Mangelson},
-  title = {Holo{O}cean: An Underwater Robotics Simulator},
-  booktitle = {Proc. IEEE Intl. Conf. on Robotics and Automation, ICRA},
-  address = {Philadelphia, PA, USA},
-  month = may,
-  year = {2022}
-}
-```
+HoloOcean 2.0, the latest release of HoloOcean, incorporates new features such as ROS integration, high-fidelity vehicle dynamics, and improved rendering with Unreal Engine 5.
 
 ## Features
  - 3+ rich worlds with various infrastructure for generating data or testing underwater algorithms
@@ -33,29 +24,32 @@ If you use HoloOcean for your research, please cite our ICRA publication;
  - Run headless or watch your agents learn
  - Linux and Windows support
 
+ ## Important Note: The latest release, HoloOcean 2.0, updates from Unreal Engine 4.27 to 5.3. Our documentation has been updated to reflect this.
+
 ## Installation
-`pip install holoocean`
+Clone the repo, then
+`cd client`
+`pip install .`
 
-(requires >= Python 3.6)
+(requires Python >= 3.7)
 
-See [Installation](https://holoocean.readthedocs.io/en/latest/usage/installation.html) for complete instructions (including Docker).
+See [Installation](https://byu-holoocean.github.io/holoocean-docs/usage/installation.html) for complete instructions (including Docker).
 
 ## Documentation
-* [Quickstart](https://holoocean.readthedocs.io/en/latest/usage/getting-started.html)
-* [Changelog](https://holoocean.readthedocs.io/en/latest/changelog/changelog.html)
-* [Examples](https://holoocean.readthedocs.io/en/latest/usage/getting-started.html#code-examples)
-* [Agents](https://holoocean.readthedocs.io/en/latest/agents/agents.html)
-* [Sensors](https://holoocean.readthedocs.io/en/latest/holoocean/sensors.html)
-* [Available Packages and Worlds](https://holoocean.readthedocs.io/en/latest/packages/packages.html)
-* [Docs](https://holoocean.readthedocs.io/en/latest/)
+* [Quickstart](https://byu-holoocean.github.io/holoocean-docs/usage/getting-started.html)
+* [Changelog](https://byu-holoocean.github.io/holoocean-docs/changelog/changelog.html)
+* [Examples](https://byu-holoocean.github.io/holoocean-docs/usage/getting-started.html#code-examples)
+* [Agents](https://byu-holoocean.github.io/holoocean-docs/agents/agents.html)
+* [Sensors](https://byu-holoocean.github.io/holoocean-docs/holoocean/sensors.html)
+* [Available Packages and Worlds](https://byu-holoocean.github.io/holoocean-docs/packages/packages.html)
+* [Docs](https://byu-holoocean.github.io/holoocean-docs)
 
 ## Usage Overview
-HoloOcean's interface is similar to [OpenAI's Gym](https://gym.openai.com/). 
+HoloOcean's interface is similar to OpenAI's gym.
 
-We try and provide a batteries included approach to let you jump right into using HoloOcean, with minimal
-fiddling required.
+We try and provide a batteries included approach to let you jump right into using HoloOcean, with minimal fiddling required.
 
-To demonstrate, here is a quick example using the `DefaultWorlds` package:
+To demonstrate, here is a quick example using the `Ocean` package:
 
 ```python
 import holoocean
@@ -75,46 +69,40 @@ for i in range(30):
 
 - `state`: dict of sensor name to the sensor's value (nparray).
 
-If you want to access the data of a specific sensor, import sensors and
-retrieving the correct value from the state dictionary:
+If you want to access the data of a specific sensor, import sensors and retrieve the correct value from the state dictionary:
 
 ```python
 print(state["DVLSensor"])
 ```
 
-## Multi Agent-Environments
-HoloOcean supports multi-agent environments.
+## Attribution and Relevent Publications
 
-Calls to [`step`](https://holoocean.readthedocs.io/en/latest/holoocean/environments.html#holoocean.environments.HoloOceanEnvironment.step) only provide an action for the main agent, and then tick the simulation. 
+In addition to the [online documentation for HoloOcean](https://byu-holoocean.github.io/holoocean-docs), 
+the features developed in HoloOcean have also been disseminated via publication in peer-reviewed conferences and journal.
+Please refer to these publications in addition to the documentation as needed.
 
-[`act`](https://holoocean.readthedocs.io/en/latest/holoocean/environments.html#holoocean.environments.HoloOceanEnvironment.act) provides a persistent action for a specific agent, and does not tick the simulation. After an 
-action has been provided, [`tick`](https://holoocean.readthedocs.io/en/latest/holoocean/environments.html#holoocean.environments.HoloOceanEnvironment.tick) will advance the simulation forward. The action is persisted until another call to `act` provides a different action.
+If you use HoloOcean for your research, please cite the relevent publications depending on the features you use as outlined below:
 
-```python
-import holoocean
-import numpy as np
-
-env = holoocean.make("Dam-Hovering")
-env.reset()
-
-# Provide an action for each agent
-env.act('auv0', np.array([0, 0, 0, 0, 10, 10, 10, 10]))
-
-# Advance the simulation
-for i in range(300):
-  # The action provided above is repeated
-  states = env.tick()
+### General HoloOcean Use
+```
+@inproceedings{Potokar22icra,
+  author = {E. Potokar and S. Ashford and M. Kaess and J. Mangelson},
+  title = {Holo{O}cean: An Underwater Robotics Simulator},
+  booktitle = {Proc. IEEE Intl. Conf. on Robotics and Automation, ICRA},
+  address = {Philadelphia, PA, USA},
+  month = {May},
+  year = {2022}
+}
 ```
 
-You can access the sensor states as before:
-
-```python
-dvl = states["auv0"]["DVLSensor"]
-location = states["auv0"]["DepthSensor"]
+### Simulation of Sonar (Imaging, Sidescan, Profiling/Bathymetric)
 ```
-
-(`auv0` comes from the [scenario configuration file](https://holoocean.readthedocs.io/en/latest/packages/docs/scenarios.html))
-
-## Running HoloOcean Headless
-HoloOcean can run headless with GPU accelerated rendering. See [Using HoloOcean Headless](https://holoocean.readthedocs.io/en/latest/usage/running-headless.html)
-
+@inproceedings{Potokar22iros,
+  author = {E. Potokar and K. Lay and K. Norman and D. Benham and T. Neilsen and M. Kaess and J. Mangelson},
+  title = {Holo{O}cean: Realistic Sonar Simulation},
+  booktitle = {Proc. IEEE/RSJ Intl. Conf. Intelligent Robots and Systems, IROS},
+  address = {Kyoto, Japan},
+  month = {Oct},
+  year = {2022}
+}
+```

@@ -65,7 +65,7 @@ def test_viewport_capture_after_teleport(resolution):
     """Validates that the ViewportCapture is updated after teleporting the camera
     to a different location.
 
-    Incidentally tests HoloOceanEnvironment.teleport_camera as well
+    Incidentally tests HoloOceanEnvironment.move_viewport as well
     """
 
     # Other tests muck with this. Set it to true just in case
