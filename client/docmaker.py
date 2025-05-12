@@ -25,5 +25,6 @@ def remove_long_list_of_links():
             pass
         f.write(str(soup))    
            
+
 make_docs()
 remove_long_list_of_links()

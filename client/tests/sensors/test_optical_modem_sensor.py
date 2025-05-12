@@ -206,7 +206,7 @@ def test_obstructed_view(env):
 )
 def test_distance_noise(env):
     """Tests to ensure that noise generation for max distance is functional"""
-    num_tests = 50
+    num_tests = 100
     tests_passed = 0
 
     env._scenario["agents"] = [

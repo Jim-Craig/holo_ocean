@@ -104,6 +104,7 @@ pip-wheel-metadata
 **/*.egg-info
 !tests/worlds
 
+
 holoocean-docs
 holoocean-docs/*
 !client/docs

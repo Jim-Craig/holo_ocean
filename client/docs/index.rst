@@ -5,6 +5,7 @@ Welcome to HoloOcean's documentation!
 HoloOcean is a high-fidelity simulator develped by the `Field Robotic Systems Lab (FRoStLab) <https://frostlab.byu.edu>`_
 at `Brigham Young University <https://www.byu.edu>`_.
 
+
 Built upon Unreal Engine (by Epic Games) and Holodeck (developed by the BYU PCCL Lab), HoloOcean enables easy simulation of marine robotics and autonomy with a wide variety of sensors, agents, and features.
 
 Features
@@ -23,6 +24,7 @@ Features
 Attribution and Relevent Publications
 """""""""""""""""""""""""""""""""""""
 If you use HoloOcean in your research, please cite the following publications depending on the features you use as outlined below:
+
 General HoloOcean use:
 ::
       
@@ -38,6 +40,7 @@ General HoloOcean use:
 Simulation of Sonar (Imaging, Profiling, Sidescan) sensors:
 ::
    
+
    @inproceedings{Potokar22iros,
       author = {E. Potokar and K. Lay and K. Norman and D. Benham and T. Neilsen and M. Kaess and J. Mangelson},
       title = {Holo{O}cean: Realistic Sonar Simulation},
