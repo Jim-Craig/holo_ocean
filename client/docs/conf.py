@@ -25,9 +25,9 @@ copyright = 'BYU FRoStLab'
 author = 'Easton Potokar, Spencer Ashford, Joshua Mangelson'
 
 # The short X.Y version
-version = "1.0.0"
+version = "2.0.0"
 # The full version, including alpha/beta/rc tags
-release = "1.0.0"
+release = "2.0.0"
 
 
 # -- General configuration ---------------------------------------------------

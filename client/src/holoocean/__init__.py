@@ -1,6 +1,6 @@
 """HoloOcean is an underwater robotics simulator.
 """
-__version__ = '1.0.0'
+__version__ = '2.0.0'
 
 from holoocean.holoocean import make
 from holoocean.packagemanager import *
