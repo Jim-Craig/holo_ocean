@@ -11,7 +11,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Easton Potokar, Spencer Ashford, BYU FRoSt & PCCL Labs",
     author_email="contagon@byu.edu",
-    url="https://bitbucket.org/frostlab/holoocean",
+    url="https://github.com/byu-holoocean/HoloOcean",
     packages=find_packages("src"),
     package_dir={"": "src"},
     license="MIT License",
