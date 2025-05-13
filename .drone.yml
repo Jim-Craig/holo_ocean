@@ -58,6 +58,8 @@ steps:
     when:
       event:
         - tag
+    depends_on:
+      - Package Project
 
   ## Build a temporary docker image that contains everything necessary to simplify further steps
   - name: build_docker
@@ -332,10 +334,12 @@ steps:
         path: /var/run/docker.sock
     commands:
       - git clone https://github.com/byu-holoocean/holoocean-docs.git
-      - pip3 install bs4 sphinx-build sphinx-rtd-theme sphinx-copybutton autodocsumm scipy
+      - pip3 install bs4 sphinx==5.0.2 sphinx-rtd-theme==2.0.0 sphinx-copybutton==0.5.2 autodocsumm==0.2.12 scipy
       - export PATH="/home/ue4/.local/bin:$PATH"
       - python3 client/docmaker.py
+      - cd holoocean-docs
       - python3 new_version.py ${DRONE_TAG}
+      - cd ..
       - mv docs holoocean-docs/${DRONE_TAG}
       - cd holoocean-docs
       - python3 Sidebar_version_links.py ${DRONE_TAG}

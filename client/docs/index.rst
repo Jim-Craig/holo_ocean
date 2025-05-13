@@ -58,6 +58,8 @@ Simulation of Sonar (Imaging, Profiling, Sidescan) sensors:
    agents/agents
    sensors/sensors
    examples/examples
+   sensors/sensors
+   examples/examples
    develop/develop
    changelog/changelog
 
@@ -74,6 +76,7 @@ Simulation of Sonar (Imaging, Profiling, Sidescan) sensors:
    holoocean/packagemanager
    holoocean/sensors
    holoocean/lcm
+   holoocean/dynamics
    holoocean/dynamics
    holoocean/shmem
    holoocean/util
