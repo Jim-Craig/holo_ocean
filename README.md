@@ -33,16 +33,16 @@ Clone the repo, then
 
 (requires Python >= 3.7)
 
-See [Installation](https://byu-holoocean.github.io/holoocean-docs/usage/installation.html) for complete instructions (including Docker).
+See [Installation](https://byu-holoocean.github.io/holoocean-docs/develop/usage/installation.html) for complete instructions (including Docker).
 
 ## Documentation
-* [Quickstart](https://byu-holoocean.github.io/holoocean-docs/usage/getting-started.html)
-* [Changelog](https://byu-holoocean.github.io/holoocean-docs/changelog/changelog.html)
-* [Examples](https://byu-holoocean.github.io/holoocean-docs/usage/getting-started.html#code-examples)
-* [Agents](https://byu-holoocean.github.io/holoocean-docs/agents/agents.html)
-* [Sensors](https://byu-holoocean.github.io/holoocean-docs/holoocean/sensors.html)
-* [Available Packages and Worlds](https://byu-holoocean.github.io/holoocean-docs/packages/packages.html)
 * [Docs](https://byu-holoocean.github.io/holoocean-docs)
+* [Quickstart](https://byu-holoocean.github.io/holoocean-docs/develop/usage/getting-started.html)
+* [Changelog](https://byu-holoocean.github.io/holoocean-docs/develop/changelog/changelog.html)
+* [Examples](https://byu-holoocean.github.io/holoocean-docs/develop/usage/getting-started.html#code-examples)
+* [Agents](https://byu-holoocean.github.io/holoocean-docs/develop/agents/agents.html)
+* [Sensors](https://byu-holoocean.github.io/holoocean-docs/develop/holoocean/sensors.html)
+* [Available Packages and Worlds](https://byu-holoocean.github.io/holoocean-docs//developpackages/packages.html)
 
 ## Usage Overview
 HoloOcean's interface is similar to OpenAI's gym.
