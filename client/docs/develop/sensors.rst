@@ -168,6 +168,10 @@ First, towards the bottom of the ``sensors.py`` file there should be a _sensor_k
 
     "ExampleSensor":ExampleSensor,
 
+    
+Additionally, if your sensor is computationally expensive and you expect the ``Hz`` parameter to be set, and affect
+the run speed, you will need to add it to the list of _heavy_sensors or _sonar_sensors in the ``SensorDefinition`` class.
+
 Next, in ``engine/Source/Holodeck/ClientCommands/Public/AddSensorCommand.h``, add an include statement 
 for your sensor's .h file:
 
