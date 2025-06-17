@@ -3,4 +3,5 @@
 
 from .helper_functions import *
 from .control import *
-from .torpedo import fourFinDep, fourFinInd ,threeFinInd
+from .actuator import *
+from .fossen_interface import *

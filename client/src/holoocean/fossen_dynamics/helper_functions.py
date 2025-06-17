@@ -8,9 +8,101 @@ Motion Control. 2nd. Edition, Wiley.
 URL: www.fossen.biz/wiley
 
 Author:     Thor I. Fossen
+Modified:   Braden Meyers
 """
 
 import numpy as np
+from scipy.spatial.transform import Rotation
+
+#------------------------------------------------------------------------------
+
+#This Matrix transforms coordinate frames between NED and NWU
+T_coord_sys = np.array([
+    [ 1,  0,  0 ],
+    [ 0,  -1,  0],
+    [ 0,  0,     -1] ])
+
+#------------------------------------------------------------------------------
+
+def R2euler(R):
+    """
+    Computes the Euler angles from the rotation matrix R.
+
+    Args:
+        R (numpy.ndarray): 3x3 rotation matrix
+
+    Returns:
+        phi, theta, psi (float): Euler angles (in radians)  
+    """
+    phi = np.arctan2(R[2, 1], R[2, 2])
+    theta = -np.arcsin(R[2, 0])
+    psi = np.arctan2(R[1, 0], R[0, 0])
+    
+    return phi, theta, psi
+
+#------------------------------------------------------------------------------
+
+def convert_NWU_to_NED(x):
+    '''
+    Converts position and velocity from NWU to NED and world frame velocities to body frame
+    
+    Args:
+        x: Holoocean Dynamic Sensor return of position (with quaternion), velocity, and acceleration (len = 19)
+    
+    Returns:
+        eta, nu (np.ndarray - float): [x, y, z, roll, pitch, yaw], [xdot, ydot, zdot, p, q, r]
+    '''
+    #world frame values for vehicle
+    pos = x[6:9]
+    quat = x[15:19]
+    vel = x[3:6]
+    omega = x[12:15]
+
+    R_body_to_world = Rotation.from_quat(quat).as_matrix()
+    R_world_to_body = np.matrix.transpose(R_body_to_world)
+
+    #Transform Position to NED coordinate system
+    eta = np.matmul(T_coord_sys, pos)
+
+    #calculate RPY in the right Euler order (zyx) for Fossen Dynamics
+    R_Fos = np.matmul(np.matmul(T_coord_sys, R_body_to_world), T_coord_sys) 
+    RPY = np.array(R2euler(R_Fos))
+
+    #World frame velocities changed from world frame to body frame and then to NED coord system
+    vel_body_NED = np.matmul(T_coord_sys, np.matmul(R_world_to_body, vel))
+    omega_body_NED = np.matmul(T_coord_sys, np.matmul(R_world_to_body, omega))
+
+    #Returns the state in the format [eta,nu], frame(body frame), and coordinate system (NED) for fossen dynamic simulations
+    return np.append(eta, RPY), np.append(vel_body_NED, omega_body_NED)
+
+#------------------------------------------------------------------------------
+
+def convert_NED_to_NWU( x, accel):
+    '''
+    Calculates rotation to world frame and changes the coordinate system from NED to NWU    
+    Rotates linear and angular accelaration from body to world      
+
+    Args:
+        x: Holoocean Dynamic Sensor return of position (with quaternion), velocity, and acceleration (len = 19)
+        accel (np.ndarray) - [accelx, accely, accelz, pdot, qdot, rdot] - Body frame in NED
+    
+    Returns:
+        accel (np.ndarray - float): [accelx, accely, accelz, pdot, qdot, rdot] - World frame in NWU
+    '''
+
+    quat = x[15:19]
+    R_body_to_world = Rotation.from_quat(quat).as_matrix()
+
+    lin_accel = accel[:3]
+    ang_accel = accel[3:6]
+
+    #Calculate acceleration from body frame (NED) to world frame (NWU) 
+    lin_accel = np.matmul(R_body_to_world, np.matmul(T_coord_sys, lin_accel))  
+    ang_accel = np.matmul(R_body_to_world, np.matmul(T_coord_sys, ang_accel))  
+
+    #Return acceleration commands in NWU world frame
+    return np.append(lin_accel, ang_accel) 
+
 
 #------------------------------------------------------------------------------
 
@@ -232,7 +324,29 @@ def crossFlowDrag(L, B, T, nu_r):
 
 #------------------------------------------------------------------------------
 
-def coeffLiftDrag(b, S, CD_0, alpha, sigma, e):
+def forceLiftDrag(b,S,CD_0,alpha,U_r,e=0.7):
+    """
+    tau_liftdrag = forceLiftDrag(b,S,CD_0,alpha,Ur) computes the hydrodynamic
+    lift and drag forces of a submerged "wing profile" for varying angle of
+    attack (Beard and McLain 2012). Application:
+    
+      M d/dt nu_r + C(nu_r)*nu_r + D*nu_r + g(eta) = tau + tau_liftdrag
+    
+    Inputs:
+        b:     wing span (m)
+        S:     wing area (m^2)
+        CD_0:  parasitic drag (alpha = 0), typically 0.1-0.2 for a streamlined body
+        alpha: angle of attack, scalar or vector (rad)
+        U_r:   relative speed (m/s)
+
+    Returns:
+        tau_liftdrag:  6x1 generalized force vector
+    """
+
+    # constants
+    rho = 1026
+
+    def coeffLiftDrag(b,S,CD_0,alpha,sigma,e=0.7):
         
         """
         [CL,CD] = coeffLiftDrag(b,S,CD_0,alpha,sigma) computes the hydrodynamic 
@@ -280,7 +394,7 @@ def coeffLiftDrag(b, S, CD_0, alpha, sigma, e):
             alpha = 0.1 * pi/180
             [CL,CD] = coeffLiftDrag(0.2, 1.8*0.2, 0.3, alpha, 0.2)
         """
-        
+         
         AR = b**2 / S       # wing aspect ratio
 
         # linear lift
@@ -296,28 +410,8 @@ def coeffLiftDrag(b, S, CD_0, alpha, sigma, e):
 
         return CL, CD
 
-#------------------------------------------------------------------------------
-
-def forceLiftDrag(b, S, CD_0, alpha, U_r, rho, e=0.7):
-    """
-    tau_liftdrag = forceLiftDrag(b,S,CD_0,alpha,Ur) computes the hydrodynamic
-    lift and drag forces of a submerged "wing profile" for varying angle of
-    attack (Beard and McLain 2012). Application:
     
-      M d/dt nu_r + C(nu_r)*nu_r + D*nu_r + g(eta) = tau + tau_liftdrag
-    
-    Inputs:
-        b:     wing span (m)
-        S:     wing area (m^2)
-        CD_0:  parasitic drag (alpha = 0), typically 0.1-0.2 for a streamlined body
-        alpha: angle of attack, scalar or vector (rad)
-        U_r:   relative speed (m/s)
-
-    Returns:
-        tau_liftdrag:  6x1 generalized force vector
-    """
-
-    [CL, CD] = coeffLiftDrag(b, S, CD_0, alpha,0, e) 
+    [CL, CD] = coeffLiftDrag(b,S,CD_0,alpha,0,e=e) 
     
     F_drag = 1/2 * rho * U_r**2 * S * CD    # drag force
     F_lift = 1/2 * rho * U_r**2 * S * CL    # lift force
@@ -365,15 +459,5 @@ def gvect(W, B, theta, phi, r_bg, r_bb):
         ])
     
     return g
-
-#------------------------------------------------------------------------------
-
-def velocityTransform(eta, nu):
-    # Transform the velocity. For use w/ rk3 or rk4. 
-    p_dot = np.matmul(Rzyx(eta[3],eta[4],eta[5]),nu[:3])
-    temp = nu[3:6].copy()
-    temp.resize(3,1)
-    v_dot = np.matmul(Tzyx(eta[3],eta[4]),nu[3:6])
-    return np.append(p_dot,v_dot)
 
 
