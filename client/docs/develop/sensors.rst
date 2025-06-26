@@ -146,7 +146,7 @@ data_shape should be 1. It should look like this:
     
     @property
     def dtype(self):
-        return np.float32 # Note that we are using numpy's data types to get the right size for the python data.
+        return np.float32 # Note that we are using numpy's data types to get the right size for the Python data.
 
     @property
     def data_shape(self):
