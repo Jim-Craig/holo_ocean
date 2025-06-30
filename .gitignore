@@ -108,3 +108,10 @@ pip-wheel-metadata
 holoocean-docs
 holoocean-docs/*
 !client/docs
+
+# Docker python build cache for development container
+docker/dev/build_cache/egg-info/*
+!docker/dev/build_cache/egg-info/.gitkeep
+docker/dev/build_cache/build/*
+!docker/dev/build_cache/build/.gitkeep
+!docker/dev/build_cache/build/

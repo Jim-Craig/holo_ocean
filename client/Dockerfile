@@ -1,3 +1,4 @@
+# This container is used to package and generate worlds automatically
 FROM ghcr.io/epicgames/unreal-engine:runtime
 
 USER root

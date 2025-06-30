@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setup(
     name="holoocean",
-    version="2.0.0",
+    version="2.0.1",
     description="Autonomous Underwater Vehicle Simulator",
     long_description=readme,
     long_description_content_type="text/markdown",
