@@ -23,8 +23,8 @@ void ASphereRobot::Tick(float DeltaSeconds) {
 	ForwardSpeed = FMath::Clamp(CommandArray[0], -MAX_FORWARD_SPEED, MAX_FORWARD_SPEED);
 	RotSpeed = FMath::Clamp(CommandArray[1], -MAX_ROTATION_SPEED, MAX_ROTATION_SPEED);
 
-	FVector DeltaLocation = GetActorForwardVector() * ForwardSpeed;
-	DeltaLocation = ConvertLinearVector(DeltaLocation, ClientToUE);
+	FVector DeltaLocation = GetActorForwardVector() * ForwardSpeed *100 ; // 100 is the conversion factor from m/s to cm/s
+	// DeltaLocation = ConvertLinearVector(DeltaLocation, ClientToUE);
 
 	AddActorWorldOffset(DeltaLocation, true);
 	FRotator DeltaRotation(0, RotSpeed, 0);
