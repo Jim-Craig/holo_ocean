@@ -408,6 +408,31 @@ class RenderQualityCommand(Command):
         self.add_number_parameters(int(render_quality))
 
 
+class SetFPSCommand(Command):
+    """Set the frames per second of the simulation.
+
+    Args:
+        fps (:obj:`int`): The number of frames per second to set the simulation to.
+
+    """
+    def __init__(self, fps):
+        Command.__init__(self)
+        self.set_command_type("AdjustFPS")
+        self.add_number_parameters(int(fps))
+    
+class SetTPSCommand(Command):
+    """Set the ticks per second of the simulation.
+
+    Args:
+        tps (:obj:`int`): The number of ticks per second to set the simulation to.
+
+    """
+    def __init__(self, tps):
+        Command.__init__(self)
+        self.set_command_type("AdjustTPS")
+        self.add_number_parameters(int(tps))
+        
+
 class CustomCommand(Command):
     """Send a custom command to the currently loaded world.
 

@@ -107,10 +107,21 @@ def make(scenario_name="", scenario_cfg=None, gl_version=GL_VERSION.OPENGL4, win
         param_dict["show_viewport"] = show_viewport
         param_dict["copy_state"] = copy_state
 
-        print("Warning: start_world is set to False. The world will not be started automatically.")
-        print("If the arguments given to the environment in the UE editor do not match your settings,")
-        print("your simulation will not run as expected.")
-        print("Double check that the arguments in the UE editor match the arguments given to this function.")
-        print("Specifically, ticks_per_sec, frames_per_sec, and env min and max.")
+        if "ticks_per_sec" in scenario_cfg:
+            ticks_per_sec = scenario_cfg["ticks_per_sec"]
+
+        if ticks_per_sec is None:
+            input("Ticks per second not specified, using default of 30. Press enter to continue...")
+            ticks_per_sec = 30
+        param_dict["ticks_per_sec"] = ticks_per_sec
+
+        if "frames_per_sec" in scenario_cfg:
+            frames_per_sec = scenario_cfg["frames_per_sec"]
+        if frames_per_sec is None:
+            input("Frames per second not specified, using default of 30. Press enter to continue...")
+            frames_per_sec = 30
+        param_dict["frames_per_sec"] = frames_per_sec    
+        param_dict["set_fps"] = True if frames_per_sec is not False else None
+        param_dict["set_tps"] = True if ticks_per_sec is not None else None
 
     return HoloOceanEnvironment(**param_dict)

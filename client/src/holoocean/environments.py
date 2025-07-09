@@ -23,6 +23,8 @@ from holoocean.command import (
     RenderQualityCommand,
     CustomCommand,
     DebugDrawCommand,
+    SetFPSCommand,
+    SetTPSCommand,
 )
 
 from holoocean.exceptions import HoloOceanException
@@ -99,6 +101,8 @@ class HoloOceanEnvironment:
         frames_per_sec=None,
         copy_state=True,
         scenario=None,
+        set_fps=None,
+        set_tps=None,
     ):
         if agent_definitions is None:
             agent_definitions = []
@@ -224,6 +228,10 @@ class HoloOceanEnvironment:
         # Flag indicates if the user has called .reset() before .tick() and .step()
         self._initial_reset = False
         self.reset()
+        if set_fps is not None:
+            self.set_fps(self._frames_per_sec)
+        if set_tps is not None:
+            self.set_ticks_per_sec(self._ticks_per_sec)
 
     @property
     def _timeout(self):
@@ -785,13 +793,41 @@ class HoloOceanEnvironment:
         """
         self._enqueue_command(RenderViewportCommand(render_viewport))
 
-    def set_render_quality(self, render_quality):
+    def set_render_quality(self, render_quality, should_keep_fps=False):
         """Adjusts the rendering quality of HoloOcean.
 
         Args:
-            render_quality (:obj:`int`): An integer between 0 = Low Quality and 3 = Epic quality.
+            render_quality (:obj:`int`, :obj:`boolean`): An integer between 0 = Low Quality and 3 = Epic quality.
+            The boolean is a second, optional parameter that determines whether or not to maintain the FPS limit at the previously defined rate. 
+            If false the FPS max rate will be removed. Default behavior is to remove the FPS cap. If true, the previous FPS limit will be maintained.
         """
         self._enqueue_command(RenderQualityCommand(render_quality))
+        if should_keep_fps:
+            self.set_fps(self._frames_per_sec)
+
+    def set_fps(self, fps: int):
+        """Sets the frames per second of the environment.
+
+        Args:
+            fps (:obj:`int`): The desired frames per second. If set to 0, will max what it can do.
+        """
+        if fps is True:
+            fps = self._ticks_per_sec
+        elif fps is False:
+            fps = 0
+
+        self._enqueue_command(SetFPSCommand(fps))
+
+    def set_ticks_per_sec(self, ticks_per_sec):
+        """Sets the ticks per second of the environment.
+
+        Args:
+            ticks_per_sec (:obj:`int`): The desired ticks per second.
+        """
+        if ticks_per_sec <= 0:
+            raise HoloOceanException("Ticks per second must be greater than 0")
+        self._ticks_per_sec = ticks_per_sec
+        self._enqueue_command(SetTPSCommand(ticks_per_sec))
 
     def set_control_scheme(self, agent_name, control_scheme):
         """Set the control scheme for a specific agent.

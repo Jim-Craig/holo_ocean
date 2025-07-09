@@ -18,6 +18,8 @@
 #include "RotateSensorCommand.h"
 #include "SendAcousticMessageCommand.h"
 #include "SendOpticalMessageCommand.h"
+#include "AdjustFPSCommand.h"
+#include "AdjustTPSCommand.h"
 
 #include "CommandFactory.generated.h"
 

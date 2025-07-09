@@ -9,6 +9,8 @@ UCommand* UCommandFactory::MakeCommand(const std::string& Name, const std::vecto
 										  { "TeleportCamera", &CreateInstance<UTeleportCameraCommand> },
 										  { "RGBCameraRate", &CreateInstance<URGBCameraRateCommand> },
 										  { "AdjustRenderQuality", &CreateInstance<UAdjustRenderQualityCommand> },
+										  { "AdjustFPS", &CreateInstance<UAdjustFPSCommand> },
+										  { "AdjustTPS", &CreateInstance<UAdjustTPSCommand> },
 										  { "DebugDraw", &CreateInstance<UDebugDrawCommand> },
 										  { "RenderViewport", &CreateInstance<URenderViewportCommand> },
 										  { "AddSensor", &CreateInstance<UAddSensorCommand> },
