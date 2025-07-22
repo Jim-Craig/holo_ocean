@@ -3,7 +3,15 @@ type: docker
 name: default
 
 
-steps:      
+steps:
+  - name: fix-permissions
+    image: alpine
+    user: root
+    commands:
+    - chmod -R 0777 /drone/src
+    depends_on:
+      - clone
+
   - name: Build Editor
     image: ghcr.io/epicgames/unreal-engine:dev-slim-5.3.2
     commands:
@@ -13,7 +21,7 @@ steps:
       - bash Build/ContinuousIntegration/build_project.sh
       - echo "The commit builds"
     depends_on:
-      - clone
+      - fix-permissions
 
   - name: Package Project
     image: ghcr.io/epicgames/unreal-engine:dev-slim-5.3.2
@@ -39,7 +47,8 @@ steps:
       strip_prefix: engine/final/
       target: /TestWorlds/${DRONE_BRANCH}
       path_style: true
-      endpoint: http://minio:9000/
+      # endpoint: http://minio:9000/
+      endpoint: http://robots.et.byu.edu:9000
     depends_on:
       - Package Project
 
@@ -55,7 +64,8 @@ steps:
       strip_prefix: engine/tag/
       target: /TestWorlds/${DRONE_TAG}
       path_style: true
-      endpoint: http://minio:9000/
+      # endpoint: http://minio:9000/
+      endpoint: http://robots.et.byu.edu:9000
     when:
       event:
         - tag
