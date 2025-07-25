@@ -470,6 +470,26 @@ steps:
         - success
         - failure
 
+  ## Message slack on success/fail
+  - name: notify-slack
+    image: plugins/slack-blame
+    environment:
+    settings:
+      token:
+        from_secret: slack_token
+      channel: holoocean_builds
+      success_template: |
+        SUCCESS! Build #{{build.number}} passed for {{repo.name}}: {{build.message}} on {{build.branch}}!
+      failure_template: |
+        FAILURE! Build #{{build.number}} failed on steps {{DRONE_FAILED_STEPS}} for {{repo.name}}: {{build.message}} on {{build.branch}}!
+    depends_on:
+      - remove-docker-image
+    
+    when:
+      status:
+        - success
+        - failure
+
 volumes:
   - name: docker_sock
     host:
