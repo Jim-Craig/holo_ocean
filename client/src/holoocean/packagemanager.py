@@ -45,7 +45,7 @@ def available_packages():
         List of package names
     """
     # Get the index json file from the backend
-    url = "{ver}/available".format(ver=util.get_holoocean_version())
+    url = "{ver}/available".format(ver=set_world_version(__version__))
     try:
         index = _get_from_backend(url)
         index = json.loads(index)
@@ -207,6 +207,27 @@ def _validVersion(user_v,min_v):
     
     return True
 
+def set_world_version(user_version):
+    replacement_user_version = ""
+    end_user_version = ""
+    parsing_counter = 0
+
+    for i in range(0,len(user_version)):
+        if user_version[i] == '.':
+            parsing_counter += 1
+            replacement_user_version = replacement_user_version + user_version[i]
+            continue
+        if parsing_counter < 2:
+            replacement_user_version = replacement_user_version + user_version[i]
+        if parsing_counter == 2:
+            end_user_version = end_user_version + user_version[i]
+        
+
+    if (int(end_user_version) != 0):
+        user_version = replacement_user_version + '0'
+        print(user_version)
+
+    return user_version
 
 def install(package_name, url=None, branch=None, commit=None):
     """Installs a holoocean package.
@@ -222,10 +243,13 @@ def install(package_name, url=None, branch=None, commit=None):
     
     user_version =__version__
     min_version = "1.0.0"
+
+    user_version = set_world_version(user_version)
+
     if(_validVersion(user_version, min_version) == False):
         print("You must update HoloOcean to at least version 1.0.0 to continue. Packages are not available for earlier versions.")
         return 
-    
+
     if package_name is None and url is None:
         raise HoloOceanException("You must specify the URL or a valid package name")
 
