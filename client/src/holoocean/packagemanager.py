@@ -45,7 +45,8 @@ def available_packages():
         List of package names
     """
     # Get the index json file from the backend
-    url = "{ver}/available".format(ver=set_world_version(__version__))
+    temp_vers = set_world_version(__version__) if _validVersion(__version__, "2.1.0") else __version__
+    url = "{ver}/available".format(ver=temp_vers)
     try:
         index = _get_from_backend(url)
         index = json.loads(index)
@@ -178,33 +179,40 @@ def scenario_info(scenario_name="", scenario=None, base_indent=0):
     if "agents" in scenario:
         _print_agent_info(scenario["agents"], base_indent)
 
-def _validVersion(user_v,min_v):
-    """Check if user version is less than the minimum version.
+def _validVersion(user_v, min_v):
+    """Check if user version is greater than or equal to the minimum version.
     Returns true if user_v is equal or above min_v, otherwise returns False.
+    
+    Supports semantic versioning (e.g., "1.2.3", "2.0.0", "1.10.5")
 
     Args:
         user_v (:obj:`str`): The user's version number
         min_v (:obj:`str`): The minimum allowable version number
     """
-    user = []
-    min = []
-
-    for i in range(0,len(user_v)):
-        if user_v[i] == '.':
-            continue
-        user.append(user_v[i])
-
-    for i in range(0,len(min_v)):
-        if min_v[i] == '.':
-            continue
-        min.append(min_v[i])
-
-    for i in range(0,len(min)):
-        if user[i] < min[i]:
-            return False
-        if user[i] > min[i]:
-            return True
+    def parse_version(version_str):
+        """Parse a version string into a list of integers"""
+        try:
+            return [int(x) for x in version_str.split('.')]
+        except ValueError:
+            # If parsing fails, treat as 0.0.0
+            return [0, 0, 0]
     
+    user_parts = parse_version(user_v)
+    min_parts = parse_version(min_v)
+    
+    # Pad shorter version with zeros (e.g., "1.2" becomes "1.2.0")
+    max_len = max(len(user_parts), len(min_parts))
+    user_parts.extend([0] * (max_len - len(user_parts)))
+    min_parts.extend([0] * (max_len - len(min_parts)))
+    
+    # Compare each part
+    for user_part, min_part in zip(user_parts, min_parts):
+        if user_part > min_part:
+            return True
+        elif user_part < min_part:
+            return False
+    
+    # All parts are equal
     return True
 
 def set_world_version(user_version):
@@ -244,9 +252,9 @@ def install(package_name, url=None, branch=None, commit=None):
     user_version =__version__
     min_version = "1.0.0"
 
-    user_version = set_world_version(user_version)
+    user_version = set_world_version(user_version) if _validVersion(user_version, "2.1.0") else user_version
 
-    if(_validVersion(user_version, min_version) == False):
+    if(not _validVersion(user_version, min_version)):
         print("You must update HoloOcean to at least version 1.0.0 to continue. Packages are not available for earlier versions.")
         return 
 
@@ -270,10 +278,20 @@ def install(package_name, url=None, branch=None, commit=None):
 
         if branch is not None:
             if util.get_os_key() != "Linux":
-                print(f"Can't install from branch when using {util.get_os_key()}")
-                return
+                if branch is not "develop":
+                    print(f"Can't install from branch when using {util.get_os_key()}")
+                    return
+                if not _validVersion(user_version, "2.0.1"):
+                    print(f"Can't install from branch when using {util.get_os_key()} on versions prior to 2.0.1")
+                    return
             if commit is None:
-                commit = "latest"
+                if util.get_os_key() == "Linux":
+                    commit = "latest"
+                else:
+                    commit = "WindowsLatest"
+            else:
+                if util.get_os_key() != "Linux":
+                    commit = "Windows"+commit
 
         else:
             branch = "v{holodeck_version}".format(holodeck_version=util.get_holoocean_version())
@@ -425,7 +443,7 @@ def get_binary_path_for_package(package_name):
         try:
             if config["name"] == package_name:
                 return os.path.join(path, config["path"])
-        except KeyError as e:
+        except KeyError:
             print("Error parsing config file for {}".format(path))
 
     raise NotFoundException("Package `{}` not found!".format(package_name))
