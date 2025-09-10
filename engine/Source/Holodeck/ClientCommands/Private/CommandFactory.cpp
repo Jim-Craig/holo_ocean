@@ -18,7 +18,9 @@ UCommand* UCommandFactory::MakeCommand(const std::string& Name, const std::vecto
 										  { "RotateSensor", &CreateInstance<URotateSensorCommand> },
 										  { "CustomCommand", &CreateInstance<UCustomCommand> },
 										  { "SendAcousticMessage", &CreateInstance<USendAcousticMessageCommand> },
-										  { "SendOpticalMessage", &CreateInstance<USendOpticalMessageCommand> }, };
+										  { "SendOpticalMessage", &CreateInstance<USendOpticalMessageCommand> },
+										  { "TurnOnFlashlight", &CreateInstance<UTurnOnFlashlightCommand>},
+										  { "TurnOffFlashlight", &CreateInstance<UTurnOffFlashlightCommand>}, };
 
 	UCommand*(*CreateCommandFunction)()  = CommandMap[Name];
 	UCommand* ToReturn = nullptr;

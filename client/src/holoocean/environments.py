@@ -25,12 +25,15 @@ from holoocean.command import (
     DebugDrawCommand,
     SetFPSCommand,
     SetTPSCommand,
+    TurnOnFlashlightCommand,
+    TurnOffFlashlightCommand,
 )
 
 from holoocean.exceptions import HoloOceanException
 from holoocean.holooceanclient import HoloOceanClient
 from holoocean.agents import AgentDefinition, SensorDefinition, AgentFactory
 from holoocean.weather import WeatherController
+from holoocean.flashlight import FlashlightController
 
 from holoocean.sensors import AcousticBeaconSensor
 from holoocean.sensors import OpticalModemSensor
@@ -416,6 +419,30 @@ class HoloOceanEnvironment:
             if "day_cycle_length" in weather:
                 day_cycle_length = weather["day_cycle_length"]
                 self.weather.start_day_cycle(day_cycle_length)
+
+        if "flashlight" in self._scenario:
+            for flashlight_data in self._scenario["flashlight"]:
+                # Get flashlight name
+                flashlight_name = flashlight_data.get("flashlight_name", "flashlight1")
+
+                # Create a new controller instance for each flashlight
+                flashlight_controller = FlashlightController(
+                    self._client,
+                    flashlight_name=flashlight_name,
+                    intensity=flashlight_data.get("intensity", 5000),
+                    beam_width=flashlight_data.get("beam_width", 45.0),
+                    location_x_offset=flashlight_data.get("location_x_offset", 0),
+                    location_y_offset=flashlight_data.get("location_y_offset", 0),
+                    location_z_offset=flashlight_data.get("location_z_offset", 0),
+                    angle_pitch=flashlight_data.get("angle_pitch", -30),
+                    angle_yaw=flashlight_data.get("angle_yaw", 0),
+                    color_R=flashlight_data.get("color_R", 1),
+                    color_G=flashlight_data.get("color_G", 1),
+                    color_B=flashlight_data.get("color_B", 1),
+                )
+
+                flashlight_controller.set_flashlight()
+
 
     def reset(self):
         """Resets the environment, and returns the state.
@@ -828,6 +855,50 @@ class HoloOceanEnvironment:
             raise HoloOceanException("Ticks per second must be greater than 0")
         self._ticks_per_sec = ticks_per_sec
         self._enqueue_command(SetTPSCommand(ticks_per_sec))
+
+    def turn_on_flashlight(self, flashlight_name, intensity=5000, beam_width=45, location_x_offset=0, location_y_offset=0, location_z_offset=0, angle_pitch=-30, angle_yaw=0, color_R=1, color_G=1, color_B=1):
+        """Turns on the vehicle's flashlight and sets its visual parameters.
+
+        Args:
+            flashlight_name(:obj:`str`): The name of the flashlight to turn on. (e.g., flashlight1)
+            intensity (:obj:`float`): The brightness of the flashlight. Recommended range: 0 to 100000. (Default = 5000)
+            beam_width (:obj:`float`): The beam's spread angle in degrees. Recommended range: 1 to 80. (Default = 45)
+            location_x_offset (:obj:`float`): x component of the flashlight location offset. (Default = 0)
+            location_y_offset (:obj:`float`): y component of the flashlight location offset. (Default = 0)
+            location_z_offset (:obj:`float`): z component of the flashlight location offset. (Default = 0)
+            angle_pitch (:obj:`float`): The pitch angle (in degrees) for flashlight direction. Range: -70 to 70. (Default = -30)
+            angle_yaw (:obj:`float`): The yaw angle (in degrees) for flashlight direction. Range: -70 to 70. (Default = 0)
+            color_R (:obj:`float`): Red component of the flashlight color. Range: 0.0 to 1.0. (Default = 1)
+            color_G (:obj:`float`): Green component of the flashlight color. Range: 0.0 to 1.0. (Default = 1)
+            color_B (:obj:`float`): Blue component of the flashlight color. Range: 0.0 to 1.0. (Default = 1)
+        """
+
+        if "flashlight" in self._scenario:
+            for flashlight_data in self._scenario["flashlight"]:
+                # Check if flashlight is defined in the config and use those values as default
+                if (flashlight_name == flashlight_data.get("flashlight_name")):
+                    intensity=flashlight_data.get("intensity", intensity)
+                    beam_width=flashlight_data.get("beam_width", beam_width)
+                    location_x_offset=flashlight_data.get("location_x_offset", location_x_offset)
+                    location_y_offset=flashlight_data.get("location_y_offset", location_y_offset)
+                    location_z_offset=flashlight_data.get("location_z_offset", location_z_offset)
+                    angle_pitch=flashlight_data.get("angle_pitch", angle_pitch)
+                    angle_yaw=flashlight_data.get("angle_yaw", angle_yaw)
+                    color_R=flashlight_data.get("color_R", color_R)
+                    color_G=flashlight_data.get("color_G", color_G)
+                    color_B=flashlight_data.get("color_B", color_B)
+                    break
+
+        self._enqueue_command(TurnOnFlashlightCommand(flashlight_name, intensity, beam_width, location_x_offset, location_y_offset, location_z_offset, angle_pitch, angle_yaw, color_R, color_G, color_B))
+        
+    def turn_off_flashlight(self, flashlight_name):
+        """Turns off the vehicle's flashlight.
+
+        Args:
+            flashlight_name(:obj:`str`): The name of the flashlight to turn off. Vehicles have 4 flashlights (flashlight1-flashlight4)
+
+        """
+        self._enqueue_command(TurnOffFlashlightCommand(flashlight_name))
 
     def set_control_scheme(self, agent_name, control_scheme):
         """Set the control scheme for a specific agent.

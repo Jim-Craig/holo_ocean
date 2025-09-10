@@ -20,6 +20,8 @@
 #include "SendOpticalMessageCommand.h"
 #include "AdjustFPSCommand.h"
 #include "AdjustTPSCommand.h"
+#include "TurnOnFlashlightCommand.h"
+#include "TurnOffFlashlightCommand.h"
 
 #include "CommandFactory.generated.h"
 

@@ -433,6 +433,51 @@ class SetTPSCommand(Command):
         self.add_number_parameters(int(tps))
         
 
+class TurnOnFlashlightCommand(Command):
+    """Turns on the vehicle's flashlight and sets its visual parameters.
+
+    Args:
+        flashlight_name(:obj:`str`): The name of the flashlight to turn on. (e.g., flashlight1)
+        intensity (:obj:`float`): The brightness of the flashlight. Recommended range: 0 to 100000. (Default = 5000)
+        beam_width (:obj:`float`): The beam's spread angle in degrees. Recommended range: 1 to 80. (Default = 45)
+        location_x_offset (:obj:`float`): x component of the flashlight location offset. (Default = 0)
+        location_y_offset (:obj:`float`): y component of the flashlight location offset. (Default = 0)
+        location_z_offset (:obj:`float`): z component of the flashlight location offset. (Default = 0)
+        angle_pitch (:obj:`float`): The pitch angle (in degrees) for flashlight direction. Range: -70 to 70. (Default = -30)
+        angle_yaw (:obj:`float`): The yaw angle (in degrees) for flashlight direction. Range: -70 to 70. (Default = 0)
+        color_R (:obj:`float`): Red component of the flashlight color. Range: 0.0 to 1.0. (Default = 1)
+        color_G (:obj:`float`): Green component of the flashlight color. Range: 0.0 to 1.0. (Default = 1)
+        color_B (:obj:`float`): Blue component of the flashlight color. Range: 0.0 to 1.0. (Default = 1)
+    """
+
+    def __init__(self, flashlight_name, intensity=5000, beam_width=45, location_x_offset=0, location_y_offset=0, location_z_offset=0, angle_pitch=-30, angle_yaw=0, color_R=1, color_G=1, color_B=1):
+        Command.__init__(self)
+        self.set_command_type("TurnOnFlashlight")
+        self.add_string_parameters(flashlight_name)
+        self.add_number_parameters(float(intensity))
+        self.add_number_parameters(float(beam_width))
+        self.add_number_parameters(float(location_x_offset))
+        self.add_number_parameters(float(location_y_offset))
+        self.add_number_parameters(float(location_z_offset))
+        self.add_number_parameters(float(angle_pitch))
+        self.add_number_parameters(float(angle_yaw))
+        self.add_number_parameters(float(color_R))
+        self.add_number_parameters(float(color_G))
+        self.add_number_parameters(float(color_B))
+
+class TurnOffFlashlightCommand(Command):
+    """Turns off the vehicle's flashlight.
+
+    Args:
+        flashlight_name(:obj:`str`): The name of the flashlight to turn off. Vehicles have 4 flashlights (flashlight1-flashlight4)
+    """
+
+    def __init__(self, flashlight_name):
+        Command.__init__(self)
+        self.set_command_type("TurnOffFlashlight")
+        self.add_string_parameters(flashlight_name)
+        
+
 class CustomCommand(Command):
     """Send a custom command to the currently loaded world.
 
