@@ -23,10 +23,17 @@ from holoocean.command import (
     RenderQualityCommand,
     CustomCommand,
     DebugDrawCommand,
+    WaterColorCommand,
+    TideCommand,
+    ChangeWeatherCommand,
+    ChangeTimeOfDayCommand,
     SetFPSCommand,
     SetTPSCommand,
     TurnOnFlashlightCommand,
     TurnOffFlashlightCommand,
+    SetRainParametersCommand,
+    AirFogCommand,
+    WaterFogCommand,
 )
 
 from holoocean.exceptions import HoloOceanException
@@ -34,6 +41,8 @@ from holoocean.holooceanclient import HoloOceanClient
 from holoocean.agents import AgentDefinition, SensorDefinition, AgentFactory
 from holoocean.weather import WeatherController
 from holoocean.flashlight import FlashlightController
+from holoocean.tide_cycle import TideController
+from holoocean.time_cycle import TimeController
 
 from holoocean.sensors import AcousticBeaconSensor
 from holoocean.sensors import OpticalModemSensor
@@ -203,8 +212,16 @@ class HoloOceanEnvironment:
         self._reset_ptr = self._client.malloc("RESET", [1], np.bool_)
         self._reset_ptr[0] = False
 
-        # Initialize environment controller
-        self.weather = WeatherController(self.send_world_command)
+        # Initialize weather controller
+        self.weather = WeatherController(self._client)
+
+        # Initialize tide controller
+        self.tide_cycle = TideController(self._client)
+        self.tide_cycle.get_ticks(lambda: self._num_ticks)
+
+        #Initialize time of day controller
+        self.time_cycle = TimeController(self._client)
+        self.time_cycle.get_ticks(lambda: self._num_ticks)
 
         # Set up agents already in the world
         self.agents = dict()
@@ -282,11 +299,11 @@ class HoloOceanEnvironment:
                 result.append(sensor.name)
                 result.append("\n")
         return "".join(result)
-
+    
     def _load_scenario(self):
         """Loads the scenario defined in self._scenario_key.
 
-        Instantiates agents, sensors, and weather.
+        Instantiates agents, sensors, weather, tides, and time of day.
 
         If no scenario is defined, does nothing.
         """
@@ -410,15 +427,26 @@ class HoloOceanEnvironment:
 
         if "weather" in self._scenario:
             weather = self._scenario["weather"]
-            if "hour" in weather:
-                self.weather.set_day_time(weather["hour"])
             if "type" in weather:
                 self.weather.set_weather(weather["type"])
-            if "fog_density" in weather:
-                self.weather.set_fog_density(weather["fog_density"])
-            if "day_cycle_length" in weather:
-                day_cycle_length = weather["day_cycle_length"]
-                self.weather.start_day_cycle(day_cycle_length)
+
+        if "tide_cycle" in self._scenario:
+            tide_cycle = self._scenario["tide_cycle"]
+            if "active" in tide_cycle:
+                self.tide_cycle.set_active(tide_cycle["active"])
+            if "amplitude" in tide_cycle:
+                self.tide_cycle.set_amplitude(tide_cycle["amplitude"])
+            if "frequency" in tide_cycle:
+                self.tide_cycle.set_frequency(tide_cycle["frequency"])
+
+        if "time_cycle" in self._scenario:
+            time_cycle = self._scenario["time_cycle"]
+            if "active" in time_cycle:
+                self.time_cycle.set_active(time_cycle["active"])
+            if "frequency" in time_cycle:
+                self.time_cycle.set_frequency(time_cycle["frequency"])
+            if "hour" in time_cycle:
+                self.time_cycle.set_hour(time_cycle["hour"])
 
         if "flashlight" in self._scenario:
             for flashlight_data in self._scenario["flashlight"]:
@@ -533,6 +561,9 @@ class HoloOceanEnvironment:
 
             last_state = self._default_state_fn()
 
+            self.tide_cycle.update_tide()
+            self.time_cycle.update_time()
+
             self._tick_sensor()
             self._num_ticks += 1
 
@@ -592,6 +623,8 @@ class HoloOceanEnvironment:
 
             # Clock will not advance if the tick_clock is false (pre_start_steps in reset() so clock starts at 0)
             if tick_clock:
+                self.tide_cycle.update_tide()
+                self.time_cycle.update_time()
                 self._tick_sensor()
                 self._num_ticks += 1
             if publish and self._lcm is not None:
@@ -899,6 +932,75 @@ class HoloOceanEnvironment:
 
         """
         self._enqueue_command(TurnOffFlashlightCommand(flashlight_name))
+
+    def water_color(self, red, green, blue):
+        """Changes the color of the water.
+
+
+        Args:
+            red (:obj:`float`): A number between 0 and 1 to set the intensity of the red value.
+            green(:obj:`float`): A number between 0 and 1 to set the intensity of the green value.
+            blue (:obj:`float`): A number between 0 and 1 to set the intensity of the blue value.
+        """
+        self._enqueue_command(WaterColorCommand(red, green, blue))
+
+    def tide(self, adjustment, bool):
+        """Changes the water level.
+
+        Args:
+            adjustment (:obj:`float`): Any positive/negative number that you want to adjust/set the water level to.
+            bool (:obj:`float`): 0 if you want to adjust water level, and 1 if you want to set a new water level.
+        """
+        self._enqueue_command(TideCommand(adjustment, bool))
+
+    def change_weather(self, weather):
+        """Changes the weather in the world.
+
+        Args:
+            weather (:obj:`int`): The weather wanted (0 - sunny, 1 - cloudy, 2 - rainy).      
+        """
+        self._enqueue_command(ChangeWeatherCommand(weather))
+
+    def change_time_of_day(self, TimeOfDay):
+        """Changes the world's time of day. 
+
+        Args:
+            TimeOfDay (:obj:`float`): Time of day desired, a number between 0 and 23 inclusive.
+        """
+        self._enqueue_command(ChangeTimeOfDayCommand(TimeOfDay))
+
+    def set_rain_parameters(self, vel_x, vel_y, vel_z, spawnRate):
+        """Changes the rain's velocity and spawn rate. 
+
+        Args:
+            vel_x (:obj:`float`): Rain velocity on the x axis.
+            vel_y (:obj:`float`): VRain velocity on the y axis.
+            vel_z (:obj:`float`): Rain velocity on the z axis. Should be a negative value.
+            spawnRate(:obj:`float`): Rain's spawn rate (number of particles).
+        """
+        self._enqueue_command(SetRainParametersCommand(vel_x,vel_y,vel_z,spawnRate))
+
+    def air_fog(self, fogDensity, fogDepth=3.0, color_R=0.45, color_G=0.5, color_B=0.6):
+        """Changes the air fog density, depth, and color.
+        Args:
+            fogDensity (:obj:`float`): The density value for the fog. Range: 0.0 to 10.0.
+            fogDepth (:obj:`float`): The distance at which the fog begins. Range: 0.0 to 10.0. (Default = 3)
+            color_R (:obj:`float`): The red component of the fog's color. Range: 0.0 to 1.0. (Default = 0.45)
+            color_G (:obj:`float`): The green component of the fog's color. Range: 0.0 to 1.0. (Default = 0.5)
+            color_B (:obj:`float`): The blue component of the fog's color. Range: 0.0 to 1.0. (Default = 0.6)
+        """
+        self._enqueue_command(AirFogCommand(fogDensity, fogDepth, color_R, color_G, color_B))
+
+    def water_fog(self, fogDensity, fogDepth=3.0, color_R=0.4, color_G=0.6, color_B=1.0):
+        """Changes the water fog density, depth, and color.
+        Args:
+            fogDensity (:obj:`float`): The density value for the fog. Range: 0.0 to 10.0.
+            fogDepth (:obj:`float`): The distance at which the fog begins. Range: 0.0 to 10.0. (Default = 3)
+            color_R (:obj:`float`): The red component of the fog's color. Range: 0.0 to 1.0. (Default = 0.4)
+            color_G (:obj:`float`): The green component of the fog's color. Range: 0.0 to 1.0. (Default = 0.6)
+            color_B (:obj:`float`): The blue component of the fog's color. Range: 0.0 to 1.0. (Default = 1.0)tt
+        """
+        self._enqueue_command(WaterFogCommand(fogDensity, fogDepth, color_R, color_G, color_B))
 
     def set_control_scheme(self, agent_name, control_scheme):
         """Set the control scheme for a specific agent.

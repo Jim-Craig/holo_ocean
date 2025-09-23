@@ -18,10 +18,17 @@
 #include "RotateSensorCommand.h"
 #include "SendAcousticMessageCommand.h"
 #include "SendOpticalMessageCommand.h"
+#include "TideCommand.h"
+#include "ChangeTimeOfDayCommand.h"
+#include "ChangeWeatherCommand.h"
+#include "WaterColorCommand.h"
 #include "AdjustFPSCommand.h"
 #include "AdjustTPSCommand.h"
 #include "TurnOnFlashlightCommand.h"
 #include "TurnOffFlashlightCommand.h"
+#include "SetRainParametersCommand.h"
+#include "AirFogCommand.h"
+#include "WaterFogCommand.h"
 
 #include "CommandFactory.generated.h"
 

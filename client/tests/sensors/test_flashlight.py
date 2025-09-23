@@ -24,7 +24,7 @@ config= {
                     "socket": "CameraSocket"
                 }
             ],
-            "control_scheme": 0,
+            "control_scheme": 2,
             "location": [-8.8, -31.8, 0.5],
             "rotation": [0.0, 0.0, 220.0]
         }
@@ -48,7 +48,7 @@ config= {
             "color_R": 0,
             "color_B": 0, #green
         },
-        #flashlight 6 does not exist, should throw a warning but not crash. 
+        #flashlight 6 does not exist, should give a warning but not crash. 
         {
             "flashlight_name": "flashlight6",
             "intensity": 10000,
@@ -74,47 +74,56 @@ def test_flashlights(request):
         env.tick()
 
         #Let simulation environment set 
-        for _ in range(200):
+        for _ in range(60):
             env.tick()
         pixels = env.tick()["Camera"][:,:,0:3]
         filepath = str("/baseline_images/3_flashlights_config.png")
         baseline = cv2.imread(str(request.fspath.dirname + filepath))
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
+        
         #3 flashlights should be on with the settings from the config
+        # # to show pictures visually
+        # cv2.imshow("real", pixels)
+        # cv2.imshow("meant to be", baseline)
+        # cv2.waitKey(0)        
         err = mean_square_err(pixels, baseline)
         assert err < 2500, f"Flashlights set up incorrectly"
+
 
         env.turn_off_flashlight("flashlight1")
         env.turn_off_flashlight("flashlight2")
         env.turn_off_flashlight("flashlight3")
-        for _ in range(100):
+        for _ in range(60):
             env.tick()
         pixels = env.tick()["Camera"][:,:,0:3]
         filepath = str("/baseline_images/flashlights_off.png")
         baseline = cv2.imread(str(request.fspath.dirname + filepath))
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
+
         #All flashlights should be off (command)
         err = mean_square_err(pixels, baseline)
         assert err < 2500, f"Flashlights turned off incorrectly"
 
         env.turn_on_flashlight("flashlight4", beam_width=30, location_z_offset=10, color_G=0) 
-        for _ in range(200):
+        for _ in range(60):
             env.tick()
         pixels = env.tick()["Camera"][:,:,0:3]
         filepath = str("/baseline_images/flashlight_4_on.png")
         baseline = cv2.imread(str(request.fspath.dirname + filepath))
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
+        
         #Only flashlight 4 should be on with the settings from the command
         err = mean_square_err(pixels, baseline)
         assert err < 2500, f"Flashlight turned on incorrectly by command"
 
         env.turn_off_flashlight("flashlight4")
         env.turn_on_flashlight("flashlight1")   
-        for _ in range(200):
+        for _ in range(60):
             env.tick()
         pixels = env.tick()["Camera"][:,:,0:3]
         filepath = str("/baseline_images/flashlight_1_config.png")
         baseline = cv2.imread(str(request.fspath.dirname + filepath))
+
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
         #Flashlight 1 should be on by command but keep the setting from the config
         err = mean_square_err(pixels, baseline)

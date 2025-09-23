@@ -2,6 +2,7 @@
 
 #include "Holodeck.h"
 #include "DepthSensor.h"
+#include "HolodeckBuoyantAgent.h"
 
 UDepthSensor::UDepthSensor() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -33,6 +34,13 @@ void UDepthSensor::InitializeSensor() {
 
 	//You need to get the pointer to the object you are attached to. 
 	Parent = this->GetAttachParent();
+	//Need to get the agent you are attatched to for accurate depth with changing water level
+	if (Parent) {
+		Agent = Parent->GetOwner();
+	}
+	if (Agent) {
+		BuoyantAgent = Cast<AHolodeckBuoyantAgent>(Agent);
+	}
 }
 
 void UDepthSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
@@ -42,6 +50,12 @@ void UDepthSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FAc
 		
 		FVector Location = this->GetComponentLocation();
 		Location = ConvertLinearVector(Location, UEToClient);
+		
+		if (BuoyantAgent == nullptr) {
+			UE_LOG(LogHolodeck, Log, TEXT("buoyant agent is a nullptr -- depth may not be accurate"));
+		} else {
+			Location.Z -= (BuoyantAgent->SurfaceLevel / 100);
+		}
 		
 		Location.Z += mvn.sampleFloat();
 		FloatBuffer[0] = Location.Z;

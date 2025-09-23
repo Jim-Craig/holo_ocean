@@ -7,7 +7,10 @@
 
 #include "MultivariateNormal.h"
 
+#include "HolodeckBuoyantAgent.h"
+
 #include "DepthSensor.generated.h"
+
 
 /**
 * DepthSensor
@@ -47,6 +50,8 @@ private:
 	 * Parent
 	 * After initialization, Parent contains a pointer to whatever the sensor is attached to.
 	 */
+	AActor* Agent;
+	AHolodeckBuoyantAgent* BuoyantAgent;
 	USceneComponent* Parent;
 	MultivariateNormal<1> mvn;
 };

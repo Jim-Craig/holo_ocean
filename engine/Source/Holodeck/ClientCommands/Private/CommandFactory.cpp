@@ -20,7 +20,15 @@ UCommand* UCommandFactory::MakeCommand(const std::string& Name, const std::vecto
 										  { "SendAcousticMessage", &CreateInstance<USendAcousticMessageCommand> },
 										  { "SendOpticalMessage", &CreateInstance<USendOpticalMessageCommand> },
 										  { "TurnOnFlashlight", &CreateInstance<UTurnOnFlashlightCommand>},
-										  { "TurnOffFlashlight", &CreateInstance<UTurnOffFlashlightCommand>}, };
+										  { "TurnOffFlashlight", &CreateInstance<UTurnOffFlashlightCommand>}, 
+										  { "SendOpticalMessage", &CreateInstance<USendOpticalMessageCommand> },
+										  { "Tide", &CreateInstance<UTideCommand>},
+										  { "ChangeTimeOfDay", &CreateInstance<UChangeTimeOfDayCommand>},
+										  { "ChangeWeather", &CreateInstance<UChangeWeatherCommand>},
+										  { "WaterColor", &CreateInstance<UWaterColorCommand>},
+										  { "SetRainParameters", &CreateInstance<USetRainParametersCommand>},
+										  { "AirFog",  &CreateInstance<UAirFogCommand>},
+										  { "WaterFog",  &CreateInstance<UWaterFogCommand>}, };
 
 	UCommand*(*CreateCommandFunction)()  = CommandMap[Name];
 	UCommand* ToReturn = nullptr;

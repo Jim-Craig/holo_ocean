@@ -49,10 +49,11 @@ engine/dist/
 # Keep the build scripts folder
 # Builds
 !engine/Build/
-engine/Build/*
 !engine/Build/ContinuousIntegration
 !engine/Build/ContinuousIntegration/*.sh
+engine/Build/*
 engine/dist/*
+
 
 # Don't ignore icon files in Build
 # !engine/Build/**/*.ico

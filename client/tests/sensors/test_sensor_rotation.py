@@ -16,7 +16,7 @@ def test_sensor_rotation(rotation_env, request):
     """
     # Re-use the screenshot for test_rgb_camera
     rotation_env.agents["sphere0"].sensors["RGBCamera"].rotate([0, 0, 0])
-    pixels = rotation_env.tick(10)["RGBCamera"][:, :, 0:3]
+    pixels = rotation_env.tick(20)["RGBCamera"][:, :, 0:3]
 
     filepath = str("/baseline_images/baseline_256.png")
     baseline = cv2.imread(str(request.fspath.dirname + filepath))

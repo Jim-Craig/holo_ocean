@@ -9,6 +9,7 @@ import uuid
 base_cfg = {
     "name": "test_viewport_capture",
     "world": "TestWorld",
+    "package_name": "TestWorlds",
     "main_agent": "sphere0",
     "frames_per_sec": False,
     "agents": [
@@ -132,7 +133,7 @@ def test_rgb_camera(resolution):
         verbose=True,
         uuid=str(uuid.uuid4()),
     ) as env:
-        for _ in range(5):
+        for _ in range(20):
             env.tick()
 
         val = env.tick()
@@ -149,9 +150,9 @@ if __name__ == "__main__":
     # test_rgb_camera(256)
     # test_rgb_camera(500)
     # test_rgb_camera(1000)
-    # # test_viewport_capture(500)
-    # # test_viewport_capture(1000)
+    # test_viewport_capture(500)
+    # test_viewport_capture(1000)
     # test_viewport_capture(1024)
-    test_viewport_capture_after_teleport(1024)
+    # test_viewport_capture_after_teleport(1024)
 
     # test_sensor_rotation(rotation_env())

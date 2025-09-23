@@ -67,7 +67,7 @@ def test_rgb_camera(resolution, request):
         verbose=True,
         uuid=str(uuid.uuid4()),
     ) as env:
-        for _ in range(5):
+        for _ in range(20):
             env.tick()
 
         pixels = env.tick()["TestCamera"][:, :, 0:3]
