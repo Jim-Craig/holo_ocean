@@ -1,4 +1,5 @@
-# HoloOcean
+
+<img width="30960" height="6770" alt="holoocean-02" src="https://github.com/user-attachments/assets/4a7e1e62-7553-4ec4-959b-27fde516c28c" />
 
 ![HoloOcean Image](client/docs/images/inspect_plane.jpg)
 
