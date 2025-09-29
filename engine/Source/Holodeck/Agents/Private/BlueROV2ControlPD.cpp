@@ -3,12 +3,12 @@
 
 UBlueROV2ControlPD::UBlueROV2ControlPD(const FObjectInitializer& ObjectInitializer) :
 		Super(ObjectInitializer), 
-		PositionController_X(BR_POS_P_X, BR_POS_I_X, BR_POS_D_X), 
-		PositionController_Y(BR_POS_P_Y, BR_POS_I_Y, BR_POS_D_Y),
-		PositionController_Z(BR_POS_P_Z, BR_POS_I_Z, BR_POS_D_Z),
-		RotationController_R(BR_ROT_P_R, BR_ROT_I_R, BR_ROT_D_R),
-		RotationController_P(BR_ROT_P_P, BR_ROT_I_P, BR_ROT_D_P),
-		RotationController_Y(BR_ROT_P_Y, BR_ROT_I_Y, BR_ROT_D_Y) { }
+		PositionController_X(BR_POS_X_P, BR_POS_X_I, BR_POS_X_D), 
+		PositionController_Y(BR_POS_Y_P, BR_POS_Y_I, BR_POS_Y_D),
+		PositionController_Z(BR_POS_Z_P, BR_POS_Z_I, BR_POS_Z_D),
+		RotationController_R(BR_ROT_R_P, BR_ROT_R_I, BR_ROT_R_D),
+		RotationController_P(BR_ROT_P_P, BR_ROT_P_I, BR_ROT_P_D),
+		RotationController_Y(BR_ROT_Y_P, BR_ROT_Y_I, BR_ROT_Y_D) { }
 
 void UBlueROV2ControlPD::Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) {
 	if (BlueROV2 == nullptr) {
@@ -67,18 +67,21 @@ void UBlueROV2ControlPD::Execute(void* const CommandArray, void* const InputComm
 	FRotator rotation = BlueROV2->GetActorRotation();
 
 	FVector e3 = rotation.UnrotateVector(FVector(0,0,1));
-	e3 = ConvertLinearVector(e3, NoScale);
+	// e3 = ConvertLinearVector(e3, NoScale);
 
-	FVector COB = ConvertLinearVector(BlueROV2->CenterBuoyancy - BlueROV2->CenterMass, UEToClient);
-	FVector tau = BlueROV2->Volume * BlueROV2->WaterDensity * 9.8 * FVector::CrossProduct(e3, COB);
+	FVector COB = BlueROV2->CenterBuoyancy - BlueROV2->CenterMass;
+	// COB = ConvertLinearVector(COB, UEToClient);
+	FVector tau = BlueROV2->Volume * BlueROV2->WaterDensity * 9.81 * FVector::CrossProduct(e3, COB);
+	// tau = rotation.RotateVector(tau);
+	tau = ConvertAngularVector(tau, UEToClient);
 
 	AngAccel += tau;
 
-	FVector before = FVector(AngAccel);
-	AngAccel = ConvertAngularVector(AngAccel, ClientToUE);
-	AngAccel = rotation.RotateVector(AngAccel);
-	AngAccel = ConvertAngularVector(AngAccel, UEToClient);
-	// Fill in with the PD Control
+	// FVector before = FVector(AngAccel);
+	// AngAccel = ConvertAngularVector(AngAccel, ClientToUE);
+	// AngAccel = rotation.RotateVector(AngAccel);
+	// AngAccel = ConvertAngularVector(AngAccel, UEToClient);
+	// Fill in with the PID Control
 	// Command array is then passed to vehicle as acceleration & angular velocity
 	for(int i=0; i<3; i++){
 		CommandArrayFloat[i] = LinAccel[i];

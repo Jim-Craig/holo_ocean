@@ -759,7 +759,7 @@ class HoveringAUV(HoloOceanAgent):
 
     #. Thruster Forces: ``[Vertical Front Starboard, Vertical Front Port, Vertical Back Port, Vertical Back Starboard, Angled Front Starboard, Angled Front Port, Angled Back Port, Angled Back Starboard]``
 
-    #. PD Controller: ``[des_pos_x, des_pos_y, des_pos_z, roll, pitch, yaw]``
+    #. PID Controller: ``[des_pos_x, des_pos_y, des_pos_z, roll, pitch, yaw]``
 
     #. Accelerations, in global frame: ``[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]``
 
@@ -833,7 +833,7 @@ class BlueROV2(HoloOceanAgent):
     **Action Space**
     Has three possible control schemes, as follows
     #. Thruster Forces: ``[Vertical Front Starboard, Vertical Front Port, Vertical Back Port, Vertical Back Starboard, Angled Front Starboard, Angled Front Port, Angled Back Port, Angled Back Starboard]``
-    #. PD Controller: ``[des_pos_x, des_pos_y, des_pos_z, roll, pitch, yaw]``
+    #. PID Controller: ``[des_pos_x, des_pos_y, des_pos_z, roll, pitch, yaw]``
     #. Accelerations, in global frame: ``[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]``
     Inherits from :class:`HoloOceanAgent`.
 

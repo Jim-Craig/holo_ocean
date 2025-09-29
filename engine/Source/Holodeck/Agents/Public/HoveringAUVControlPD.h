@@ -13,11 +13,29 @@
 const float AUV_CONTROL_MAX_LIN_ACCEL = 1;
 const float AUV_CONTROL_MAX_ANG_ACCEL = 1;
 
-const float AUV_POS_P = 100;
-const float AUV_POS_D = 50;
+const float AUV_POS_X_P = 100;
+const float AUV_POS_X_I = 0;
+const float AUV_POS_X_D = 50;
 
-const float AUV_ROT_P = 0.1;
-const float AUV_ROT_D = 0.1;
+const float AUV_POS_Y_P = 100;
+const float AUV_POS_Y_I = 0;
+const float AUV_POS_Y_D = 50;
+
+const float AUV_POS_Z_P = 100;
+const float AUV_POS_Z_I = 0;
+const float AUV_POS_Z_D = 50;
+
+const float AUV_ROT_R_P = 0.2;
+const float AUV_ROT_R_I = 0.001;
+const float AUV_ROT_R_D = 0.15;
+
+const float AUV_ROT_P_P = 0.2;
+const float AUV_ROT_P_I = 0.001;
+const float AUV_ROT_P_D = 0.15;
+
+const float AUV_ROT_Y_P = 0.2;
+const float AUV_ROT_Y_I = 0.001;
+const float AUV_ROT_Y_D = 0.15;
 
 /**
 * UHoveringAUVControlPD
@@ -41,6 +59,10 @@ private:
 	AHolodeckPawnController* HoveringAUVController;
 	AHoveringAUV* HoveringAUV;
 
-	SimplePID PositionController;
-	SimplePID RotationController;
+	SimplePID PositionController_X;
+	SimplePID PositionController_Y;
+	SimplePID PositionController_Z;
+	SimplePID RotationController_R;
+	SimplePID RotationController_P;
+	SimplePID RotationController_Y;
 };
