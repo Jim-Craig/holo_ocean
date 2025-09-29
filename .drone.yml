@@ -11,7 +11,6 @@ steps:
     - chmod -R 0777 /drone/src
     depends_on:
       - clone
-
   - name: Build Editor
     image: ghcr.io/epicgames/unreal-engine:dev-slim-5.3.2
     commands:
@@ -463,6 +462,7 @@ steps:
     commands:
      - docker rmi -f "byu-holoocean/holoocean:${DRONE_COMMIT:0:7}"
      - docker volume prune -f -a
+
     depends_on:
      - py313-sensors
     when:

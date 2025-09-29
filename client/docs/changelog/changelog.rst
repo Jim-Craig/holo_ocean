@@ -34,7 +34,6 @@ Bug Fixes
 
 - Fixed PID instability for the hovering and BlueROV vehicles.
 
-
 HoloOcean 2.0.1
 ===============
 *6/27/2025*
