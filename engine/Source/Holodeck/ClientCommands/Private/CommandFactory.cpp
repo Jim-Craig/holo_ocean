@@ -5,7 +5,7 @@
 const static std::string SPAWN_AGENT = "SpawnAgent";
 
 UCommand* UCommandFactory::MakeCommand(const std::string& Name, const std::vector<float>& NumberParameters, const std::vector<std::string>& StringParameters, AActor* ParameterGameMode) {
-	static UCommandMapType CommandMap = { { "SpawnAgent", &CreateInstance<USpawnAgentCommand>},
+	static UCommandMapType CommandMap = { { "SpawnAgent", &CreateInstance<USpawnAgentCommand> },
 										  { "TeleportCamera", &CreateInstance<UTeleportCameraCommand> },
 										  { "RGBCameraRate", &CreateInstance<URGBCameraRateCommand> },
 										  { "AdjustRenderQuality", &CreateInstance<UAdjustRenderQualityCommand> },
@@ -19,16 +19,17 @@ UCommand* UCommandFactory::MakeCommand(const std::string& Name, const std::vecto
 										  { "CustomCommand", &CreateInstance<UCustomCommand> },
 										  { "SendAcousticMessage", &CreateInstance<USendAcousticMessageCommand> },
 										  { "SendOpticalMessage", &CreateInstance<USendOpticalMessageCommand> },
-										  { "TurnOnFlashlight", &CreateInstance<UTurnOnFlashlightCommand>},
-										  { "TurnOffFlashlight", &CreateInstance<UTurnOffFlashlightCommand>}, 
+										  { "OceanCurrents", &CreateInstance<UOceanCurrentsCommand> },
+										  { "TurnOnFlashlight", &CreateInstance<UTurnOnFlashlightCommand> },
+										  { "TurnOffFlashlight", &CreateInstance<UTurnOffFlashlightCommand> }, 
 										  { "SendOpticalMessage", &CreateInstance<USendOpticalMessageCommand> },
-										  { "Tide", &CreateInstance<UTideCommand>},
-										  { "ChangeTimeOfDay", &CreateInstance<UChangeTimeOfDayCommand>},
-										  { "ChangeWeather", &CreateInstance<UChangeWeatherCommand>},
-										  { "WaterColor", &CreateInstance<UWaterColorCommand>},
-										  { "SetRainParameters", &CreateInstance<USetRainParametersCommand>},
-										  { "AirFog",  &CreateInstance<UAirFogCommand>},
-										  { "WaterFog",  &CreateInstance<UWaterFogCommand>}, };
+										  { "Tide", &CreateInstance<UTideCommand> },
+										  { "ChangeTimeOfDay", &CreateInstance<UChangeTimeOfDayCommand> },
+										  { "ChangeWeather", &CreateInstance<UChangeWeatherCommand> },
+										  { "WaterColor", &CreateInstance<UWaterColorCommand> } ,
+										  { "SetRainParameters", &CreateInstance<USetRainParametersCommand> },
+										  { "AirFog",  &CreateInstance<UAirFogCommand> },
+										  { "WaterFog",  &CreateInstance<UWaterFogCommand> }, };
 
 	UCommand*(*CreateCommandFunction)()  = CommandMap[Name];
 	UCommand* ToReturn = nullptr;

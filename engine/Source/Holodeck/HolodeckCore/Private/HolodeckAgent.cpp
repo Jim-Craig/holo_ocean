@@ -39,6 +39,7 @@ void AHolodeckAgent::InitializeAgent() {
 		Server->AgentMap.Add(*AgentName, this);
 	}
 
+
 	// Initialize Sensors
 	TArray<UActorComponent*> Sensors;
 	this->GetComponents(UHolodeckSensor::StaticClass(), Sensors, false);

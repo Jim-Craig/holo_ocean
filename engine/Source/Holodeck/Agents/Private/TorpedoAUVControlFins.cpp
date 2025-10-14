@@ -20,7 +20,7 @@ void UTorpedoAUVControlFins::Execute(void* const CommandArray, void* const Input
 	float* CommandArrayFloat = static_cast<float*>(CommandArray);
 
 	// Buoyancy forces
-	TorpedoAUV->ApplyBuoyantForce();
+	TorpedoAUV->ApplyBuoyancyDragForce();
 
 	// Propeller
 	TorpedoAUV->ApplyThrust(InputCommandFloat[4]);

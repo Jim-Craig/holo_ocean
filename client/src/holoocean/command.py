@@ -56,7 +56,7 @@ class Command:
 
     Derived classes must set the ``_command_type``.
 
-    The order in which :meth:`add_number_parameters` and :meth:`add_number_parameters` are called
+    The order in which :meth:`add_number_parameters` and :meth:`add_string_parameters` are called
     is significant, they are added to an ordered list. Ensure that you are adding parameters in
     the order the client expects them.
 
@@ -331,6 +331,22 @@ class AddSensorCommand(Command):
         self.add_number_parameters(sensor_definition.rotation[0])
         self.add_number_parameters(sensor_definition.rotation[1])
         self.add_number_parameters(sensor_definition.rotation[2])
+
+class OceanCurrentsCommand(Command):
+    """Share individual current velocities for each agent
+
+        Args:
+            ocean_currents: current velocity per agent
+    """
+
+    def __init__(self, name, x, y, z, vehicle_debugging):
+        Command.__init__(self)
+        self._command_type = "OceanCurrents"
+        self.add_string_parameters(name)
+        self.add_number_parameters(x)
+        self.add_number_parameters(y)
+        self.add_number_parameters(z)
+        self.add_number_parameters(vehicle_debugging)
 
 
 class RemoveSensorCommand(Command):

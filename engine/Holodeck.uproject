@@ -17,6 +17,10 @@
 		{
 			"Name": "RapidJson",
 			"Enabled": false
+		},
+		{
+			"Name": "CascadeToNiagaraConverter",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

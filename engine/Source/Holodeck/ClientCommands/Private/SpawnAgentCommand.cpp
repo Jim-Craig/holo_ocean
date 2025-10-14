@@ -38,7 +38,7 @@ void USpawnAgentCommand::Execute() {
 	SpawnedAgent->MainAgent = IsMainAgent;
 	SpawnedAgent->SpawnDefaultController();
 	SpawnedController = static_cast<AHolodeckPawnController*>(SpawnedAgent->Controller);
-	SpawnedController->SetServer(GameTarget->GetAssociatedServer());
+	SpawnedController->SetServer(GameTarget->GetAssociatedServer()); 
 	SpawnedAgent->InitializeAgent();
 
 	UE_LOG(LogHolodeck, Log, TEXT("SpawnAgentCommand spawned a new Agent."));

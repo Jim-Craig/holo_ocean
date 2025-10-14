@@ -19,6 +19,10 @@ ASurfaceVessel::ASurfaceVessel() {
 	
 	this->BoundingBox = FBox(FVector(-250, -120, -25), FVector(250, 120, 25));
 
+	// These values are completely guesstimations
+	this->CoefficientOfDrag = 0.8;
+	this->AreaOfDrag = 1.0;
+
 	// Shift thruster locations by offset to the origin
 	for(int i=0;i<2;i++){
 		thrusterLocations[i] -= CenterMass;
@@ -54,7 +58,9 @@ void ASurfaceVessel::Tick(float DeltaSeconds) {
 // For empty dynamics, damping is disabled
 // Enable it when using thrusters/controller
 void ASurfaceVessel::EnableDamping(){
-	RootMesh->SetLinearDamping(3);
+	// UE_LOG(LogHolodeck, Log, TEXT("Linear Damping On"));
+	RootMesh->SetLinearDamping(3.0);
+	// UE_LOG(LogHolodeck, Log, TEXT("Angular Damping On"));
 	RootMesh->SetAngularDamping(0.75);
 }
 

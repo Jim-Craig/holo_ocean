@@ -304,7 +304,7 @@ class Torpedo:
         tau = np.zeros(6,float)
         for actuator in self.controls:
             tau += actuator.tau(nu_r, nu)
-
+        
         # AUV dynamics
         tau_sum = tau + tau_liftdrag + tau_crossflow - np.matmul(C+D,nu_r)  - g
         nu_dot = Dnu_c + np.matmul(self.Minv, tau_sum)
@@ -322,7 +322,7 @@ class Torpedo:
     def stepInput(self, t):
         """
         u_c = stepInput(t) generates step inputs.
-                     
+            
         Returns:
             
             u_control = [ delta_r   rudder angle (rad)
@@ -344,9 +344,9 @@ class Torpedo:
         return u_control
     
     
-    def depthHeadingAutopilot(self, eta, nu, sampleTime):
+    def depthHeadingAutopilot(self, eta, nu_r, sampleTime):
         """
-        [delta_r, delta_s, n] = depthHeadingAutopilot(eta,nu,sampleTime) 
+        [delta_r, delta_s, n] = depthHeadingAutopilot(eta,nu_r,sampleTime) 
         simultaneously control the heading and depth of the AUV using control
         laws of PID type. Propeller rpm is given as a step command.
         
@@ -360,10 +360,10 @@ class Torpedo:
         z = eta[2]                  # heave position (depth)
         theta = eta[4]              # pitch angle
         psi = eta[5]                # yaw angle
-        surge = nu[0]               # surge velocity
-        w = nu[2]                   # heave velocity
-        q = nu[4]                   # pitch rate
-        r = nu[5]                   # yaw rate
+        surge = nu_r[0]               # surge velocity
+        w = nu_r[2]                   # heave velocity
+        q = nu_r[4]                   # pitch rate
+        r = nu_r[5]                   # yaw rate
         e_psi = psi - self.psi_d    # yaw angle tracking error
         e_r   = r - self.r_d        # yaw rate tracking error
         z_ref = self.ref_z          # heave position (depth) setpoint
@@ -372,9 +372,9 @@ class Torpedo:
         #######################################################################
         # Propeller command
         #######################################################################
-        n = self.ref_n 
+        n = self.ref_n
         
-        #######################################################################            
+        #######################################################################
         # Depth autopilot (succesive loop closure)
         #######################################################################
         if surge > self.surge_threshold:
@@ -451,13 +451,13 @@ class Torpedo:
         self.torque_r = delta_r*10
         for fin in self.heading_subsystem:
             torque = self.torque_r/len(self.heading_subsystem)
-            command = fin.calculate_deflection([0.0, 0.0, torque], nu)
+            command = fin.calculate_deflection([0.0, 0.0, torque], nu_r)
             fin.actuate(sampleTime, command)
 
         
         for fin in self.depth_subsystem:
             torque = self.torque_s/len(self.depth_subsystem)
-            command = fin.calculate_deflection([0.0, torque, 0.0], nu)
+            command = fin.calculate_deflection([0.0, torque, 0.0], nu_r)
             fin.actuate(sampleTime, command)
         
         self.controls[-1].actuate(sampleTime, n)

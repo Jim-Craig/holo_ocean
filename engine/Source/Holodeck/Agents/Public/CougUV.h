@@ -2,10 +2,14 @@
 
 #pragma once
 
+#include "Holodeck.h"
+
 #include "Containers/Array.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Pawn.h"
 #include "HolodeckBuoyantAgent.h"
+#include "HolodeckPawnController.h"
+#include "HolodeckControlScheme.h"
 #include "CougUV.generated.h"
 
 const float CUV_MIN_THRUST = -100;
@@ -65,8 +69,12 @@ public:
 
 	void EnableDamping();
 
+	void SetController(AHolodeckPawnController* const Controller) { CougUVController = Controller; };
+
+
 private:
 	// Accelerations
 	float CommandArray[6];
-
+	AHolodeckPawnController* CougUVController;
+	ACougUV* CougUV;
 };

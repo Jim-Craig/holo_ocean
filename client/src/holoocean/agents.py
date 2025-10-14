@@ -67,6 +67,7 @@ class ControlSchemes:
     # Torpedo AUV Control Schemes
     TAUV_FINS = 0
     TAUV_FORCES = 1
+    TAUV_BUOYANT_FORCES = 2
 
     # Surface Vessel Control Schemes
     SV_THRUSTERS = 0
@@ -114,7 +115,6 @@ class HoloOceanAgent:
         self._teleport_buffer = self._client.malloc(name + "_teleport_command", [12], np.float32)
         self._control_scheme_buffer = self._client.malloc(name + "_control_scheme", [1],
                                                           np.uint8)
-        self._ocean_current_velocity = self._client.malloc(name + "_ocean_current_velocity", [3], np.float32)
         self._current_control_scheme = 0
         self.set_control_scheme(0)
 
@@ -260,10 +260,6 @@ class HoloOceanAgent:
         specified joint. Will return None if the joint does not exist for the agent.
         """
         raise NotImplementedError("Child class must implement this function")
-
-    def get_ocean_current_velocity(self):
-        """Returns the current ocean current velocity for the agent."""
-        return self._ocean_current_velocity
 
     def __act__(self, action):
         # Allow for smaller arrays to be provided as input
@@ -1013,6 +1009,7 @@ class TorpedoAUV(HoloOceanAgent):
         limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
         
         return [(scheme_fins, ContinuousActionSpace([5], low=[-i for i in limits_fins], high=limits_fins)),
+                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
                 (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel))]
 
     def get_joint_constraints(self, joint_name):
@@ -1075,6 +1072,8 @@ class CougUV(HoloOceanAgent):
         limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
         
         return [(scheme_fins, ContinuousActionSpace([5], low=[-i for i in limits_fins], high=limits_fins)),
+                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
+                # Fossen Buoyancy
                 (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel))]
 
     def get_joint_constraints(self, joint_name):

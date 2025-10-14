@@ -125,8 +125,16 @@ public:
 	TMap<FString, UHolodeckSensor*> SensorMap;
 	AHolodeckPawnControllerInterface* HolodeckController;
 
+	float* OceanCurrentSetPtr;
+	float* OceanCurrentVelocityPtr;
+	float* OceanCurrentOffsetPtr;
+	int* OceanCurrentFieldIndexPtr;
+	int* OceanCurrentFieldsCountPtr;
+	bool* ShowVectorFieldNamePtr;
+
+	UHolodeckServer* Server;
+
 private:
 
 	UHolodeckGameInstance* Instance;
-	UHolodeckServer* Server;
 };

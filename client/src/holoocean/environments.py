@@ -14,6 +14,8 @@ import sys
 import copy
 
 import numpy as np
+import json
+import time
 
 from holoocean.command import (
     CommandCenter,
@@ -34,6 +36,7 @@ from holoocean.command import (
     SetRainParametersCommand,
     AirFogCommand,
     WaterFogCommand,
+    OceanCurrentsCommand
 )
 
 from holoocean.exceptions import HoloOceanException
@@ -1014,6 +1017,105 @@ class HoloOceanEnvironment:
             print("No such agent %s" % agent_name)
         else:
             self.agents[agent_name].set_control_scheme(control_scheme)
+        
+    # use this to get the names of vector field for debug purposes
+    def set_show_vector_field_name(self, state):
+        """Set whether to show the vector field name in the viewport.
+        Args:
+            state (:obj:`bool`): Whether to show the vector field name in the viewport.
+        """
+        self._show_vector_field_name_ptr[0] = state
+
+    def set_ocean_currents(self, agent_name, velocity):
+        """Send the ocean current velocity at the location of the vehicle to the server to be transformed into a force vector and applied to the vehicle. 
+        Note that if the following config parameter is set, three debugging lines will be graphed at the location of all vehicles 
+        that current is applied to. Of the debugging lines, blue will be the buoyancy force, green will be the gravity force, and 
+        red will be the ocean currents velocity applied to the center of mass of the vehicle.
+
+        Args:
+            agent_name (:obj:`string`): The name of the vehicle you want the current to affect (ex: "auv0")
+            velocity (:obj:`list`): A 3 element vector [x, y, z] that represents the velocity of the current to be applied to the vehicle
+        """
+        config = self._scenario
+        vehicle_debugging = 0
+        if "current" in config:
+            if "vehicle_debugging" in config["current"]:
+                if config["current"]["vehicle_debugging"] == True:
+                    vehicle_debugging = 1
+
+        command_to_send = OceanCurrentsCommand(agent_name, velocity[0], velocity[1], velocity[2], vehicle_debugging)
+        self._enqueue_command(command_to_send)
+
+    def centered_range(self, num_points, spacing=1.0):
+        """
+        Creates a symmetric range around 0, such that 0 is exactly included,
+        even if num_points is even.
+        """
+        half = (num_points - 1) / 2
+        return np.linspace(-half * spacing, half * spacing, num_points)
+
+    def draw_debug_vector_field(self, currents_function, location, vector_field_dimensions=[30, 30, 30], spacing=20, arrow_thickness=10, arrow_size = 1, lifetime=40):
+        """Create a temporary vector field by drawing vectors at points within a 3D matrix to help demonstrate flow of ocean currents
+
+        Args:
+            currents_function (:obj:`Callable`): A vector field function that takes in a 3 element location vector [x,y,z] and outputs a 3D currents velocity vector [x,y,z]
+            location (:obj:`list`): A 3D vector [x,y,z] that represents where you want to draw the center of the vector field
+            vector_field_dimensions (:obj:`list`): A 3 element vector that represents the dimensions [x,y,z] of the vector field generated
+            spacing (:obj:`int`): How much space is in between each vector in meters (defaults to 20)
+            arrow_thickness (:obj:`int`): A measure of how thick each of the debug vectors are (defaults to 10)
+            arrow_size (:obj:`int`): A scalar that affects length of each debug arrow at different strengths (defaults to 1)
+            lifetime (:obj:`int`): A scalar to determine the length of time that the arrows persist in the simulation (defaults to 40)
+        """
+        cx, cy, _ = location
+        x_dim, y_dim, z_depth = vector_field_dimensions  # z_depth is a positive number representing depth below surface
+
+        # X and Y are centered around the vehicle's location
+        x_range = np.arange(cx - x_dim // 2, cx + x_dim // 2, 1)
+        y_range = np.arange(cy - y_dim // 2, cy + y_dim // 2, 1)
+
+        # Z range goes from 0 (surface) downward to -z_depth (deep)
+        z_range = np.arange(0, -z_depth, -1)
+
+        print(f"Generating vector field centered at ({cx}, {cy}) with depth {z_depth} and size {x_dim}x{y_dim}")
+
+        current_field = np.zeros((len(x_range), len(y_range), len(z_range), 3))
+
+        step = spacing  # Controls arrow density
+        command_count = 0
+        batch_size = 1000
+        vector_list = []
+
+        for i, x in enumerate(x_range):
+            if i % step != 0: continue
+            for j, y in enumerate(y_range):
+                if j % step != 0: continue
+                for k, z in enumerate(z_range):
+                    if k % step != 0: continue
+                    location = [x, y, z]
+                    dx, dy, dz = currents_function(location)
+
+                    dx *= arrow_size
+                    dy *= arrow_size
+                    dz *= arrow_size
+                    current_field[i, j, k] = [dx, dy, dz]
+                    vector_list.append({
+                        "position": [float(x), float(y), float(z)],
+                        "vector": [float(dx), float(dy), float(dz)]
+                    })
+
+                    self.draw_arrow(start=[x, y, z], end=[x + dx, y + dy, z + dz], lifetime=40, thickness=arrow_thickness)
+                    command_count += 1
+
+                    if command_count >= batch_size:
+                        self.tick()
+                        command_count = 0
+
+        # file_path = r"D:\World_Vector_Fields\latest.json"
+        # os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        # with open(file_path, "w") as f:
+        #     json.dump(vector_list, f)
+
+        # print(f"Saved vector field to {file_path}")
 
     def send_world_command(self, name, num_params=None, string_params=None):
         """Send a world command.

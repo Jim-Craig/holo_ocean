@@ -7,6 +7,7 @@
 #include "HolodeckPawnController.h"
 #include "CougUV.h"
 #include "CougUVControlFins.h"
+#include "CougUVFossenBuoyancy.h"
 
 #include "CougUVController.generated.h"
 
@@ -36,6 +37,11 @@ public:
 		UCougUVControlFins* Thrusters = NewObject<UCougUVControlFins>();
 		Thrusters->SetController(this);
 		ControlSchemes.Insert(Thrusters, 0);
+
+		// Add Fossen Buoyancy controller
+		UCougUVFossenBuoyancy* FossenBuoyancy = NewObject<UCougUVFossenBuoyancy>();
+		FossenBuoyancy->SetController(this);
+		ControlSchemes.Insert(FossenBuoyancy, 2);	
 	}
 };
 

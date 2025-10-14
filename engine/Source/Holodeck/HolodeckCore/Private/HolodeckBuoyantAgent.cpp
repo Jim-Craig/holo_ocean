@@ -2,6 +2,8 @@
 
 #include "Holodeck.h"
 #include "HolodeckBuoyantAgent.h"
+#include "VectorField/VectorFieldStatic.h"
+#include "HolodeckAgent.h"
 
 void AHolodeckBuoyantAgent::InitializeAgent(){
 	Super::InitializeAgent();
@@ -12,7 +14,9 @@ void AHolodeckBuoyantAgent::InitializeAgent(){
 
 	// Set Mass
 	RootMesh->SetMassOverrideInKg("", MassInKG);
-	RootMesh->SetCenterOfMass(CenterMass); // set the center of mass in the body frame
+	// RootMesh->SetCenterOfMass(CenterMass); // set the center of mass in the body frame
+	FVector OriginCenterOfMass(0.0, 0.0f, 0.0f);
+	RootMesh->SetCenterOfMass(OriginCenterOfMass);
 	
 	// Set Bounding Box (if it hasn't been set by hand)
 	if(BoundingBox.GetExtent() == FVector(0, 0, 0))
@@ -43,14 +47,13 @@ void AHolodeckBuoyantAgent::BeginDestroy() {
 	if(octreeGlobal != nullptr) delete octreeGlobal;
 }
 
-void AHolodeckBuoyantAgent::ApplyBuoyantForce(){
+void AHolodeckBuoyantAgent::ApplyBuoyancyDragForce(){
     //Get all the values we need once
     FVector ActorLocation = GetActorLocation(); // transformation from body to global UE frame, expressed in global UE frame
 	FRotator ActorRotation = GetActorRotation(); // rotation from body to global UE frame
 	FVector COM = RootMesh->GetCenterOfMass(); // COM in global UE frame
 	FVector COB = COM + ActorRotation.RotateVector(CenterBuoyancy - CenterMass); // COB in global frame
 
-	// Check to see how underwater we are
 	FVector* points = SurfacePoints.GetData();
 	int count = 0;
 	for(int i=0;i<NumSurfacePoints;i++){	
@@ -71,9 +74,27 @@ void AHolodeckBuoyantAgent::ApplyBuoyantForce(){
 	BuoyantVector = ConvertLinearVector(BuoyantVector, ClientToUE); // converts Newtons to centiNewtons
 	RootMesh->AddForceAtLocation(BuoyantVector, COB); 
 
+	// Drag Force (Applied at COM)
+	FVector OceanCurrentsVel = GetOceanCurrentVelocity();
+	FVector AUVVel = RootMesh->GetBodyInstance()->GetUnrealWorldVelocity() / 100.0; // in m/s
+	FVector RelativeVel = AUVVel - OceanCurrentsVel;
+	FVector DragForce = -0.5 * WaterDensity * RelativeVel.SizeSquared() * CoefficientOfDrag * AreaOfDrag * RelativeVel.GetSafeNormal();
+	RootMesh->AddForceAtLocation(DragForce * ratio, COM); // Apply drag force proportional to how submerged the vehicle is (this is an approximation, as drag coeff is not constant with depth underwater)
+
 	// Draw Debug Lines
-	// DrawDebugLine(GetWorld(), COM, COM + GravityVector*0.1, FColor::Green, false, .1, ECC_WorldStatic, 2.f);
-	// DrawDebugLine(GetWorld(), COB, COB + BuoyantVector*0.1, FColor::Blue , false, .1, ECC_WorldStatic, 2.f);
+	if (Ocean_Current_Vehicle_Debugging) {
+		DrawDebugLine(GetWorld(), COM, COM + GravityVector*0.02, FColor::Green, false, 0, ECC_WorldStatic, 2.f);
+		DrawDebugLine(GetWorld(), COB, COB + BuoyantVector*0.02, FColor::Blue , false, 0, ECC_WorldStatic, 2.f);
+		DrawDebugLine(GetWorld(), COM, COM + OceanCurrentsVel*0.02, FColor::Red , false, 0, ECC_WorldStatic, 2.f);
+	}
+}
+
+FVector AHolodeckBuoyantAgent::GetOceanCurrentVelocity() {
+	FVector OceanCurrentsVel = FVector(0, 0, 0);
+	OceanCurrentsVel[0] = Ocean_Current_Velocity_X;
+	OceanCurrentsVel[1] = -Ocean_Current_Velocity_Y;
+	OceanCurrentsVel[2] = Ocean_Current_Velocity_Z;
+	return OceanCurrentsVel;
 }
 
 void AHolodeckBuoyantAgent::ShowBoundingBox(float DeltaTime){

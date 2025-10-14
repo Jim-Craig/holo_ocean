@@ -2,6 +2,7 @@
 
 #include "Holodeck.h"
 #include "CougUV.h"
+#include "HolodeckBuoyantAgent.h"
 
 // Sets default values
 ACougUV::ACougUV() {
@@ -15,6 +16,8 @@ ACougUV::ACougUV() {
 	this->Volume =  MassInKG / WaterDensity; //0.0342867409204;
 	this->CenterMass = FVector(0, 0, 0);     // cm (unreal units)
 	this->CenterBuoyancy = FVector(0, 0, 1); // cm (unreal units)
+	this->CoefficientOfDrag = 0.5;
+	this->AreaOfDrag = 0.3;
 }
 
 void ACougUV::InitializeAgent() {
@@ -23,10 +26,10 @@ void ACougUV::InitializeAgent() {
 	Super::InitializeAgent();
 }
 
-// Called every frame
+// Called every frame when custom dynamics is active
 void ACougUV::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
-
+	
 	// Convert linear acceleration to force
 	FVector linAccel = FVector(CommandArray[0], CommandArray[1], CommandArray[2]);
 	linAccel = ClampVector(linAccel, -FVector(CUV_MAX_LIN_ACCEL), FVector(CUV_MAX_LIN_ACCEL));
@@ -53,10 +56,28 @@ void ACougUV::ApplyFin(int i, float command){
 	FRotator bodyToWorld = this->GetActorRotation();
 	FRotator finToBody = UKismetMathLibrary::ComposeRotators(FRotator(commandAngle, 0, 0), finRotation[i]); // Note: rotators use convention (pitch, yaw, roll). The command is a pitch. 
 
+	// Check that CougUV controller is valid
+	if (!CougUVController) {
+		UE_LOG(LogHolodeck, Error, TEXT("CougUVController is null"));
+		return;
+	}
+
+	// Grab CougUV
+	if (CougUV == nullptr) {
+		CougUV = static_cast<ACougUV*>(CougUVController->GetPawn());
+		if (CougUV == nullptr) {
+			UE_LOG(LogHolodeck, Error, TEXT("UCougUVControlFins couldn't get CougUV reference"));
+			return;
+		}
+	}
+
+
 	// get velocity at fin location, in fin frame
 	FVector finWorld = RootMesh->GetCenterOfMass() + bodyToWorld.RotateVector(finTranslation[i] - CenterMass);
 	FVector velWorld = RootMesh->GetPhysicsLinearVelocityAtPoint(finWorld); // METERS/sec (unreal is dumb, distance is in cm/s but velocity is in m/s)
-	FVector velBody = bodyToWorld.UnrotateVector(velWorld);
+	FVector velOceanCurrent = CougUV->GetOceanCurrentVelocity();
+	FVector relativeVel = velWorld - velOceanCurrent;
+	FVector velBody = bodyToWorld.UnrotateVector(relativeVel);
 	FVector velFin = finToBody.UnrotateVector(velBody);
 
 	// get angle of flow relative to fin and transform to body frame
@@ -91,7 +112,7 @@ void ACougUV::ApplyFin(int i, float command){
 	FVector forceBody = flowToBody.RotateVector(forceFlow);
 	FVector forceWorld = bodyToWorld.RotateVector(forceBody);
 	if (RootMesh->GetCenterOfMass().Z <= 0) { // simple check to make sure we're underwater, could be made more robust
-		RootMesh->AddForceAtLocation(forceWorld, finWorld);
+		// RootMesh->AddForceAtLocation(forceWorld, finWorld);
 	}
 	
 	// Draw Debug Lines

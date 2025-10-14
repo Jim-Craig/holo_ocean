@@ -15,6 +15,8 @@ ABlueROV2::ABlueROV2() {
 	this->MassInKG = 11.5;
 	this->CenterMass 	 = FVector(0, 0, 3); // vector from mesh origin to center of mass, expressed in mesh frame
 	this->CenterBuoyancy = FVector(0, 0, 5); // vector from mesh origin to center of buoyancy, expressed in mesh frame
+	this->CoefficientOfDrag = 0.8;
+	this->AreaOfDrag = .45;
 }
 
 // Sets all values that we need

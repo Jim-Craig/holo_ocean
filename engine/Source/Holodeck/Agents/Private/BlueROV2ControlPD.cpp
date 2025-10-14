@@ -23,7 +23,7 @@ void UBlueROV2ControlPD::Execute(void* const CommandArray, void* const InputComm
 	}
 
 	// Apply gravity & buoyancy
-	BlueROV2->ApplyBuoyantForce();
+	BlueROV2->ApplyBuoyancyDragForce();
 	float* InputCommandFloat = static_cast<float*>(InputCommand);
 	float* CommandArrayFloat = static_cast<float*>(CommandArray);
 

@@ -76,16 +76,23 @@ class fin:
 
         Returns:
             numpy array: tau vector [Fx, Fy, Fz, Tx, Ty, Tz] (N) and (N*m) in body-fixed frame
-        """
+        """        
+        ur = self.velocity_in_rotated_plane(nu_r[:3])  # Calculate relative velocity in plane of the fin
         
-        ur = self.velocity_in_rotated_plane(nu_r[:3])  # Calulate relative velocity in plane of the fin
-        
+        print(ur)
+        print(f"rho: {self.rho}")
+        print(f"area: {self.area}")
+        print(f"CL: {self.CL}")
+        print(f"u_actual: {self.u_actual}")
         # Calculate lift force magnitude
         f = 0.5 * self.rho * self.area * self.CL * self.u_actual * ur**2  # N
+
+        print(f)
 
         # Decompose force into y and z components
         fy = np.sin(self.angle_rad) * f  # N
         fz = -np.cos(self.angle_rad) * f  # N 
+        print(f"{fy}, {fz}")
 
         F = np.array([0, fy, fz])  # Force vector (N)
 
@@ -199,6 +206,7 @@ class thruster:
         Returns:
             numpy array: tau vector [Fx, Fy, Fz, Tx, Ty, Tz] (N) and (N*m) in body-fixed frame
         """
+            
         U = np.sqrt(nu[0]**2 + nu[1]**2 + nu[2]**2)  # vehicle speed
 
         # Commands and actual control signals

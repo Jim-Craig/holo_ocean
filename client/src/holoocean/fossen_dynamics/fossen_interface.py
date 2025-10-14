@@ -96,7 +96,7 @@ class FossenInterface:
         vehicle = self.vehicles[vehicle_name]
 
         if len(u_control) == vehicle.dimU:
-            vehicle.u_control=u_control
+             vehicle.u_control=u_control
         else:
             raise ValueError(f"Vehicle Control command does not match expected length, got {len(u_control)}, expected: {vehicle.dimU}")
         

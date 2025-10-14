@@ -29,6 +29,7 @@
 #include "SetRainParametersCommand.h"
 #include "AirFogCommand.h"
 #include "WaterFogCommand.h"
+#include "OceanCurrentsCommand.h"
 
 #include "CommandFactory.generated.h"
 

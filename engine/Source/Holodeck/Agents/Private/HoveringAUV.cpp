@@ -18,6 +18,9 @@ AHoveringAUV::AHoveringAUV() {
 	this->CenterMass 	 = FVector(-5.9 ,  0.46, -2.82); // vector from mesh origin to center of mass, expressed in body frame
 	this->CenterBuoyancy = FVector(-5.96,  0.29, -1.85); // vector from mesh origin to center of buoyancy, expressed in body frame
 	// this->OffsetToOrigin = FVector(-0.7 , -2   , 32	  ); // vector from UE body origin to mesh origin, expressed in UE body frame
+	// These values are completely guesstimations
+	this->CoefficientOfDrag = 0.8;
+	this->AreaOfDrag = 0.5;
 }
 
 // Sets all values that we need
@@ -63,6 +66,11 @@ void AHoveringAUV::Tick(float DeltaSeconds) {
 // For empty dynamics, damping is disabled
 // Enable it when using thrusters/controller
 void AHoveringAUV::EnableDamping(){
+	// Only damp if we are not doing currents
+	// if (VectorFieldActors.Num() == 0){
+	// 	RootMesh->SetLinearDamping(1.0);
+	// }
+	
 	RootMesh->SetLinearDamping(1.0);
 	RootMesh->SetAngularDamping(0.75);
 }
