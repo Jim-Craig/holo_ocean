@@ -2018,6 +2018,407 @@ class RaycastSemanticLidar(HoloOceanSensor):
         return data_this_frame[:i, :]
 
 
+class BSTSensor(HoloOceanSensor):
+    """Biomass, Salinity, Temperature Sensor
+    
+    Gets the biomass, salinity, and temperature values at the agent's location.
+    Returns values as [biomass, salinity, temperature].
+    """
+
+    sensor_type = "BSTSensor"
+
+    def __init__(
+        self, client, agent_name, agent_type, name="BSTSensor", config=None
+    ):
+        self.config = {} if config is None else config
+        
+        # Initialize biomass configuration
+        self.biomass = {
+            "config": {
+                "max_biomass": 1.0,
+                "max_concentration_depth": 100.0,
+                "attenuation_exponent": 0.858,
+                "biomass_clusters": []
+            },
+            "biomass_function": self.config.get("biomass_function", None)
+        }
+        self.biomass["config"].update({
+            k: v for k, v in self.config.items() if k in self.biomass["config"]
+        })
+
+        # Initialize salinity configuration
+        self.salinity = {
+            "config": {
+                "surface_psu": 33,
+                "deep_psu": 34.5,
+                "halocline_depth": 100,
+                "halocline_thickness": 20,
+                "salinity_clusters": []
+            },
+            "salinity_function": self.config.get("salinity_function", None)
+        }
+        self.salinity["config"].update({
+            k: v for k, v in self.config.items() if k in self.salinity["config"]
+        })
+
+        # Initialize temperature configuration
+        self.temperature = {
+            "config": {
+                "surface_temp": 23,
+                "deep_temp": 4,
+                "thermocline_depth": 100,
+                "thermocline_thickness": 20,
+                "temperature_clusters": []
+            },
+            "temperature_function": self.config.get("temperature_function", None)
+        }
+        self.temperature["config"].update({
+            k: v for k, v in self.config.items() if k in self.temperature["config"]
+        })
+
+        super(BSTSensor, self).__init__(
+            client, agent_name, agent_type, name=name, config=config
+        )
+
+    @staticmethod
+    def temperature_model(**args):
+        """Calculate temperature based on depth and thermal clusters
+
+        Possible Arguments:
+        surface_temp (:obj:`float`): The temperature at the very surface in celsius.
+        deep_temp (:obj:`float`): The temperature that is approached as depth increases.
+        thermocline_depth (:obj:`float`): The center point where the thermocline occurs (sharp change in temperature).
+        thermocline_thickness (:obj:`float`): How much depth the thermocline spans across.
+
+        Equation:
+
+        .. math::
+
+            base\_temp = surface\_temp +
+                        \\frac{deep\_temp - surface\_temp}
+                                {1 + e^{\\left(-\\frac{depth - thermocline\_depth}
+                                                    {thermocline\_thickness}\\right)}}
+        """
+        location = np.array(args.get("location", [0, 0, 0]))
+        
+        # Ensure location is 2D array for consistent processing
+        if location.ndim == 1:
+            location = location[np.newaxis, :]  # Convert (3,) to (1, 3)
+            single_point = True
+        else:
+            single_point = False
+            
+        depth = np.maximum(-location[:, 2], 0)  # Ensure positive depth
+        
+        # Get parameters
+        surface_temp = args.get("surface_temp", 23)
+        deep_temp = args.get("deep_temp", 4)
+        thermocline_depth = args.get("thermocline_depth", 100)
+        thermocline_thickness = args.get("thermocline_thickness", 20)
+        temperature_clusters = args.get("temperature_clusters", [])
+
+        # Calculate base temperature with thermocline
+        base_temp = surface_temp + (deep_temp - surface_temp) / (
+            1 + np.exp(-(depth - thermocline_depth) / thermocline_thickness)
+        )
+
+        # Initialize influence array with same shape as base_temp
+        influence = np.zeros_like(base_temp, dtype=np.float64)
+        
+        # Add cluster influences
+        for cluster in temperature_clusters:
+            try:
+                pos = np.array(cluster["position"])
+                strength = float(cluster.get("strength", 0))
+                falloff = float(cluster.get("falloff", 10))
+                
+                if falloff <= 0:
+                    continue
+                    
+                # Calculate distances
+                dists = np.linalg.norm(location - pos, axis=1)
+                
+                # Calculate influence with proper broadcasting
+                cluster_influence = strength * np.exp(-dists / falloff)
+                
+                # Ensure shapes match before addition
+                if cluster_influence.shape == influence.shape:
+                    influence += cluster_influence
+                else:
+                    # Handle broadcasting issues
+                    influence = influence + cluster_influence
+                    
+            except Exception as e:
+                print(f"Warning: Error processing thermal cluster: {e}")
+                continue
+
+        result = base_temp + influence
+        
+        # Set values above surface (z > 0) to zero
+        result[location[:, 2] > 0] = 0.0
+
+        # Return scalar if input was single point
+        if single_point:
+            return float(result[0])
+        return result
+
+    @staticmethod
+    def salinity_model(**args):
+        """Calculate salinity based on depth and halocline clusters
+        
+        Possible Arguments:
+        surface_psu (:obj:`float`): The practical salinity unit at the surface of the water.
+        deep_psu (:obj:`float`): The practical salinity unit approached as depth increases.
+        halocline_depth (:obj:`float`): The center point where the halocline occurs (rapid salinity change).
+        halocline_thickness (:obj:`float`): The depth that the halocline spans across.
+
+        Equation:
+        
+        .. math::
+
+            \\text{base_salinity} = \\text{surface_psu} + 
+                                    \\frac{\\text{deep_psu} - \\text{surface_psu}}
+                                        {1 + e^{\\left(-\\frac{\\text{depth} - \\text{halocline_depth}}
+                                                            {\\text{halocline_thickness}}\\right)}}
+        """
+        location = np.array(args.get("location", [0, 0, 0]))
+        
+        # Ensure location is 2D array for consistent processing
+        if location.ndim == 1:
+            location = location[np.newaxis, :]
+            single_point = True
+        else:
+            single_point = False
+            
+        depth = np.maximum(-location[:, 2], 0)  # Ensure positive depth
+        
+        # Get parameters
+        surface_psu = args.get("surface_psu", 33)
+        deep_psu = args.get("deep_psu", 34.5)
+        halocline_depth = args.get("halocline_depth", 100)
+        halocline_thickness = args.get("halocline_thickness", 20)
+        salinity_clusters = args.get("salinity_clusters", [])
+
+        # Calculate base salinity with halocline
+        base_salinity = surface_psu + (deep_psu - surface_psu) / (
+            1 + np.exp(-(depth - halocline_depth) / halocline_thickness)
+        )
+
+        # Initialize influence array with same shape as base_salinity
+        influence = np.zeros_like(base_salinity, dtype=np.float64)
+        
+        # Add cluster influences
+        for cluster in salinity_clusters:
+            try:
+                pos = np.array(cluster["position"])
+                strength = float(cluster.get("strength", 0))
+                falloff = float(cluster.get("falloff", 10))
+                
+                if falloff <= 0:
+                    continue
+                    
+                # Calculate distances
+                dists = np.linalg.norm(location - pos, axis=1)
+                
+                # Calculate influence with proper broadcasting
+                cluster_influence = strength * np.exp(-dists / falloff)
+                
+                # Ensure shapes match before addition
+                if cluster_influence.shape == influence.shape:
+                    influence += cluster_influence
+                else:
+                    influence = influence + cluster_influence
+                    
+            except Exception as e:
+                print(f"Warning: Error processing salinity cluster: {e}")
+                continue
+
+        result = base_salinity + influence
+        
+        # Set values above surface (z > 0) to zero
+        result[location[:, 2] > 0] = 0.0
+
+        # Return scalar if input was single point
+        if single_point:
+            return float(result[0])
+        return result
+
+    @staticmethod
+    def biomass_model(**args):
+        """Calculate biomass with realistic subsurface maximum and biocline
+        
+        Possible Arguments:
+        max_biomass (:obj:`float`): The peak biomass value across the model (kg/m^3).
+        surface_biomass (:obj:`float`): The biomass level at surface level.
+        peak_depth (:obj:`float`): The depth at which biomass peaks.
+        biocline_sharpness (:obj:`float`): The degree of biomass drop off from the peak.
+        photic_zone_depth (:obj:`float`): The depth at which the photic zone ends (biomass decline).
+        deep_biomass (:obj:`float`): The biomass level approached as depth continues to increase.
+
+        Equation:
+
+        .. math::
+
+            \\text{gaussian_component} = (\\text{max_biomass} - \\text{surface_biomass})
+                                            \\cdot e^{\\left(-\\frac{(\\text{depth} - \\text{peak_depth})^2}
+                                                                {2 \\cdot \\text{width_factor}^2}\\right)}
+
+        .. math::
+
+            \\text{photic_biomass} = \\text{surface_biomass} + \\text{gaussian_component}
+
+        .. math::
+
+            \\text{biocline_factor} = \\frac{1}{1 + e^{\\left(\\frac{\\text{depth} - \\text{photic_zone_depth}}
+                                                                        {\\text{biocline_sharpness}}\\right)}}
+
+        .. math::
+
+            \\text{base_biomass} = \\text{photic_biomass} \\cdot \\text{biocline_factor} 
+                                    + \\text{deep_biomass} \\cdot (1 - \\text{biocline_factor})
+        """
+        location = np.array(args.get("location", [0, 0, 0]))
+        # print(f"biomass_model: location shape: {location.shape}")  # Debug
+        
+        # Ensure location is 2D array for consistent processing
+        if location.ndim == 1:
+            location = location[np.newaxis, :]
+            single_point = True
+        else:
+            single_point = False
+            
+        depth = np.maximum(-location[:, 2], 1e-3)  # Ensure positive depth, avoid division by zero
+        
+        # Get parameters - realistic photic zone biomass distribution
+        max_biomass = args.get("max_biomass", 2.5)  # Peak biomass value
+        peak_depth = args.get("peak_depth", 50.0)   # Subsurface chlorophyll maximum
+        surface_biomass = args.get("surface_biomass", 1.2)  # Surface biomass level
+        width_factor = args.get("width_factor", 25)  # Controls spread of the peak
+        photic_zone_depth = args.get("photic_zone_depth", 200.0)  # End of photic zone
+        biocline_sharpness = args.get("biocline_sharpness", 20.0)  # Steepness of biocline drop
+        deep_biomass = args.get("deep_biomass", 0.1)  # Minimal deep water biomass
+        biomass_clusters = args.get("biomass_clusters", [])
+
+        # Photic zone: Gaussian subsurface maximum
+        gaussian_component = (max_biomass - surface_biomass) * np.exp(-((depth - peak_depth) ** 2) / (2 * width_factor ** 2))
+        photic_biomass = surface_biomass + gaussian_component
+        
+        # Biocline: Sharp transition at photic zone boundary using sigmoid
+        biocline_factor = 1 / (1 + np.exp((depth - photic_zone_depth) / biocline_sharpness))
+        
+        # Deep water: Minimal biomass in aphotic zone
+        base_biomass = photic_biomass * biocline_factor + deep_biomass * (1 - biocline_factor)
+
+        # Initialize influence array with same shape as base_biomass
+        influence = np.zeros_like(base_biomass, dtype=np.float64)
+        
+        # Add cluster influences
+        for cluster in biomass_clusters:
+            try:
+                # print("cluster detected")
+                pos = np.array(cluster["position"])
+                strength = float(cluster.get("strength", 0))
+                falloff = float(cluster.get("falloff", 10))
+                
+                if falloff <= 0:
+                    continue
+                    
+                # Calculate distances
+                dists = np.linalg.norm(location - pos, axis=1)
+                
+                # Calculate influence with proper broadcasting
+                cluster_influence = strength * np.exp(-dists / falloff)
+                
+                # Ensure shapes match before addition
+                if cluster_influence.shape == influence.shape:
+                    influence += cluster_influence
+                else:
+                    influence = influence + cluster_influence
+                    
+            except Exception as e:
+                print(f"Warning: Error processing biomass cluster: {e}")
+                continue
+
+        result = base_biomass + influence
+        
+        # Set values above surface (z > 0) to zero
+        result[location[:, 2] > 0] = 0.0
+        
+        # Return scalar if input was single point
+        if single_point:
+            return float(result[0])
+        return result
+
+    @property
+    def sensor_data(self):
+        """Get the sensor data buffer
+
+        Returns:
+            :obj:`np.ndarray` of size :obj:`self.data_shape`: Current sensor data
+            [biomass, salinity, temperature]
+        """
+        try:
+            location = self._sensor_data_buffer
+            
+            # Ensure location is valid
+            if location is None or len(location) < 3:
+                print(f"Warning: Invalid location data: {location}")
+                return np.array([0.0, 35.0, 20.0], dtype=np.float32)
+            
+            # Update configurations with current location
+            self.biomass["config"]["location"] = location
+            self.salinity["config"]["location"] = location
+            self.temperature["config"]["location"] = location
+            
+            # Calculate biomass
+            try:
+                if self.biomass["biomass_function"]:
+                    bio_data = self.biomass["biomass_function"](**self.biomass["config"])
+                else:
+                    bio_data = self.biomass_model(**self.biomass["config"])
+                bio_data = float(bio_data) if np.isscalar(bio_data) else float(bio_data[0])
+            except Exception as e:
+                print(f"Error calculating biomass: {e}")
+                bio_data = 0.0
+            
+            # Calculate salinity
+            try:
+                if self.salinity["salinity_function"]:
+                    salinity_data = self.salinity["salinity_function"](**self.salinity["config"])
+                else:
+                    salinity_data = self.salinity_model(**self.salinity["config"])
+                salinity_data = float(salinity_data) if np.isscalar(salinity_data) else float(salinity_data[0])
+            except Exception as e:
+                print(f"Error calculating salinity: {e}")
+                salinity_data = 35.0
+            
+            # Calculate temperature
+            try:
+                if self.temperature["temperature_function"]:
+                    temp_data = self.temperature["temperature_function"](**self.temperature["config"])
+                else:
+                    temp_data = self.temperature_model(**self.temperature["config"])
+                temp_data = float(temp_data) if np.isscalar(temp_data) else float(temp_data[0])
+            except Exception as e:
+                print(f"Error calculating temperature: {e}")
+                temp_data = 20.0
+            
+            sensor_data = np.array([bio_data, salinity_data, temp_data], dtype=np.float32)
+            return sensor_data
+            
+        except Exception as e:
+            print(f"Critical error in BSTSensor.sensor_data: {e}")
+            return np.array([0.0, 35.0, 20.0], dtype=np.float32)
+
+    @property
+    def dtype(self):
+        return np.float32
+
+    @property
+    def data_shape(self):
+        return [3]
+
+
 ######################################################################################
 class SensorDefinition:
     """A class for new sensors and their parameters, to be used for adding new sensors.
@@ -2073,7 +2474,8 @@ class SensorDefinition:
         "MagnetometerSensor": MagnetometerSensor,
         "SinglebeamSonar": SinglebeamSonar,
         "RaycastLidar": RaycastLidar,
-        "RaycastSemanticLidar": RaycastSemanticLidar
+        "RaycastSemanticLidar": RaycastSemanticLidar,
+        "BSTSensor": BSTSensor
     }
 
     # Sensors that need timeout turned off

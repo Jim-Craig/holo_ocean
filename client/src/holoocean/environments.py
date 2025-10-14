@@ -46,7 +46,7 @@ from holoocean.weather import WeatherController
 from holoocean.flashlight import FlashlightController
 from holoocean.tide_cycle import TideController
 from holoocean.time_cycle import TimeController
-
+from holoocean.bst_graph import BST_Visualizer
 from holoocean.sensors import AcousticBeaconSensor
 from holoocean.sensors import OpticalModemSensor
 
@@ -1116,6 +1116,55 @@ class HoloOceanEnvironment:
         #     json.dump(vector_list, f)
 
         # print(f"Saved vector field to {file_path}")
+
+    @staticmethod
+    def initialize_bst_graphs(**kwargs):
+        """Initialize the bst heat maps for visualization and return BST visualizer instance. Make sure 
+        to call graph_instance.update_position(x, y, z) to update the graph periodically.
+
+        Args:
+            biomass_func (:func:`Callable`): An optional, custom biomass function parameter that takes in a 3D array called "location" and outputs the biomass metric at that location. 
+
+            salinity_func (:func:`Callable`): An optional, custom salinity function parameter that takes in a 3D array called "location" and outputs the biomass metric at that location.
+
+            temperature_func (:func:`Callable`): An optional, custom temperature function parameter that takes in a 3D array called "location" and outputs the biomass metric at that location.a
+            NOTE: when designing these custom functions, you must name the location parameter as "location"
+
+            agent (:obj:`string`): the name of the agent that you want to sample biomass, salinity, and temperature from (defaults to main agent)
+            biomass_range (:obj:`tuple`): the scale range of biomass for the heatmap (defaults to (0, 3))
+
+            salinity_range (:obj:`tuple`): the scale range of salinity for the heatmap (defaults to (32.8, 34))
+
+            temperature_range (:obj:`tuple`): the scale range of temperature for the heatmap (defaults to (4, 25))
+        """
+        # Initialize BST graphs
+        bst = BST_Visualizer(**kwargs)
+        bst.show()
+        return bst
+
+    def set_biomass_function(self, agent_name, new_fx):
+        """Change the default biomass function to your own custom function
+        Args:
+            agent_name (:obj:`string`): The name of the agent that you want to change biomass function for
+            new_fx (:obj:`callable`): The new function that takes in atleast the argument "location"
+        """
+        self.agents[agent_name].sensors["BSTSensor"].biomass["biomass_function"] = BST_Visualizer.make_bst_compatible(new_fx)
+
+    def set_salinity_function(self, agent_name, new_fx):
+        """Change the default salinity function to your own custom function
+        Args:
+            agent_name (:obj:`string`): The name of the agent that you want to change biomass function for
+            new_fx (:obj:`callable`): The new function that takes in atleast the argument "location"
+        """
+        self.agents[agent_name].sensors["BSTSensor"].salinity["salinity_function"] = BST_Visualizer.make_bst_compatible(new_fx)
+
+    def set_temperature_function(self, agent_name, new_fx):
+        """Change the default temperature function to your own custom function
+        Args:
+            agent_name (:obj:`string`): The name of the agent that you want to change biomass function for
+            new_fx (:obj:`callable`): The new function that takes in atleast the argument "location"
+        """
+        self.agents[agent_name].sensors["BSTSensor"].temperature["temperature_function"] = BST_Visualizer.make_bst_compatible(new_fx)
 
     def send_world_command(self, name, num_params=None, string_params=None):
         """Send a world command.

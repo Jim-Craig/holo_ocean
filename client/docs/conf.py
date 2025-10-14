@@ -36,6 +36,10 @@ release = "2.1.0"
 #
 # needs_sphinx = '1.0'
 
+
+mathjax_path = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -43,11 +47,12 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.imgmath',
+    # 'sphinx.ext.imgmath',
     'sphinx.ext.ifconfig',
     'sphinx.ext.napoleon',
     "sphinx_copybutton",
     'autodocsumm',
+    'sphinx.ext.mathjax',
 ]
 
 autodoc_default_options = {
@@ -202,3 +207,8 @@ epub_exclude_files = ['search.html']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+# Force docstrings to be formatted the same as regular .rst pages
+napoleon_use_rtype = False
+napoleon_google_docstring = False
+napoleon_numpy_docstring = False

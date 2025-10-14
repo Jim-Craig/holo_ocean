@@ -22,5 +22,6 @@ setup(
         'pywin32 >= 303; platform_system == "Windows" and python_version > "3.7"',
         "numpy",
         "scipy",
+        "matplotlib",
     ],
 )

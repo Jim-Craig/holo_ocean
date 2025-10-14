@@ -62,6 +62,7 @@ void UAddSensorCommand::Execute() {
 		{"SemanticSegmentationCamera", USemanticSegmentationCamera::StaticClass()},
 		{"RaycastLidar", URaycastLidar::StaticClass()},
 		{"RaycastSemanticLidar", URaycastSemanticLidar::StaticClass()},
+		{"BSTSensor", UBSTSensor::StaticClass()},
 
 	};
 
