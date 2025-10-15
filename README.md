@@ -7,11 +7,16 @@
  [![Build Status](https://robots.et.byu.edu:4144/api/badges/byu-holoocean/HoloOcean/status.svg?ref=refs/heads/develop)](https://robots.et.byu.edu:4144/byu-holoocean/HoloOcean)
 [![Docker Image CI](https://github.com/byu-holoocean/HoloOcean/actions/workflows/docker-image.yml/badge.svg)](https://github.com/byu-holoocean/HoloOcean/actions/workflows/docker-image.yml)
 
-HoloOcean is a high-fidelity simulator develped by the [Field Robotic Systems Lab (FRostLab)](https://frostlab.byu.edu) at [Brigham Young University](https://byu.edu).
+HoloOcean is a high-fidelity simulator develped by the [Field Robotic Systems Lab (FRoStLab)](https://frostlab.byu.edu) at [Brigham Young University](https://byu.edu).
 
 Built upon Unreal Engine (by Epic Games) and Holodeck (developed by the BYU PCCL Lab), HoloOcean enables easy simulation of marine robotics and autonomy with a wide variety of sensors, agents, and features.
 
-HoloOcean 2.0, the latest release of HoloOcean, incorporates new features such as ROS integration, high-fidelity vehicle dynamics, and improved rendering with Unreal Engine 5.
+## New Features
+ - Underwater currents 
+ - Biomass, salinity, and temperature (BST) sensor
+ - Tide control
+ - Environment appearance with weather and time of day commands
+ - Vehicle flashlights
 
 ## Features
  - 3+ rich worlds with various infrastructure for generating data or testing underwater algorithms
@@ -23,9 +28,13 @@ HoloOcean 2.0, the latest release of HoloOcean, incorporates new features such a
  - Easy installation and simple, OpenAI Gym-like Python interface
  - High performance - simulation speeds of up to 2x real time are possible. Performance penalty only for what you need
  - Run headless or watch your agents learn
+ - ROS 2 integration
+ - High-fidelity Fossen vehicle dynamics
  - Linux and Windows support
 
- ## Important Note: The latest release, HoloOcean 2.0, updates from Unreal Engine 4.27 to 5.3. Our documentation has been updated to reflect this.
+## Upcoming Features
+
+Semantic segmentation camera, semantic LiDAR sensor, and depth camera coming soon for HoloOcean 2.3.
 
 ## Installation
 Clone the repo, then
@@ -105,5 +114,18 @@ If you use HoloOcean for your research, please cite the relevent publications de
   address = {Kyoto, Japan},
   month = {Oct},
   year = {2022}
+}
+```
+
+### HoloOcean 2.0 features:
+```
+   @misc{romrell2025previewholoocean20,
+      title={A Preview of HoloOcean 2.0}, 
+      author={Blake Romrell and Abigail Austin and Braden Meyers and Ryan Anderson and Carter Noh and Joshua G. Mangelson},
+      year={2025},
+      eprint={2510.06160},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2510.06160}, 
 }
 ```
