@@ -1,6 +1,7 @@
 import holoocean
 import uuid
 import pytest
+import numpy as np
 
 from tests.utils.equality import almost_equal
 
@@ -35,8 +36,8 @@ def cfg1(vehicle_type="SphereAgent"):
     ["SphereAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
     indirect=True,
 )
-def test_range_finder_sensor_max(cfg1):
-    """Make sure the range sensor set max distance correctly."""
+def test_range_finder_sensor_no_hit(cfg1):
+    """Make sure the range sensor returns a -1 when nothing is within the max range of the sensor."""
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
 
     with holoocean.environments.HoloOceanEnvironment(
@@ -55,14 +56,50 @@ def test_range_finder_sensor_max(cfg1):
             len(actual) == expected_count
         ), "Sensed range size did not match the expected size!"
 
-        expected_dist = cfg1["agents"][0]["sensors"][0]["configuration"][
-            "LaserMaxDistance"
-        ]
-        assert all(x > 0 for x in actual), "Sensed range includes 0!"
+        expected_dist = -1
         assert all(
-            x <= expected_dist for x in actual
-        ), "Sensed range includes value greater than 1!"
+            np.isclose(expected_dist, actual)
+        ), "Sensed range not -1 for no detected hit"
 
+@pytest.mark.parametrize(
+    "cfg1",
+    ["SphereAgent", "HoveringAUV", "TorpedoAUV", "SurfaceVessel", "BlueROV2"],
+    indirect=True,
+)
+def test_range_finder_sensor_range_values(cfg1):
+    """Make sure the range sensor returns appropriate values across the full span of possible measurements.
+    Starts before the range finder can see anything, then from 0 to the max range."""
+
+    binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
+    max_range_setting = cfg1["agents"][0]["sensors"][0]["configuration"]["LaserMaxDistance"]
+    x_location_modifiers = np.arange(0, max_range_setting+0.015, 0.01)
+    agent_start_location = [2.78, 0.5, 0.5]
+
+    with holoocean.environments.HoloOceanEnvironment(
+        scenario=cfg1,
+        binary_path=binary_path,
+        show_viewport=False,
+        # verbose=True,
+        uuid=str(uuid.uuid4()),
+    ) as env:
+        range_finder_measurements = []
+        for x_location_mod in x_location_modifiers:
+            new_location = np.asarray(agent_start_location)
+            new_location[0] -= x_location_mod
+            env.agents["sphere0"].teleport(location=new_location.tolist())
+            state = env.tick()
+            actual = state["RangeFinderSensor"]
+            range_finder_measurements.append(float(actual[0]))
+        # Check if the first measurement was a "no return" of -1
+        expected_no_hit_meas = -1
+        assert (expected_no_hit_meas == range_finder_measurements[0]), "Sensed range for no detection did not match expected value!"
+        # Check that the rest of the measurements lie between 0 and the max range
+        print(range_finder_measurements[1:])
+        assert all(np.asarray(range_finder_measurements[1:]) >= 0.0), "Sensed range went below 0.0 when not expected!"
+        assert all(np.asarray(range_finder_measurements[1:]) <= max_range_setting), "Sensed range exceeded maximum value!"
+        # Check that the expected number of lasers matches the actual number
+        expected_count = cfg1["agents"][0]["sensors"][0]["configuration"]["LaserCount"]
+        assert (len(actual) == expected_count), "Sensed range size did not match the expected size!"
 
 @pytest.fixture(scope="module")
 def cfg2(vehicle_type="UavAgent"):

@@ -66,7 +66,7 @@ void URangeFinderSensor::TickSensorComponent(float DeltaTime, ELevelTick TickTyp
 
 		bool TraceResult = GetWorld()->LineTraceSingleByChannel(Hit, start, end, ECollisionChannel::ECC_Visibility, QueryParams);
 		
-		FloatBuffer[i] = (TraceResult ? Hit.Distance : LaserMaxDistance) / 100.0;  // centimeter to meters
+		FloatBuffer[i] = (TraceResult ? Hit.Distance : -100.0) / 100.0;  // centimeter to meters
 
 		if (LaserDebug) {
 			DrawDebugLine(GetWorld(), start, end, FColor::Green, false, .01, ECC_WorldStatic, 1.f);

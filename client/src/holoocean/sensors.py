@@ -368,7 +368,7 @@ class DynamicsSensor(HoloOceanSensor):
 
 class RangeFinderSensor(HoloOceanSensor):
     """Returns distances to nearest collisions in the directions specified by
-    the parameters. 
+    the parameters. If no hit is detected by the laser, a negative value is returned.
 
     **Configuration**
 

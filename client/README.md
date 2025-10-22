@@ -24,7 +24,7 @@ HoloOcean 2.0, the latest release of HoloOcean, incorporates new features such a
  - Run headless or watch your agents learn
  - Linux and Windows support
 
- ## Important Note: The latest release, HoloOcean 2.0, updates from Unreal Engine 4.27 to 5.3. Our documentation has been updated to reflect this.
+ ## Important Note: Starting with HoloOcean 2.0, we have updated from Unreal Engine 4.27 to 5.3. Our documentation has been updated to reflect this.
 
 ## Installation
 Clone the repo, then
