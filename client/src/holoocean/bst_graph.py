@@ -9,39 +9,46 @@ warnings.filterwarnings('ignore')
 
 
 class BST_Visualizer:
-    def __init__(self, config=None, biomass_func=None, salinity_func=None, temperature_func=None, agent=None, biomass_range=(0, 3), salinity_range=(32.8, 34), temperature_range=(4, 25)):
+    def __init__(self, config=None, biomass_function=None, salinity_function=None, temperature_function=None, agent=None):
         # Position and settings
         self.position = np.array([0.0, 0.0, 0.0])
         self.range_val = 75.0
         self.resolution = 25
         self.config = config or {}
-        
+
         # Functions - keep original model functions exactly as they were
-        if biomass_func is not None:
-            self.biomass_func = self.make_bst_compatible(biomass_func)
+        if biomass_function is not None:
+            self.biomass_function = self.make_bst_compatible(biomass_function)
         else:
-            self.biomass_func = BSTSensor.biomass_model
+            self.biomass_function = BSTSensor.biomass_model
 
-        if salinity_func is not None:
-            self.salinity_func = self.make_bst_compatible(salinity_func)
+        if salinity_function is not None:
+            self.salinity_function = self.make_bst_compatible(salinity_function)
         else:
-            self.salinity_func = BSTSensor.salinity_model
+            self.salinity_function = BSTSensor.salinity_model
 
-        if temperature_func is not None:
-            self.temperature_func = self.make_bst_compatible(temperature_func)
+        if temperature_function is not None:
+            self.temperature_function = self.make_bst_compatible(temperature_function)
         else:
-            self.temperature_func = BSTSensor.temperature_model
+            self.temperature_function = BSTSensor.temperature_model
 
+        # Here we grab the bst range configuration from the original config. We use the next() function, which iterates
+        # through an iterator and checks a condition, returning the first item that matches the condition
         self.agent = agent or self.config["main_agent"]
-        self.biomass_range = biomass_range
-        self.salinity_range = salinity_range
-        self.temperature_range = temperature_range
+        self.agent_list = self.config["agents"]
+        self.sensor_list = next(agent["sensors"] for agent in self.agent_list if agent["agent_name"] == self.agent)
+        self.bst_config = next(sensor["configuration"] for sensor in self.sensor_list if sensor["sensor_type"] == "BSTSensor")
         
+        self.biomass_range = self.bst_config.get("biomass_range", (0, 3))
+        self.salinity_range = self.bst_config.get("salinity_range", (32.75, 34))
+        self.temperature_range = self.bst_config.get("temperature_range", (5, 25))
+        print(f"Biomass Range: {self.biomass_range}\nSalinity Range: {self.salinity_range}\nTemperature Range: {self.temperature_range}")
+
         # Function info for plotting
         self.functions = [
-            (self.biomass_func, 'Biomass', 'kg/m³', 'Greens'),
-            (self.salinity_func, 'Salinity', 'psu', 'Blues'),
-            (self.temperature_func, 'Temperature', '°C', 'Reds')
+            (self.biomass_function, 'Biomass', 'kg/m³', 'Greens'),
+            (self.salinity_function, 'Salinity', 'psu', 'Blues'),
+            (self.temperature_function, 'Temperature', '°C', 'Reds')
         ]
         
         # Plot elements
@@ -127,7 +134,7 @@ class BST_Visualizer:
             self.initialized = True
             
         except Exception as e:
-            print(f"❌ Error setting up plots: {e}")
+            print(f"Error setting up plots: {e}")
             for backend in ['Qt5Agg', 'Agg']:
                 try:
                     matplotlib.use(backend)
@@ -135,7 +142,7 @@ class BST_Visualizer:
                     self.fig.patch.set_facecolor('black')
                     plt.subplots_adjust(hspace=0.8, wspace=0.4, top=0.85, bottom=0.08, left=0.08, right=0.92)
                     self.initialized = True
-                    print(f"✅ Using {backend} backend")
+                    print(f"Using {backend} backend")
                     break
                 except:
                     continue
@@ -225,7 +232,7 @@ class BST_Visualizer:
     def update_plots(self):
         """Update all plots without recreating colorbars"""
         if not self.initialized:
-            print("❌ Plots not initialized")
+            print("Plots not initialized")
             return False
         
         try:
@@ -336,7 +343,7 @@ class BST_Visualizer:
                             self.images[i][1].set_extent([X_xz.min(), X_xz.max(), Z_xz.min(), Z_xz.max()])
                             
                             # Update colorbar limits - adjusted for new biomass model
-                            limits = [(0, 3), (32.8, 34), (4, 25)][i]  # biomass, salinity, temperature
+                            limits = [self.biomass_range, self.salinity_range, self.temperature_range][i]  # biomass, salinity, temperature
                             self.images[i][1].set_clim(limits[0], limits[1])
                     
                     # Remove old crosshair and value text
@@ -392,17 +399,17 @@ class BST_Visualizer:
             self.fig.canvas.draw()
             self.fig.canvas.flush_events()
             
-            # print("✅ Plots updated successfully")
+            # print("Plots updated successfully")
             return True
             
         except Exception as e:
-            print(f"❌ Error updating plots: {e}")
+            print(f"Error updating plots: {e}")
             return False
     
     def show(self):
         """Show the visualizer"""
         if not self.initialized:
-            print("❌ Cannot show - plots not initialized")
+            print("Cannot show - plots not initialized")
             return
         
         try:
@@ -411,10 +418,10 @@ class BST_Visualizer:
             plt.show(block=False)
             self.fig.canvas.draw()
             self.fig.canvas.flush_events()
-            # print("✅ Visualizer displayed. Use update_position([x, y, z]) to update.")
+            # print("Visualizer displayed. Use update_position([x, y, z]) to update.")
             
         except Exception as e:
-            print(f"❌ Error showing plots: {e}")
+            print(f"Error showing plots: {e}")
     
     def close(self):
         """Close the visualizer"""
@@ -433,4 +440,4 @@ class BST_Visualizer:
         except Exception as e:
             print(f"Warning during cleanup: {e}")
         finally:
-            print("✅ Visualizer closed")
+            print("Visualizer closed")

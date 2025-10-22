@@ -2037,7 +2037,7 @@ class BSTSensor(HoloOceanSensor):
             "config": {
                 "max_biomass": 1.0,
                 "max_concentration_depth": 100.0,
-                "attenuation_exponent": 0.858,
+                "biomass_attenuation_exponent": 0.858,
                 "biomass_clusters": []
             },
             "biomass_function": self.config.get("biomass_function", None)
@@ -2076,6 +2076,11 @@ class BSTSensor(HoloOceanSensor):
             k: v for k, v in self.config.items() if k in self.temperature["config"]
         })
 
+        # Grab statistic ranges from config
+        self.biomass_range = self.config.get("biomass_range", (0, 3))
+        self.salinity_range = self.config.get("salinity_range", (32.8, 34))
+        self.temperature_range = self.config.get("temperature_range", (4, 25))
+
         super(BSTSensor, self).__init__(
             client, agent_name, agent_type, name=name, config=config
         )
@@ -2107,7 +2112,7 @@ class BSTSensor(HoloOceanSensor):
             single_point = True
         else:
             single_point = False
-            
+        
         depth = np.maximum(-location[:, 2], 0)  # Ensure positive depth
         
         # Get parameters
