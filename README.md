@@ -52,7 +52,7 @@ See [Installation](https://byu-holoocean.github.io/holoocean-docs/develop/usage/
 * [Examples](https://byu-holoocean.github.io/holoocean-docs/develop/usage/getting-started.html#code-examples)
 * [Agents](https://byu-holoocean.github.io/holoocean-docs/develop/agents/agents.html)
 * [Sensors](https://byu-holoocean.github.io/holoocean-docs/develop/holoocean/sensors.html)
-* [Available Packages and Worlds](https://byu-holoocean.github.io/holoocean-docs//developpackages/packages.html)
+* [Available Packages and Worlds](https://byu-holoocean.github.io/holoocean-docs/develop/packages/packages.html)
 
 ## Usage Overview
 HoloOcean's interface is similar to OpenAI's gym.
