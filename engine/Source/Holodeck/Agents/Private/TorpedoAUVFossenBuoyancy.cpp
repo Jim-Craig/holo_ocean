@@ -9,7 +9,7 @@ void UTorpedoAUVFossenBuoyancy::Execute(void* const CommandArray, void* const In
 	if (TorpedoAUV == nullptr) {
 		TorpedoAUV = static_cast<ATorpedoAUV*>(TorpedoAUVController->GetPawn());
 		if (TorpedoAUV == nullptr) {
-			UE_LOG(LogHolodeck, Error, TEXT("UTorpedoAUVControlFins couldn't get TorpedoAUV reference"));
+			UE_LOG(LogHolodeck, Error, TEXT("UTorpedoAUVFossenBuoyancy couldn't get TorpedoAUV reference"));
 			return;
 		}
 		

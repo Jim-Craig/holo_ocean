@@ -11,7 +11,7 @@ ATorpedoAUV::ATorpedoAUV() {
 	AIControllerClass = LoadClass<AController>(NULL, TEXT("/Script/Holodeck.TorpedoAUVController"), NULL, LOAD_None, NULL);
 	AutoPossessAI = EAutoPossessAI::PlacedInWorld;
 
-	this->MassInKG = 45;
+	this->MassInKG = 36;
 	this->Volume =  MassInKG / WaterDensity; //0.0342867409204;
 	this->CenterMass = FVector(0, 0, 0);     // cm (unreal units)
 	this->CenterBuoyancy = FVector(0, 0, 1); // cm (unreal units)
@@ -54,25 +54,10 @@ void ATorpedoAUV::ApplyFin(int i, float command){
 	FRotator bodyToWorld = this->GetActorRotation();
 	FRotator finToBody = UKismetMathLibrary::ComposeRotators(FRotator(commandAngle, 0, 0), finRotation[i]); // Note: rotators use convention (pitch, yaw, roll). The command is a pitch. 
 
-	// Check that TorpedoAUV controller is valid
-	if (!TorpedoAUVController) {
-		UE_LOG(LogHolodeck, Error, TEXT("TorpedoAUVController is null"));
-		return;
-	}
-
-	// Grab TorpedoAUV
-	if (TorpedoAUV == nullptr) {
-		TorpedoAUV = static_cast<ATorpedoAUV*>(TorpedoAUVController->GetPawn());
-		if (TorpedoAUV == nullptr) {
-			UE_LOG(LogHolodeck, Error, TEXT("UTorpedoAUVControlFins couldn't get TorpedoAUV reference"));
-			return;
-		}
-	}
-
 	// get velocity at fin location, in fin frame
 	FVector finWorld = RootMesh->GetCenterOfMass() + bodyToWorld.RotateVector(finTranslation[i] - CenterMass);
 	FVector velWorld = RootMesh->GetPhysicsLinearVelocityAtPoint(finWorld); // METERS/sec (unreal is dumb, distance is in cm/s but velocity is in m/s)
-	FVector velOceanCurrent = TorpedoAUV->GetOceanCurrentVelocity();
+	FVector velOceanCurrent = this->GetOceanCurrentVelocity();
 	FVector relativeVel = velWorld - velOceanCurrent;
 	FVector velBody = bodyToWorld.UnrotateVector(relativeVel);
 	FVector velFin = finToBody.UnrotateVector(velBody);
@@ -141,5 +126,6 @@ void ATorpedoAUV::ApplyThrust(float thrust){
 // For empty dynamics, damping is disabled
 // Enable it when using thrusters & fins
 void ATorpedoAUV::EnableDamping(){
+	RootMesh->SetLinearDamping(0.75);
 	RootMesh->SetAngularDamping(0.5);
 }
