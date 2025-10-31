@@ -180,6 +180,16 @@ void USidescanSonar::TickSensorComponent(float DeltaTime, ELevelTick TickType, F
 			for(Octree* l : bin){
 				// Calculate range bin
 				l->idx.X = (int32)((l->locSpherical.X - RangeMin) / RangeRes);
+				if (l->idx.X == RangeBins) { // This happens if l->locSpherical.X is equal to (or really close to) RangeMax. Which is very rare, but is possible
+					l->idx.X = RangeBins - 1; // Adjusts l->idx.X to ensure later computations for 'idx' produce expected values
+				}
+				// The following two statements shouldn't ever be possible, but we include them just in case we have a unique situation, to avoid unexplained behavior
+				else if (l->idx.X > RangeBins) {
+					UE_LOG(LogHolodeck, Fatal, TEXT("USidescanSonar::TickSensorComponent 'l->idx.X' was assigned a value larger than RangeBins"));
+				}
+				else if (l->idx.X < 0) {
+					UE_LOG(LogHolodeck, Fatal, TEXT("USidescanSonar::TickSensorComponent 'l->idx.X' was assigned a negative value"));
+				}
 
 				// Add to their appropriate bin
 				if (l->idx.Y > (AzimuthBins / 2)){
