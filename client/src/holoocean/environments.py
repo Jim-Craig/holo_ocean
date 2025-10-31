@@ -17,6 +17,7 @@ import numpy as np
 import json
 import time
 
+
 from holoocean.command import (
     CommandCenter,
     SpawnAgentCommand,
@@ -1386,6 +1387,7 @@ class HoloOceanEnvironment:
         return None  # Not implemented for other types
 
     ######################### HOLOOCEAN CUSTOM #############################
+
 
     ######################## ACOUSTIC BEACON HELPERS ###########################
 

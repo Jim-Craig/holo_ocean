@@ -1,12 +1,19 @@
 """Module containing high level interface for loading environments."""
+
 import uuid
 
 from holoocean.environments import HoloOceanEnvironment
-from holoocean.packagemanager import get_scenario,\
-    get_binary_path_for_scenario,\
-    get_package_config_for_scenario,\
-    get_binary_path_for_package
+from holoocean.packagemanager import (
+    get_scenario,
+    get_binary_path_for_scenario,
+    get_package_config_for_scenario,
+    get_binary_path_for_package,
+)
 from holoocean.exceptions import HoloOceanException
+
+from holoocean.util import get_holoocean_path, human_readable_size
+import os
+from shutil import rmtree as shutilrmtree
 
 
 class GL_VERSION:
@@ -16,12 +23,23 @@ class GL_VERSION:
         OPENGL3 (:obj:`int`): The value for OpenGL3.
         OPENGL4 (:obj:`int`): The value for OpenGL4.
     """
+
     OPENGL4 = 4
     OPENGL3 = 3
 
 
-def make(scenario_name="", scenario_cfg=None, gl_version=GL_VERSION.OPENGL4, window_res=None, verbose=False,
-         show_viewport=True, ticks_per_sec=None, frames_per_sec=None, copy_state=True, start_world=True):
+def make(
+    scenario_name="",
+    scenario_cfg=None,
+    gl_version=GL_VERSION.OPENGL4,
+    window_res=None,
+    verbose=False,
+    show_viewport=True,
+    ticks_per_sec=None,
+    frames_per_sec=None,
+    copy_state=True,
+    start_world=True,
+):
     """Creates a HoloOcean environment
 
     Args:
@@ -46,7 +64,7 @@ def make(scenario_name="", scenario_cfg=None, gl_version=GL_VERSION.OPENGL4, win
             If the viewport window should be shown on-screen (Linux only). Defaults to True
 
         ticks_per_sec (:obj:`int`, optional):
-            The number of frame ticks per unreal seconds. This will override whatever is 
+            The number of frame ticks per unreal seconds. This will override whatever is
             in the configuration json. Defaults to 30.
 
         frames_per_sec (:obj:`int` or :obj:`bool`, optional):
@@ -78,10 +96,16 @@ def make(scenario_name="", scenario_cfg=None, gl_version=GL_VERSION.OPENGL4, win
             scenario = scenario_cfg
             binary_path = get_binary_path_for_package(scenario["package_name"])
         else:
-            raise HoloOceanException("You must specify scenario_name or scenario_config")
+            raise HoloOceanException(
+                "You must specify scenario_name or scenario_config"
+            )
         # Get pre-start steps
         package_config = get_package_config_for_scenario(scenario)
-        world = [world for world in package_config["worlds"] if world["name"] == scenario["world"]][0]
+        world = [
+            world
+            for world in package_config["worlds"]
+            if world["name"] == scenario["world"]
+        ][0]
         param_dict["pre_start_steps"] = world["pre_start_steps"]
         if "env_min" not in scenario and "env_min" in world:
             scenario["env_min"] = world["env_min"]
@@ -111,17 +135,103 @@ def make(scenario_name="", scenario_cfg=None, gl_version=GL_VERSION.OPENGL4, win
             ticks_per_sec = scenario_cfg["ticks_per_sec"]
 
         if ticks_per_sec is None:
-            input("Ticks per second not specified, using default of 30. Press enter to continue...")
+            input(
+                "Ticks per second not specified, using default of 30. Press enter to continue..."
+            )
             ticks_per_sec = 30
         param_dict["ticks_per_sec"] = ticks_per_sec
 
         if "frames_per_sec" in scenario_cfg:
             frames_per_sec = scenario_cfg["frames_per_sec"]
         if frames_per_sec is None:
-            input("Frames per second not specified, using default of 30. Press enter to continue...")
+            input(
+                "Frames per second not specified, using default of 30. Press enter to continue..."
+            )
             frames_per_sec = 30
-        param_dict["frames_per_sec"] = frames_per_sec    
+        param_dict["frames_per_sec"] = frames_per_sec
         param_dict["set_fps"] = True if frames_per_sec is not False else None
         param_dict["set_tps"] = True if ticks_per_sec is not None else None
 
     return HoloOceanEnvironment(**param_dict)
+
+
+def delete_all_octrees():
+    """Deletes the octree from the world.
+    If this fails, it will raise a HoloOceanException.
+    If it succeeds, it will print the amount of space freed up.
+    """
+    holoocean_path = get_holoocean_path()
+    os.chdir(holoocean_path)
+    if not os.path.exists("worlds"):
+        raise HoloOceanException("No worlds directory found in HoloOcean path.")
+    os.chdir("worlds")
+    if not os.path.exists("Ocean"):
+        raise HoloOceanException("Ocean not found.")
+    os.chdir("Ocean")
+    os_type = "Windows" if os.name == "nt" else "Linux"
+    if not os.path.exists(os_type):
+        raise HoloOceanException("No {} directory found.".format(os_type))
+    os.chdir(os_type)
+    if not os.path.exists("Holodeck"):
+        raise HoloOceanException("No Holodeck directory found.")
+    os.chdir("Holodeck")
+    if not os.path.exists("Octrees"):
+        raise HoloOceanException("No Octrees directory found.")
+    os.chdir("Octrees")
+    for world_name in os.listdir():
+        print("Deleting octree for world: ", world_name)
+
+        def getSize():
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(world_name):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            return total_size
+
+        size_freed = getSize()
+        shutilrmtree(world_name)
+        size_freed_str = human_readable_size(size_freed)
+        print("Freed up ", size_freed_str)
+
+
+def delete_world_octrees(world_name):
+    """Deletes the octree from the specified world.
+    If this fails, it will raise a HoloOceanException.
+    If it succeeds, it will print the amount of space freed up.
+    """
+    holoocean_path = get_holoocean_path()
+    os.chdir(holoocean_path)
+    if not os.path.exists("worlds"):
+        raise HoloOceanException("No worlds directory found in HoloOcean path.")
+    os.chdir("worlds")
+    if not os.path.exists("Ocean"):
+        raise HoloOceanException("Ocean not found.")
+    os.chdir("Ocean")
+    os_type = "Windows" if os.name == "nt" else "Linux"
+    if not os.path.exists(os_type):
+        raise HoloOceanException("No {} directory found.".format(os_type))
+    os.chdir(os_type)
+    if not os.path.exists("Holodeck"):
+        raise HoloOceanException("No Holodeck directory found.")
+    os.chdir("Holodeck")
+    if not os.path.exists("Octrees"):
+        raise HoloOceanException("No Octrees directory found.")
+    os.chdir("Octrees")
+    if not os.path.exists(world_name):
+        raise HoloOceanException("No octree found for world: {}".format(world_name))
+    else:
+        print("Deleting octree for world: ", world_name)
+
+        def getSize():
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(world_name):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            return total_size
+
+        size_freed = getSize()
+        shutilrmtree(world_name)
+        size_freed_str = human_readable_size(size_freed)
+        print("Freed up ", size_freed_str)
