@@ -24,6 +24,10 @@ ASurfaceVessel::ASurfaceVessel() {
 	this->AreaOfDrag = 1.0;
 
 
+	// These values are completely guesstimations
+	this->CoefficientOfDrag = 0.8;
+	this->AreaOfDrag = 1.0;
+
 	// Shift thruster locations by offset to the origin
 	for(int i=0;i<2;i++){
 		thrusterLocations[i] -= CenterMass;
