@@ -37,7 +37,7 @@ from holoocean.command import (
     SetRainParametersCommand,
     AirFogCommand,
     WaterFogCommand,
-    OceanCurrentsCommand
+    OceanCurrentsCommand,
 )
 
 from holoocean.exceptions import HoloOceanException
@@ -173,7 +173,7 @@ class HoloOceanEnvironment:
             self._ticks_per_sec = 30
 
         # If one wasn't passed in, use one in scenario
-        if frames_per_sec is None :
+        if frames_per_sec is None:
             if scenario is not None and "frames_per_sec" in scenario:
                 frames_per_sec = scenario["frames_per_sec"]
             #  default to true
@@ -223,7 +223,7 @@ class HoloOceanEnvironment:
         self.tide_cycle = TideController(self._client)
         self.tide_cycle.get_ticks(lambda: self._num_ticks)
 
-        #Initialize time of day controller
+        # Initialize time of day controller
         self.time_cycle = TimeController(self._client)
         self.time_cycle.get_ticks(lambda: self._num_ticks)
 
@@ -303,7 +303,7 @@ class HoloOceanEnvironment:
                 result.append(sensor.name)
                 result.append("\n")
         return "".join(result)
-    
+
     def _load_scenario(self):
         """Loads the scenario defined in self._scenario_key.
 
@@ -474,7 +474,6 @@ class HoloOceanEnvironment:
                 )
 
                 flashlight_controller.set_flashlight()
-
 
     def reset(self):
         """Resets the environment, and returns the state.
@@ -862,7 +861,7 @@ class HoloOceanEnvironment:
 
         Args:
             render_quality (:obj:`int`, :obj:`boolean`): An integer between 0 = Low Quality and 3 = Epic quality.
-            The boolean is a second, optional parameter that determines whether or not to maintain the FPS limit at the previously defined rate. 
+            The boolean is a second, optional parameter that determines whether or not to maintain the FPS limit at the previously defined rate.
             If false the FPS max rate will be removed. Default behavior is to remove the FPS cap. If true, the previous FPS limit will be maintained.
         """
         self._enqueue_command(RenderQualityCommand(render_quality))
@@ -893,7 +892,20 @@ class HoloOceanEnvironment:
         self._ticks_per_sec = ticks_per_sec
         self._enqueue_command(SetTPSCommand(ticks_per_sec))
 
-    def turn_on_flashlight(self, flashlight_name, intensity=5000, beam_width=45, location_x_offset=0, location_y_offset=0, location_z_offset=0, angle_pitch=-30, angle_yaw=0, color_R=1, color_G=1, color_B=1):
+    def turn_on_flashlight(
+        self,
+        flashlight_name,
+        intensity=5000,
+        beam_width=45,
+        location_x_offset=0,
+        location_y_offset=0,
+        location_z_offset=0,
+        angle_pitch=-30,
+        angle_yaw=0,
+        color_R=1,
+        color_G=1,
+        color_B=1,
+    ):
         """Turns on the vehicle's flashlight and sets its visual parameters.
 
         Args:
@@ -913,21 +925,41 @@ class HoloOceanEnvironment:
         if "flashlight" in self._scenario:
             for flashlight_data in self._scenario["flashlight"]:
                 # Check if flashlight is defined in the config and use those values as default
-                if (flashlight_name == flashlight_data.get("flashlight_name")):
-                    intensity=flashlight_data.get("intensity", intensity)
-                    beam_width=flashlight_data.get("beam_width", beam_width)
-                    location_x_offset=flashlight_data.get("location_x_offset", location_x_offset)
-                    location_y_offset=flashlight_data.get("location_y_offset", location_y_offset)
-                    location_z_offset=flashlight_data.get("location_z_offset", location_z_offset)
-                    angle_pitch=flashlight_data.get("angle_pitch", angle_pitch)
-                    angle_yaw=flashlight_data.get("angle_yaw", angle_yaw)
-                    color_R=flashlight_data.get("color_R", color_R)
-                    color_G=flashlight_data.get("color_G", color_G)
-                    color_B=flashlight_data.get("color_B", color_B)
+                if flashlight_name == flashlight_data.get("flashlight_name"):
+                    intensity = flashlight_data.get("intensity", intensity)
+                    beam_width = flashlight_data.get("beam_width", beam_width)
+                    location_x_offset = flashlight_data.get(
+                        "location_x_offset", location_x_offset
+                    )
+                    location_y_offset = flashlight_data.get(
+                        "location_y_offset", location_y_offset
+                    )
+                    location_z_offset = flashlight_data.get(
+                        "location_z_offset", location_z_offset
+                    )
+                    angle_pitch = flashlight_data.get("angle_pitch", angle_pitch)
+                    angle_yaw = flashlight_data.get("angle_yaw", angle_yaw)
+                    color_R = flashlight_data.get("color_R", color_R)
+                    color_G = flashlight_data.get("color_G", color_G)
+                    color_B = flashlight_data.get("color_B", color_B)
                     break
 
-        self._enqueue_command(TurnOnFlashlightCommand(flashlight_name, intensity, beam_width, location_x_offset, location_y_offset, location_z_offset, angle_pitch, angle_yaw, color_R, color_G, color_B))
-        
+        self._enqueue_command(
+            TurnOnFlashlightCommand(
+                flashlight_name,
+                intensity,
+                beam_width,
+                location_x_offset,
+                location_y_offset,
+                location_z_offset,
+                angle_pitch,
+                angle_yaw,
+                color_R,
+                color_G,
+                color_B,
+            )
+        )
+
     def turn_off_flashlight(self, flashlight_name):
         """Turns off the vehicle's flashlight.
 
@@ -961,12 +993,12 @@ class HoloOceanEnvironment:
         """Changes the weather in the world.
 
         Args:
-            weather (:obj:`int`): The weather wanted (0 - sunny, 1 - cloudy, 2 - rainy).      
+            weather (:obj:`int`): The weather wanted (0 - sunny, 1 - cloudy, 2 - rainy).
         """
         self._enqueue_command(ChangeWeatherCommand(weather))
 
     def change_time_of_day(self, TimeOfDay):
-        """Changes the world's time of day. 
+        """Changes the world's time of day.
 
         Args:
             TimeOfDay (:obj:`float`): Time of day desired, a number between 0 and 23 inclusive.
@@ -974,7 +1006,7 @@ class HoloOceanEnvironment:
         self._enqueue_command(ChangeTimeOfDayCommand(TimeOfDay))
 
     def set_rain_parameters(self, vel_x, vel_y, vel_z, spawnRate):
-        """Changes the rain's velocity and spawn rate. 
+        """Changes the rain's velocity and spawn rate.
 
         Args:
             vel_x (:obj:`float`): Rain velocity on the x axis.
@@ -982,7 +1014,7 @@ class HoloOceanEnvironment:
             vel_z (:obj:`float`): Rain velocity on the z axis. Should be a negative value.
             spawnRate(:obj:`float`): Rain's spawn rate (number of particles).
         """
-        self._enqueue_command(SetRainParametersCommand(vel_x,vel_y,vel_z,spawnRate))
+        self._enqueue_command(SetRainParametersCommand(vel_x, vel_y, vel_z, spawnRate))
 
     def air_fog(self, fogDensity, fogDepth=3.0, color_R=0.45, color_G=0.5, color_B=0.6):
         """Changes the air fog density, depth, and color.
@@ -993,9 +1025,13 @@ class HoloOceanEnvironment:
             color_G (:obj:`float`): The green component of the fog's color. Range: 0.0 to 1.0. (Default = 0.5)
             color_B (:obj:`float`): The blue component of the fog's color. Range: 0.0 to 1.0. (Default = 0.6)
         """
-        self._enqueue_command(AirFogCommand(fogDensity, fogDepth, color_R, color_G, color_B))
+        self._enqueue_command(
+            AirFogCommand(fogDensity, fogDepth, color_R, color_G, color_B)
+        )
 
-    def water_fog(self, fogDensity, fogDepth=3.0, color_R=0.4, color_G=0.6, color_B=1.0):
+    def water_fog(
+        self, fogDensity, fogDepth=3.0, color_R=0.4, color_G=0.6, color_B=1.0
+    ):
         """Changes the water fog density, depth, and color.
         Args:
             fogDensity (:obj:`float`): The density value for the fog. Range: 0.0 to 10.0.
@@ -1004,7 +1040,9 @@ class HoloOceanEnvironment:
             color_G (:obj:`float`): The green component of the fog's color. Range: 0.0 to 1.0. (Default = 0.6)
             color_B (:obj:`float`): The blue component of the fog's color. Range: 0.0 to 1.0. (Default = 1.0)tt
         """
-        self._enqueue_command(WaterFogCommand(fogDensity, fogDepth, color_R, color_G, color_B))
+        self._enqueue_command(
+            WaterFogCommand(fogDensity, fogDepth, color_R, color_G, color_B)
+        )
 
     def set_control_scheme(self, agent_name, control_scheme):
         """Set the control scheme for a specific agent.
@@ -1018,7 +1056,7 @@ class HoloOceanEnvironment:
             print("No such agent %s" % agent_name)
         else:
             self.agents[agent_name].set_control_scheme(control_scheme)
-        
+
     # use this to get the names of vector field for debug purposes
     def set_show_vector_field_name(self, state):
         """Set whether to show the vector field name in the viewport.
@@ -1028,9 +1066,9 @@ class HoloOceanEnvironment:
         self._show_vector_field_name_ptr[0] = state
 
     def set_ocean_currents(self, agent_name, velocity):
-        """Send the ocean current velocity at the location of the vehicle to the server to be transformed into a force vector and applied to the vehicle. 
-        Note that if the following config parameter is set, three debugging lines will be graphed at the location of all vehicles 
-        that current is applied to. Of the debugging lines, blue will be the buoyancy force, green will be the gravity force, and 
+        """Send the ocean current velocity at the location of the vehicle to the server to be transformed into a force vector and applied to the vehicle.
+        Note that if the following config parameter is set, three debugging lines will be graphed at the location of all vehicles
+        that current is applied to. Of the debugging lines, blue will be the buoyancy force, green will be the gravity force, and
         red will be the ocean currents velocity applied to the center of mass of the vehicle.
 
         Args:
@@ -1044,7 +1082,9 @@ class HoloOceanEnvironment:
                 if config["current"]["vehicle_debugging"] == True:
                     vehicle_debugging = 1
 
-        command_to_send = OceanCurrentsCommand(agent_name, velocity[0], velocity[1], velocity[2], vehicle_debugging)
+        command_to_send = OceanCurrentsCommand(
+            agent_name, velocity[0], velocity[1], velocity[2], vehicle_debugging
+        )
         self._enqueue_command(command_to_send)
 
     def centered_range(self, num_points, spacing=1.0):
@@ -1055,7 +1095,16 @@ class HoloOceanEnvironment:
         half = (num_points - 1) / 2
         return np.linspace(-half * spacing, half * spacing, num_points)
 
-    def draw_debug_vector_field(self, currents_function, location, vector_field_dimensions=[30, 30, 30], spacing=20, arrow_thickness=10, arrow_size = 1, lifetime=40):
+    def draw_debug_vector_field(
+        self,
+        currents_function,
+        location,
+        vector_field_dimensions=[30, 30, 30],
+        spacing=20,
+        arrow_thickness=10,
+        arrow_size=1,
+        lifetime=40,
+    ):
         """Create a temporary vector field by drawing vectors at points within a 3D matrix to help demonstrate flow of ocean currents
 
         Args:
@@ -1068,7 +1117,9 @@ class HoloOceanEnvironment:
             lifetime (:obj:`int`): A scalar to determine the length of time that the arrows persist in the simulation (defaults to 40)
         """
         cx, cy, _ = location
-        x_dim, y_dim, z_depth = vector_field_dimensions  # z_depth is a positive number representing depth below surface
+        x_dim, y_dim, z_depth = (
+            vector_field_dimensions  # z_depth is a positive number representing depth below surface
+        )
 
         # X and Y are centered around the vehicle's location
         x_range = np.arange(cx - x_dim // 2, cx + x_dim // 2, 1)
@@ -1077,7 +1128,9 @@ class HoloOceanEnvironment:
         # Z range goes from 0 (surface) downward to -z_depth (deep)
         z_range = np.arange(0, -z_depth, -1)
 
-        print(f"Generating vector field centered at ({cx}, {cy}) with depth {z_depth} and size {x_dim}x{y_dim}")
+        print(
+            f"Generating vector field centered at ({cx}, {cy}) with depth {z_depth} and size {x_dim}x{y_dim}"
+        )
 
         current_field = np.zeros((len(x_range), len(y_range), len(z_range), 3))
 
@@ -1087,11 +1140,14 @@ class HoloOceanEnvironment:
         vector_list = []
 
         for i, x in enumerate(x_range):
-            if i % step != 0: continue
+            if i % step != 0:
+                continue
             for j, y in enumerate(y_range):
-                if j % step != 0: continue
+                if j % step != 0:
+                    continue
                 for k, z in enumerate(z_range):
-                    if k % step != 0: continue
+                    if k % step != 0:
+                        continue
                     location = [x, y, z]
                     dx, dy, dz = currents_function(location)
 
@@ -1099,12 +1155,19 @@ class HoloOceanEnvironment:
                     dy *= arrow_size
                     dz *= arrow_size
                     current_field[i, j, k] = [dx, dy, dz]
-                    vector_list.append({
-                        "position": [float(x), float(y), float(z)],
-                        "vector": [float(dx), float(dy), float(dz)]
-                    })
+                    vector_list.append(
+                        {
+                            "position": [float(x), float(y), float(z)],
+                            "vector": [float(dx), float(dy), float(dz)],
+                        }
+                    )
 
-                    self.draw_arrow(start=[x, y, z], end=[x + dx, y + dy, z + dz], lifetime=40, thickness=arrow_thickness)
+                    self.draw_arrow(
+                        start=[x, y, z],
+                        end=[x + dx, y + dy, z + dz],
+                        lifetime=40,
+                        thickness=arrow_thickness,
+                    )
                     command_count += 1
 
                     if command_count >= batch_size:
@@ -1120,11 +1183,11 @@ class HoloOceanEnvironment:
 
     @staticmethod
     def initialize_bst_graphs(**kwargs):
-        """Initialize the bst heat maps for visualization and return BST visualizer instance. Make sure 
+        """Initialize the bst heat maps for visualization and return BST visualizer instance. Make sure
         to call graph_instance.update_position(x, y, z) to update the graph periodically.
 
         Args:
-            biomass_func (:func:`Callable`): An optional, custom biomass function parameter that takes in a 3D array called "location" and outputs the biomass metric at that location. 
+            biomass_func (:func:`Callable`): An optional, custom biomass function parameter that takes in a 3D array called "location" and outputs the biomass metric at that location.
 
             salinity_func (:func:`Callable`): An optional, custom salinity function parameter that takes in a 3D array called "location" and outputs the biomass metric at that location.
 
@@ -1149,7 +1212,9 @@ class HoloOceanEnvironment:
             agent_name (:obj:`string`): The name of the agent that you want to change biomass function for
             new_fx (:obj:`callable`): The new function that takes in atleast the argument "location"
         """
-        self.agents[agent_name].sensors["BSTSensor"].biomass["biomass_function"] = BST_Visualizer.make_bst_compatible(new_fx)
+        self.agents[agent_name].sensors["BSTSensor"].biomass["biomass_function"] = (
+            BST_Visualizer.make_bst_compatible(new_fx)
+        )
 
     def set_salinity_function(self, agent_name, new_fx):
         """Change the default salinity function to your own custom function
@@ -1157,7 +1222,9 @@ class HoloOceanEnvironment:
             agent_name (:obj:`string`): The name of the agent that you want to change biomass function for
             new_fx (:obj:`callable`): The new function that takes in atleast the argument "location"
         """
-        self.agents[agent_name].sensors["BSTSensor"].salinity["salinity_function"] = BST_Visualizer.make_bst_compatible(new_fx)
+        self.agents[agent_name].sensors["BSTSensor"].salinity["salinity_function"] = (
+            BST_Visualizer.make_bst_compatible(new_fx)
+        )
 
     def set_temperature_function(self, agent_name, new_fx):
         """Change the default temperature function to your own custom function
@@ -1165,7 +1232,9 @@ class HoloOceanEnvironment:
             agent_name (:obj:`string`): The name of the agent that you want to change biomass function for
             new_fx (:obj:`callable`): The new function that takes in atleast the argument "location"
         """
-        self.agents[agent_name].sensors["BSTSensor"].temperature["temperature_function"] = BST_Visualizer.make_bst_compatible(new_fx)
+        self.agents[agent_name].sensors["BSTSensor"].temperature[
+            "temperature_function"
+        ] = BST_Visualizer.make_bst_compatible(new_fx)
 
     def send_world_command(self, name, num_params=None, string_params=None):
         """Send a world command.
@@ -1387,7 +1456,6 @@ class HoloOceanEnvironment:
         return None  # Not implemented for other types
 
     ######################### HOLOOCEAN CUSTOM #############################
-
 
     ######################## ACOUSTIC BEACON HELPERS ###########################
 
