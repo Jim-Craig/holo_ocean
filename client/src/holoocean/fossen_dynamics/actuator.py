@@ -84,20 +84,20 @@ class fin:
             nu_r[:3]
         )  # Calculate relative velocity in plane of the fin
 
-        print(ur)
-        print(f"rho: {self.rho}")
-        print(f"area: {self.area}")
-        print(f"CL: {self.CL}")
-        print(f"u_actual: {self.u_actual}")
+        # print(ur)
+        # print(f"rho: {self.rho}")
+        # print(f"area: {self.area}")
+        # print(f"CL: {self.CL}")
+        # print(f"u_actual: {self.u_actual}")
         # Calculate lift force magnitude
         f = 0.5 * self.rho * self.area * self.CL * self.u_actual * ur**2  # N
 
-        print(f)
+        # print(f)
 
         # Decompose force into y and z components
         fy = np.sin(self.angle_rad) * f  # N
         fz = -np.cos(self.angle_rad) * f  # N
-        print(f"{fy}, {fz}")
+        # print(f"{fy}, {fz}")
 
         F = np.array([0, fy, fz])  # Force vector (N)
 
