@@ -14,8 +14,6 @@ import sys
 import copy
 
 import numpy as np
-import json
-import time
 
 
 from holoocean.command import (
@@ -1173,13 +1171,6 @@ class HoloOceanEnvironment:
                     if command_count >= batch_size:
                         self.tick()
                         command_count = 0
-
-        # file_path = r"D:\World_Vector_Fields\latest.json"
-        # os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        # with open(file_path, "w") as f:
-        #     json.dump(vector_list, f)
-
-        # print(f"Saved vector field to {file_path}")
 
     @staticmethod
     def initialize_bst_graphs(**kwargs):

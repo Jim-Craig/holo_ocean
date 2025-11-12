@@ -65,6 +65,4 @@ public:
 private:
 	// Accelerations
 	float CommandArray[6];
-	AHolodeckPawnController* TorpedoAUVController;
-	ATorpedoAUV* TorpedoAUV;
 };

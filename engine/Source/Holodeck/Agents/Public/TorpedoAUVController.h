@@ -7,7 +7,6 @@
 #include "HolodeckPawnController.h"
 #include "TorpedoAUV.h"
 #include "TorpedoAUVControlFins.h"
-#include "TorpedoAUVFossenBuoyancy.h"
 
 #include "TorpedoAUVController.generated.h"
 
@@ -37,10 +36,5 @@ public:
 		UTorpedoAUVControlFins* Thrusters = NewObject<UTorpedoAUVControlFins>();
 		Thrusters->SetController(this);
 		ControlSchemes.Insert(Thrusters, 0);
-
-		// Fossen buoyancy controls
-		UTorpedoAUVFossenBuoyancy* FossenBuoyancy = NewObject<UTorpedoAUVFossenBuoyancy>();
-		FossenBuoyancy->SetController(this);
-		ControlSchemes.Insert(FossenBuoyancy, 2);
 	}
 };

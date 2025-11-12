@@ -141,7 +141,6 @@ def editor_multi_agent_example():
             states = env.tick()
 
 
-
 def fossen_dynamics():
     """
     This exmaple steps through using fossen dynamics with multiple 
@@ -304,7 +303,6 @@ def fossen_dynamics():
         color = [0, 255, 0] if abs(depth + pos[2]) <= 2.0 else [255, 0, 0]
         env.draw_arrow(pos.tolist(), end=[x_end, y_end, -depth], color=color, thickness=5, lifetime=0.03)
 
-fossen_dynamics()
 
 def multi_agent_fossen():
 

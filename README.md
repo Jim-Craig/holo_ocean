@@ -11,7 +11,7 @@ HoloOcean is a high-fidelity simulator developed by the [Field Robotic Systems L
 
 Built upon Unreal Engine (by Epic Games) and Holodeck (developed by the BYU PCCL Lab), HoloOcean enables easy simulation of marine robotics and autonomy with a wide variety of sensors, agents, and features.
 
-## HoloOcean 2.2.1 New Features
+## HoloOcean 2.2.2 New Features
  - Underwater currents 
  - Biomass, salinity, and temperature (BST) sensor
  - Tide control

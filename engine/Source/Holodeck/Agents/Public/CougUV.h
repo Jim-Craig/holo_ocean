@@ -69,12 +69,7 @@ public:
 
 	void EnableDamping();
 
-	void SetController(AHolodeckPawnController* const Controller) { CougUVController = Controller; };
-
-
 private:
 	// Accelerations
 	float CommandArray[6];
-	AHolodeckPawnController* CougUVController;
-	ACougUV* CougUV;
 };

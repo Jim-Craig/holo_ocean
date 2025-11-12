@@ -56,26 +56,10 @@ void ACougUV::ApplyFin(int i, float command){
 	FRotator bodyToWorld = this->GetActorRotation();
 	FRotator finToBody = UKismetMathLibrary::ComposeRotators(FRotator(commandAngle, 0, 0), finRotation[i]); // Note: rotators use convention (pitch, yaw, roll). The command is a pitch. 
 
-	// Check that CougUV controller is valid
-	if (!CougUVController) {
-		UE_LOG(LogHolodeck, Error, TEXT("CougUVController is null"));
-		return;
-	}
-
-	// Grab CougUV
-	if (CougUV == nullptr) {
-		CougUV = static_cast<ACougUV*>(CougUVController->GetPawn());
-		if (CougUV == nullptr) {
-			UE_LOG(LogHolodeck, Error, TEXT("UCougUVControlFins couldn't get CougUV reference"));
-			return;
-		}
-	}
-
-
 	// get velocity at fin location, in fin frame
 	FVector finWorld = RootMesh->GetCenterOfMass() + bodyToWorld.RotateVector(finTranslation[i] - CenterMass);
 	FVector velWorld = RootMesh->GetPhysicsLinearVelocityAtPoint(finWorld); // METERS/sec (unreal is dumb, distance is in cm/s but velocity is in m/s)
-	FVector velOceanCurrent = CougUV->GetOceanCurrentVelocity();
+	FVector velOceanCurrent = this->GetOceanCurrentVelocity();
 	FVector relativeVel = velWorld - velOceanCurrent;
 	FVector velBody = bodyToWorld.UnrotateVector(relativeVel);
 	FVector velFin = finToBody.UnrotateVector(velBody);
