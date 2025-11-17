@@ -96,7 +96,7 @@ void ACougUV::ApplyFin(int i, float command){
 	FVector forceBody = flowToBody.RotateVector(forceFlow);
 	FVector forceWorld = bodyToWorld.RotateVector(forceBody);
 	if (RootMesh->GetCenterOfMass().Z <= 0) { // simple check to make sure we're underwater, could be made more robust
-		// RootMesh->AddForceAtLocation(forceWorld, finWorld);
+		RootMesh->AddForceAtLocation(forceWorld, finWorld);
 	}
 	
 	// Draw Debug Lines
