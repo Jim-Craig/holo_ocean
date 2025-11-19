@@ -100,7 +100,28 @@ HoloOcean 2.0 features:
    holoocean/util
    holoocean/exceptions
 
-Indices and tables
+Contributions
+"""""""""""""
+
+Developers
+~~~~~~~~~~
+
+Joshua Mangelson, Easton Potokar, Kalliyan Velasco, Kalin Norman, Derek Benham, 
+Daniel Butterfield, Spencer Ashford, Chad Samuelson, Blake Romrell, Abigail Austin, 
+Randy Peirce, Ryan Anderson, Carter Noh, Braden Meyers, Nelson Durrant, Cougar Smith, 
+Nathan Hill, Sarahí Ortega, Gabe Slade 
+
+Pull Request Developers
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Eli Shafer
+
+Other Contributions
+~~~~~~~~~~~~~~~~~~~
+
+Kylie Lay (Logo Design)
+
+Indices and Tables
 ==================
 
 * :ref:`genindex`

@@ -14,9 +14,7 @@ void AHolodeckBuoyantAgent::InitializeAgent(){
 
 	// Set Mass
 	RootMesh->SetMassOverrideInKg("", MassInKG);
-	// RootMesh->SetCenterOfMass(CenterMass); // set the center of mass in the body frame
-	FVector OriginCenterOfMass(0.0, 0.0f, 0.0f);
-	RootMesh->SetCenterOfMass(OriginCenterOfMass);
+	RootMesh->SetCenterOfMass(CenterMass); // set the center of mass in the body frame
 	
 	// Set Bounding Box (if it hasn't been set by hand)
 	if(BoundingBox.GetExtent() == FVector(0, 0, 0))

@@ -1,4 +1,5 @@
 """Package manager for worlds available to download and use for HoloOcean"""
+
 import json
 import os
 import shutil
@@ -23,6 +24,7 @@ from holoocean.exceptions import HoloOceanException, NotFoundException
 
 BACKEND_URL = "https://robots.et.byu.edu/holo/"
 
+
 def _get_from_backend(rel_url):
     """
     Gets the resource given at rel_url, assumes it is a utf-8 text file
@@ -35,7 +37,7 @@ def _get_from_backend(rel_url):
     """
     req = urllib.request.urlopen(BACKEND_URL + rel_url)
     data = req.read()
-    return data.decode('utf-8')
+    return data.decode("utf-8")
 
 
 def available_packages():
@@ -45,15 +47,20 @@ def available_packages():
         List of package names
     """
     # Get the index json file from the backend
-    temp_vers = set_world_version(__version__) if _validVersion(__version__, "2.1.0") else __version__
+    temp_vers = (
+        set_world_version(__version__)
+        if _validVersion(__version__, "2.1.0")
+        else __version__
+    )
     url = "{ver}/available".format(ver=temp_vers)
     try:
         index = _get_from_backend(url)
         index = json.loads(index)
     except urllib.error.URLError as err:
-        print("Unable to communicate with backend ({}), {}".format(
-            url, err.reason),
-              file=sys.stderr)
+        print(
+            "Unable to communicate with backend ({}), {}".format(url, err.reason),
+            file=sys.stderr,
+        )
         raise
 
     return index["packages"]
@@ -88,23 +95,23 @@ def package_info(pkg_name):
 
 
 def _print_agent_info(agents, base_indent=0):
-    print(base_indent*' ', "Agents:")
+    print(base_indent * " ", "Agents:")
     base_indent += 2
     for agent in agents:
-        print(base_indent*' ', "Name:", agent["agent_name"])
-        print(base_indent*' ', "Type:", agent["agent_type"])
-        print(base_indent*' ', "Sensors:")
+        print(base_indent * " ", "Name:", agent["agent_name"])
+        print(base_indent * " ", "Type:", agent["agent_type"])
+        print(base_indent * " ", "Sensors:")
         for sensor in agent["sensors"]:
-            print((base_indent + 2)*' ', sensor['sensor_type'])
+            print((base_indent + 2) * " ", sensor["sensor_type"])
             for k, v in sensor.items():
                 if k == "sensor_type":
                     continue
                 elif k == "configuration":
-                    print((base_indent + 4)*' ', k)
+                    print((base_indent + 4) * " ", k)
                     for opt, val in v.items():
-                        print((base_indent + 6)*' ', opt+":", val)
+                        print((base_indent + 6) * " ", opt + ":", val)
                 else:
-                    print((base_indent + 4)*' ', k+":", v)
+                    print((base_indent + 4) * " ", k + ":", v)
 
 
 def world_info(world_name, world_config=None, base_indent=0):
@@ -125,13 +132,13 @@ def world_info(world_name, world_config=None, base_indent=0):
     if world_config is None:
         raise HoloOceanException("Couldn't find world " + world_name)
 
-    print(base_indent*' ', world_config["name"])
+    print(base_indent * " ", world_config["name"])
     base_indent += 4
 
     if "agents" in world_config:
         _print_agent_info(world_config["agents"], base_indent)
 
-    print(base_indent*' ', "Scenarios:")
+    print(base_indent * " ", "Scenarios:")
     for scenario, _ in _iter_scenarios(world_name):
         scenario_info(scenario=scenario, base_indent=base_indent + 2)
 
@@ -166,7 +173,7 @@ def scenario_info(scenario_name="", scenario=None, base_indent=0):
     scenario_file = ""
     if scenario is None:
         # Find this file in the worlds/ directory
-        filename = '{}.json'.format(scenario_name)
+        filename = "{}.json".format(scenario_name)
         scenario_file = _find_file_in_worlds_dir(filename)
 
         if scenario_file == "":
@@ -174,54 +181,57 @@ def scenario_info(scenario_name="", scenario=None, base_indent=0):
 
         scenario = load_scenario_file(scenario_file)
 
-    print(base_indent*' ', "{}-{}:".format(scenario["world"], scenario["name"]))
+    print(base_indent * " ", "{}-{}:".format(scenario["world"], scenario["name"]))
     base_indent += 2
     if "agents" in scenario:
         _print_agent_info(scenario["agents"], base_indent)
 
+
 def _validVersion(user_v, min_v):
     """Check if user version is greater than or equal to the minimum version.
     Returns true if user_v is equal or above min_v, otherwise returns False.
-    
+
     Supports semantic versioning (e.g., "1.2.3", "2.0.0", "1.10.5")
 
     Args:
         user_v (:obj:`str`): The user's version number
         min_v (:obj:`str`): The minimum allowable version number
     """
+
     def parse_version(version_str):
         """Parse a version string into a list of integers"""
         try:
-            return [int(x) for x in version_str.split('.')]
+            return [int(x) for x in version_str.split(".")]
         except ValueError:
             # If parsing fails, treat as 0.0.0
             return [0, 0, 0]
-    
+
     user_parts = parse_version(user_v)
     min_parts = parse_version(min_v)
-    
+
     # Pad shorter version with zeros (e.g., "1.2" becomes "1.2.0")
     max_len = max(len(user_parts), len(min_parts))
     user_parts.extend([0] * (max_len - len(user_parts)))
     min_parts.extend([0] * (max_len - len(min_parts)))
-    
+
     # Compare each part
     for user_part, min_part in zip(user_parts, min_parts):
         if user_part > min_part:
             return True
         elif user_part < min_part:
             return False
-    
+
     # All parts are equal
     return True
+
 
 def set_world_version(user_version):
     replacement_user_version = ""
     end_user_version = ""
     parsing_counter = 0
 
-    for i in range(0,len(user_version)):
-        if user_version[i] == '.':
+    for i in range(0, len(user_version)):
+        if user_version[i] == ".":
             parsing_counter += 1
             replacement_user_version = replacement_user_version + user_version[i]
             continue
@@ -229,13 +239,13 @@ def set_world_version(user_version):
             replacement_user_version = replacement_user_version + user_version[i]
         if parsing_counter == 2:
             end_user_version = end_user_version + user_version[i]
-        
 
-    if (int(end_user_version) != 0):
-        user_version = replacement_user_version + '0'
+    if int(end_user_version) != 0:
+        user_version = replacement_user_version + "0"
         print(user_version)
 
     return user_version
+
 
 def install(package_name, url=None, branch=None, commit=None):
     """Installs a holoocean package.
@@ -244,19 +254,29 @@ def install(package_name, url=None, branch=None, commit=None):
         package_name (:obj:`str`): The name of the package to install
     """
 
-    print("The world that you are downloading contains Unreal Engine code and likely content.")
-    print("Download and/or use of this world signifies agreement that you have already accepted and agree\nto be bound by the Unreal Engine EULA found at https://www.unrealengine.com/en-US/eula/unreal.")
+    print(
+        "The world that you are downloading contains Unreal Engine code and likely content."
+    )
+    print(
+        "Download and/or use of this world signifies agreement that you have already accepted and agree\nto be bound by the Unreal Engine EULA found at https://www.unrealengine.com/en-US/eula/unreal."
+    )
 
     # input("Press Enter to continue: ")
-    
-    user_version =__version__
+
+    user_version = __version__
     min_version = "1.0.0"
 
-    user_version = set_world_version(user_version) if _validVersion(user_version, "2.1.0") else user_version
+    user_version = (
+        set_world_version(user_version)
+        if _validVersion(user_version, "2.1.0")
+        else user_version
+    )
 
-    if(not _validVersion(user_version, min_version)):
-        print("You must update HoloOcean to at least version 1.0.0 to continue. Packages are not available for earlier versions.")
-        return 
+    if not _validVersion(user_version, min_version):
+        print(
+            "You must update HoloOcean to at least version 1.0.0 to continue. Packages are not available for earlier versions."
+        )
+        return
 
     if package_name is None and url is None:
         raise HoloOceanException("You must specify the URL or a valid package name")
@@ -282,7 +302,9 @@ def install(package_name, url=None, branch=None, commit=None):
                     print(f"Can't install from branch when using {util.get_os_key()}")
                     return
                 if not _validVersion(user_version, "2.0.1"):
-                    print(f"Can't install from branch when using {util.get_os_key()} on versions prior to 2.0.1")
+                    print(
+                        f"Can't install from branch when using {util.get_os_key()} on versions prior to 2.0.1"
+                    )
                     return
             if commit is None:
                 if util.get_os_key() == "Linux":
@@ -291,29 +313,32 @@ def install(package_name, url=None, branch=None, commit=None):
                     commit = "WindowsLatest"
             else:
                 if util.get_os_key() != "Linux":
-                    commit = "Windows"+commit
+                    commit = "Windows" + commit
 
         else:
-            branch = "v{holodeck_version}".format(holodeck_version=util.get_holoocean_version())
+            branch = "v{holodeck_version}".format(
+                holodeck_version=util.get_holoocean_version()
+            )
             commit = util.get_os_key()
 
         # example: %backend%/Ocean/v0.1.0/Linux.zip
         url = "{backend_url}{package_name}/{branch}/{platform}.zip".format(
-                    backend_url=BACKEND_URL,
-                    branch=branch,
-                    package_name=package_name,
-                    platform=commit)
+            backend_url=BACKEND_URL,
+            branch=branch,
+            package_name=package_name,
+            platform=commit,
+        )
         if branch == "":
             url = "{backend_url}{package_name}/{platform}.zip".format(
-                    backend_url=BACKEND_URL,
-                    package_name=package_name,
-                    platform=commit)
+                backend_url=BACKEND_URL, package_name=package_name, platform=commit
+            )
 
     install_path = os.path.join(holodeck_path, "worlds", package_name)
 
     print("Installing {} from {} to {}".format(package_name, url, install_path))
 
     _download_binary(url, install_path)
+
 
 def _check_for_old_versions():
     """Checks for old versions of the binary and tells the user they can remove them.
@@ -345,8 +370,13 @@ def _check_for_old_versions():
         print("**********************************************")
         print("Use packagemanager.prune() to delete old packages")
         print("Versions:", not_matching)
-        print("Place an `ignore_old_packages` file in {} to surpress this message".format(path))
+        print(
+            "Place an `ignore_old_packages` file in {} to surpress this message".format(
+                path
+            )
+        )
         print()
+
 
 def prune():
     """Prunes old versions of holoocean, other than the running version.
@@ -356,7 +386,9 @@ def prune():
     Don't use this function if you have overidden the path.
     """
     if "HOLODECKPATH" in os.environ:
-        print("This function is not available when using HOLODECKPATH", stream=sys.stderr)
+        print(
+            "This function is not available when using HOLODECKPATH", stream=sys.stderr
+        )
         return
 
     holodeck_folder = util._get_holoocean_folder()
@@ -374,6 +406,7 @@ def prune():
 
     print("Done")
 
+
 def remove(package_name):
     """Removes a holoocean package.
 
@@ -386,9 +419,7 @@ def remove(package_name):
 
 
 def remove_all_packages():
-    """Removes all holoocean packages.
-
-    """
+    """Removes all holoocean packages."""
     for _, path in _iter_packages():
         shutil.rmtree(path)
 
@@ -404,7 +435,7 @@ def load_scenario_file(scenario_path):
         :obj:`dict`: A dictionary containing the configuration file
 
     """
-    with open(scenario_path, 'r') as f:
+    with open(scenario_path, "r") as f:
         return json.load(f)
 
 
@@ -424,8 +455,9 @@ def get_scenario(scenario_name):
     if config_path == "":
         raise FileNotFoundError(
             "The file `{file}.json` could not be found in {path}. "
-            "Make sure the package that contains {file} " \
-            "is installed.".format(file=scenario_name, path=util.get_holoocean_path()))
+            "Make sure the package that contains {file} "
+            "is installed.".format(file=scenario_name, path=util.get_holoocean_path())
+        )
 
     return load_scenario_file(config_path)
 
@@ -468,7 +500,7 @@ def get_binary_path_for_scenario(scenario_name):
     scenario_path = _find_file_in_worlds_dir(scenario_name + ".json")
     root = os.path.dirname(scenario_path)
     config_path = os.path.join(root, "config.json")
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config = json.load(f)
         return os.path.join(root, config["path"])
 
@@ -491,7 +523,9 @@ def get_package_config_for_scenario(scenario):
             if world["name"] == world_name:
                 return config
 
-    raise HoloOceanException("Could not find a package that contains world {}".format(world_name))
+    raise HoloOceanException(
+        "Could not find a package that contains world {}".format(world_name)
+    )
 
 
 def _iter_packages():
@@ -504,7 +538,7 @@ def _iter_packages():
         if os.path.isdir(full_path):
             for file_name in os.listdir(full_path):
                 if file_name == "config.json":
-                    with open(os.path.join(full_path, file_name), 'r') as f:
+                    with open(os.path.join(full_path, file_name), "r") as f:
                         config = json.load(f)
                     yield config, full_path
 
@@ -539,9 +573,8 @@ def _iter_scenarios(world_name):
         if not fnmatch.fnmatch(file_name, "{}-*.json".format(world_name)):
             continue
 
-
         full_path = os.path.join(world_path, file_name)
-        with open(full_path, 'r') as f:
+        with open(full_path, "r") as f:
             config = json.load(f)
             yield config, full_path
 
@@ -572,7 +605,9 @@ def _download_binary(binary_location, install_location, block_size=1000000):
         file_size = int(conn.headers["Content-Length"])
         print("File size:", util.human_readable_size(file_size))
         amount_read = 0
-        write_thread = Thread(target=file_writer_worker, args=(tmp_fd, file_size, queue))
+        write_thread = Thread(
+            target=file_writer_worker, args=(tmp_fd, file_size, queue)
+        )
         write_thread.start()
         while amount_read < file_size:
             queue.put(conn.read(block_size))
@@ -584,7 +619,7 @@ def _download_binary(binary_location, install_location, block_size=1000000):
     # Note the contents of the ZIP file get extracted straight into the install directory, so the
     # zip's structure should look like file.zip/config.json not file.zip/file/config.json
     print("Unpacking worlds...")
-    with zipfile.ZipFile(tmp_fd, 'r') as zip_file:
+    with zipfile.ZipFile(tmp_fd, "r") as zip_file:
         zip_file.extractall(install_location)
 
     if os.name == "posix":
@@ -592,6 +627,7 @@ def _download_binary(binary_location, install_location, block_size=1000000):
         _make_excecutable(install_location)
 
     print("Finished.")
+
 
 def _make_excecutable(install_path):
     for path, _, files in os.walk(install_path):

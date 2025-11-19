@@ -7,11 +7,11 @@
  [![Build Status](https://robots.et.byu.edu:4144/api/badges/byu-holoocean/HoloOcean/status.svg?ref=refs/heads/develop)](https://robots.et.byu.edu:4144/byu-holoocean/HoloOcean)
 [![Docker Image CI](https://github.com/byu-holoocean/HoloOcean/actions/workflows/docker-image.yml/badge.svg)](https://github.com/byu-holoocean/HoloOcean/actions/workflows/docker-image.yml)
 
-HoloOcean is a high-fidelity simulator develped by the [Field Robotic Systems Lab (FRoStLab)](https://frostlab.byu.edu) at [Brigham Young University](https://byu.edu).
+HoloOcean is a high-fidelity simulator developed by the [Field Robotic Systems Lab (FRoStLab)](https://frostlab.byu.edu) at [Brigham Young University](https://byu.edu).
 
 Built upon Unreal Engine (by Epic Games) and Holodeck (developed by the BYU PCCL Lab), HoloOcean enables easy simulation of marine robotics and autonomy with a wide variety of sensors, agents, and features.
 
-## HoloOcean 2.2.1 New Features
+## HoloOcean 2.2.2 New Features
  - Underwater currents 
  - Biomass, salinity, and temperature (BST) sensor
  - Tide control

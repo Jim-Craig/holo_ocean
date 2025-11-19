@@ -470,7 +470,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       - git clone https://github.com/byu-holoocean/holoocean-docs.git
-      - pip3 install bs4 sphinx==5.0.2 sphinx-rtd-theme==2.0.0 sphinx-copybutton==0.5.2 autodocsumm==0.2.12 scipy
+      - pip3 install bs4 sphinx==5.0.2 sphinx-rtd-theme==2.0.0 sphinx-copybutton==0.5.2 autodocsumm==0.2.12 scipy matplotlib
       - export PATH="/home/ue4/.local/bin:$PATH"
       - python3 client/docmaker.py
       - cd holoocean-docs
@@ -497,7 +497,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       - git clone https://github.com/byu-holoocean/holoocean-docs.git
-      - pip3 install bs4 sphinx==5.0.2 sphinx-rtd-theme==2.0.0 sphinx-copybutton==0.5.2 autodocsumm==0.2.12 scipy
+      - pip3 install bs4 sphinx==5.0.2 sphinx-rtd-theme==2.0.0 sphinx-copybutton==0.5.2 autodocsumm==0.2.12 scipy matplotlib
       - export PATH="/home/ue4/.local/bin:$PATH"
       - python3 client/docmaker.py
       - rm -rf holoocean-docs/develop

@@ -1,6 +1,6 @@
-"""HoloOcean is an underwater robotics simulator.
-"""
-__version__ = '2.2.1'
+"""HoloOcean is an underwater robotics simulator."""
+
+__version__ = "2.2.2"
 
 from holoocean.holoocean import make, delete_all_octrees, delete_world_octrees
 from holoocean.packagemanager import *

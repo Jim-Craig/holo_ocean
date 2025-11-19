@@ -67,7 +67,6 @@ class ControlSchemes:
     # Torpedo AUV Control Schemes
     TAUV_FINS = 0
     TAUV_FORCES = 1
-    TAUV_BUOYANT_FORCES = 2
 
     # Surface Vessel Control Schemes
     SV_THRUSTERS = 0
@@ -1009,7 +1008,6 @@ class TorpedoAUV(HoloOceanAgent):
         limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
         
         return [(scheme_fins, ContinuousActionSpace([5], low=[-i for i in limits_fins], high=limits_fins)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
                 (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel))]
 
     def get_joint_constraints(self, joint_name):
@@ -1072,8 +1070,6 @@ class CougUV(HoloOceanAgent):
         limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
         
         return [(scheme_fins, ContinuousActionSpace([5], low=[-i for i in limits_fins], high=limits_fins)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
-                # Fossen Buoyancy
                 (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel))]
 
     def get_joint_constraints(self, joint_name):
