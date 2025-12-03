@@ -4,6 +4,7 @@ import numpy as np
 from tests.utils.equality import almost_equal
 import pytest
 
+
 @pytest.fixture(scope="module")
 def cfg(vehicle_type="TurtleAgent"):
     turtle_config = {

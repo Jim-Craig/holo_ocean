@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Holodeck.h"
-
-#include "HolodeckPawnController.h"
 #include "BlueROV2.h"
 #include "HolodeckControlScheme.h"
+#include "HolodeckPawnController.h"
 #include "SimplePID.h"
 #include <math.h>
 
@@ -37,8 +36,8 @@ const float BR_ROT_Y_P = 0.2;
 const float BR_ROT_Y_I = 0.001;
 const float BR_ROT_Y_D = 0.15;
 /**
-* BlueROV2ControlPD
-*/
+ * BlueROV2ControlPD
+ */
 UCLASS()
 class HOLODECK_API UBlueROV2ControlPD : public UHolodeckControlScheme {
 public:
@@ -46,23 +45,24 @@ public:
 
 	UBlueROV2ControlPD(const FObjectInitializer& ObjectInitializer);
 
-	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) override;
+	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds)
+		override;
 
 	unsigned int GetControlSchemeSizeInBytes() const override {
 		return 8 * sizeof(float);
 	}
 
-	void SetController(AHolodeckPawnController* const Controller) { BlueROV2Controller = Controller; };
-
+	void SetController(AHolodeckPawnController* const Controller) {
+		BlueROV2Controller = Controller;
+	};
 
 private:
 	AHolodeckPawnController* BlueROV2Controller;
-	ABlueROV2* BlueROV2;
-	SimplePID PositionController_X;
-	SimplePID PositionController_Y;
-	SimplePID PositionController_Z;
-	SimplePID RotationController_R;
-	SimplePID RotationController_P;
-	SimplePID RotationController_Y;
+	ABlueROV2*				 BlueROV2;
+	SimplePID				 PositionController_X;
+	SimplePID				 PositionController_Y;
+	SimplePID				 PositionController_Z;
+	SimplePID				 RotationController_R;
+	SimplePID				 RotationController_P;
+	SimplePID				 RotationController_Y;
 };
-

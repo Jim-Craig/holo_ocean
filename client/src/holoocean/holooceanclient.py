@@ -1,4 +1,5 @@
 """The client used for subscribing shared memory between python and c++."""
+
 import os
 
 from holoocean.exceptions import HoloOceanException

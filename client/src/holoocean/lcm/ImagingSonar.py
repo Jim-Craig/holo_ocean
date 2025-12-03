@@ -9,6 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
+
 class ImagingSonar(object):
     __slots__ = ["timestamp", "bins_azimuth", "bins_range", "image"]
 
@@ -29,44 +30,64 @@ class ImagingSonar(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">qii", self.timestamp, self.bins_azimuth, self.bins_range))
+        buf.write(
+            struct.pack(">qii", self.timestamp, self.bins_azimuth, self.bins_range)
+        )
         for i0 in range(self.bins_range):
-            buf.write(struct.pack('>%df' % self.bins_azimuth, *self.image[i0][:self.bins_azimuth]))
+            buf.write(
+                struct.pack(
+                    ">%df" % self.bins_azimuth, *self.image[i0][: self.bins_azimuth]
+                )
+            )
 
     def decode(data):
-        if hasattr(data, 'read'):
+        if hasattr(data, "read"):
             buf = data
         else:
             buf = BytesIO(data)
         if buf.read(8) != ImagingSonar._get_packed_fingerprint():
             raise ValueError("Decode error")
         return ImagingSonar._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = ImagingSonar()
-        self.timestamp, self.bins_azimuth, self.bins_range = struct.unpack(">qii", buf.read(16))
+        self.timestamp, self.bins_azimuth, self.bins_range = struct.unpack(
+            ">qii", buf.read(16)
+        )
         self.image = []
         for i0 in range(self.bins_range):
-            self.image.append(struct.unpack('>%df' % self.bins_azimuth, buf.read(self.bins_azimuth * 4)))
+            self.image.append(
+                struct.unpack(
+                    ">%df" % self.bins_azimuth, buf.read(self.bins_azimuth * 4)
+                )
+            )
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     def _get_hash_recursive(parents):
-        if ImagingSonar in parents: return 0
-        tmphash = (0x3c5e617d2bbe6ae8) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
+        if ImagingSonar in parents:
+            return 0
+        tmphash = (0x3C5E617D2BBE6AE8) & 0xFFFFFFFFFFFFFFFF
+        tmphash = (
+            ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)
+        ) & 0xFFFFFFFFFFFFFFFF
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
     def _get_packed_fingerprint():
         if ImagingSonar._packed_fingerprint is None:
-            ImagingSonar._packed_fingerprint = struct.pack(">Q", ImagingSonar._get_hash_recursive([]))
+            ImagingSonar._packed_fingerprint = struct.pack(
+                ">Q", ImagingSonar._get_hash_recursive([])
+            )
         return ImagingSonar._packed_fingerprint
+
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
     def get_hash(self):
         """Get the LCM hash of the struct"""
         return struct.unpack(">Q", ImagingSonar._get_packed_fingerprint())[0]
-

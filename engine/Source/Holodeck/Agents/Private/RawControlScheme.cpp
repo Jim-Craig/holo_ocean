@@ -1,9 +1,8 @@
-#include "Holodeck.h"
 #include "RawControlScheme.h"
+#include "Holodeck.h"
 
-
-URawControlScheme::URawControlScheme(const FObjectInitializer& ObjectInitializer) :
-		Super(ObjectInitializer) {}
+URawControlScheme::URawControlScheme(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer) {}
 
 URawControlScheme::URawControlScheme(AHolodeckAgentInterface* const ControlledAgent) {
 	Agent = ControlledAgent;
@@ -12,6 +11,9 @@ URawControlScheme::URawControlScheme(AHolodeckAgentInterface* const ControlledAg
 	}
 }
 
-void URawControlScheme::Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) {
+void URawControlScheme::Execute(
+	void* const CommandArray,
+	void* const InputCommand,
+	float		DeltaSeconds) {
 	memcpy(CommandArray, InputCommand, Agent->GetRawActionSizeInBytes());
 }

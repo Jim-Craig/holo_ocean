@@ -7,48 +7,50 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 #include <numeric>
+#include <vector>
 
-namespace holoocean
-{
-	namespace data
-	{
-		
-			
-		class SemanticLidarDetection
-		{
+namespace holoocean {
+	namespace data {
+
+		class SemanticLidarDetection {
 		public:
 			FVector3f point{};
-			float cos_inc_angle{};
-			uint32_t object_idx{};
-			uint32_t object_tag{};
-
+			float	  cos_inc_angle{};
+			uint32_t  object_idx{};
+			uint32_t  object_tag{};
 
 			SemanticLidarDetection() = default;
-			
-			SemanticLidarDetection(float x, float y, float z, float cosTh, uint32_t idx, uint32_t tag) : point(x, y, z), cos_inc_angle{cosTh}, object_idx{idx}, object_tag{tag}
-			{
-				
-			}
-			SemanticLidarDetection(FVector3d p, float cosTh, uint32_t idx, uint32_t tag) :
-				point(p), cos_inc_angle{cosTh}, object_idx{idx}, object_tag{tag}
-			{
-				
+
+			SemanticLidarDetection(
+				float	 x,
+				float	 y,
+				float	 z,
+				float	 cosTh,
+				uint32_t idx,
+				uint32_t tag)
+				: point(x, y, z)
+				, cos_inc_angle{ cosTh }
+				, object_idx{ idx }
+				, object_tag{ tag } {}
+			SemanticLidarDetection(FVector3d p, float cosTh, uint32_t idx, uint32_t tag)
+				: point(p)
+				, cos_inc_angle{ cosTh }
+				, object_idx{ idx }
+				, object_tag{ tag } {}
+
+			void WritePlyHeaderInfo(std::ostream& out) const {
+				out << "property float32 x\n"
+					   "property float32 y\n"
+					   "property float32 z\n"
+					   "property float32 CosAngle\n"
+					   "property uint32 ObjIdx\n"
+					   "property uint32 ObjTag";
 			}
 
-			void WritePlyHeaderInfo(std::ostream& out) const{
-				out << "property float32 x\n" \
-				   "property float32 y\n" \
-				   "property float32 z\n" \
-				   "property float32 CosAngle\n" \
-				   "property uint32 ObjIdx\n" \
-				   "property uint32 ObjTag";
-			}
-
-			void WriteDetection(std::ostream& out) const{
-				out << point.X << ' ' << point.Y << ' ' << point.Z << ' ' \
-				  << cos_inc_angle << ' ' << object_idx << ' ' << object_tag;
+			void WriteDetection(std::ostream& out) const {
+				out << point.X << ' ' << point.Y << ' ' << point.Z << ' '
+					<< cos_inc_angle << ' ' << object_idx << ' ' << object_tag;
 			}
 		};
 
@@ -60,48 +62,42 @@ namespace holoocean
 				HorizontalAngle,
 				ChannelCount,
 				SIZE
-			  };
+			};
 
 		public:
 			explicit SemanticLidarData(uint32_t ChannelCount = 0u)
-			  : _header(Index::SIZE + ChannelCount, 0u) {
+				: _header(Index::SIZE + ChannelCount, 0u) {
 				_header[Index::ChannelCount] = ChannelCount;
 			}
 
-			SemanticLidarData(float* buffer, uint32_t ChannelCount = 0u)
-			{
+			SemanticLidarData(float* buffer, uint32_t ChannelCount = 0u) {
 				Buffer = buffer;
 				channelCount = ChannelCount;
 			}
 
-			SemanticLidarData& operator=(SemanticLidarData &&) = default;
+			SemanticLidarData& operator=(SemanticLidarData&&) = default;
 
 			virtual ~SemanticLidarData() {}
 
-			float GetHorizontalAngle() const {
-				return horizontalAngle;
-			}
+			float GetHorizontalAngle() const { return horizontalAngle; }
 
-			void SetHorizontalAngle(float angle) {
-				this->horizontalAngle = angle;
-			}
+			void SetHorizontalAngle(float angle) { this->horizontalAngle = angle; }
 
-			uint32_t GetChannelCount() const {
-				return channelCount;
-			}
+			uint32_t GetChannelCount() const { return channelCount; }
 
 			virtual void ResetMemory(std::vector<uint32_t> points_per_channel) {
-				//std::memset(_header.data() + Index::SIZE, 0, sizeof(uint32_t) * GetChannelCount());
+				// std::memset(_header.data() + Index::SIZE, 0, sizeof(uint32_t) *
+				// GetChannelCount());
 
-				uint32_t total_points = static_cast<uint32_t>(
-					std::accumulate(points_per_channel.begin(), points_per_channel.end(), 0));
+				uint32_t total_points = static_cast<uint32_t>(std::accumulate(
+					points_per_channel.begin(), points_per_channel.end(), 0));
 
 				_ser_points.clear();
 				_ser_points.reserve(total_points);
 
 				points.clear();
 				points.reserve(total_points * 6);
-				
+
 				LastFrameMaxPoints = NumPoints;
 				NumPoints = 1;
 				Buffer[0] = static_cast<float>(total_points);
@@ -112,7 +108,7 @@ namespace holoocean
 					_header[Index::SIZE + idxChannel] = points_per_channel[idxChannel];
 			}
 
-			virtual void WritePointSync(SemanticLidarDetection &detection) {
+			virtual void WritePointSync(SemanticLidarDetection& detection) {
 				//_ser_points.emplace_back(detection);
 
 				points.emplace_back(detection.point.X);
@@ -132,25 +128,24 @@ namespace holoocean
 				NumPoints++;
 			}
 
-			std::vector<SemanticLidarDetection> GetPoints()
-			{
+			std::vector<SemanticLidarDetection> GetPoints() {
 				return this->_ser_points;
 			}
 
 		protected:
 			std::vector<uint32_t> _header;
-			uint32_t _max_channel_points;
+			uint32_t			  _max_channel_points;
 
 		private:
 			std::vector<SemanticLidarDetection> _ser_points;
-			std::vector<float> points;
-			float* Buffer;
-			int NumPoints = 0;
-			int LastFrameMaxPoints = 0;
+			std::vector<float>					points;
+			float*								Buffer;
+			int									NumPoints = 0;
+			int									LastFrameMaxPoints = 0;
 
-			float horizontalAngle;
+			float	 horizontalAngle;
 			uint32_t channelCount;
 		};
-	}
+	} // namespace data
 
-}
+} // namespace holoocean

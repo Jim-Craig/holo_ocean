@@ -36,6 +36,7 @@ def env():
     ) as env:
         yield env
 
+
 def test_pid_controller(env):
     """Test to make sure it goes to the orientation and position we command"""
     des = [2, 2, -12, 0, 0, 45]
@@ -50,6 +51,7 @@ def test_pid_controller(env):
     assert np.allclose(
         des[3:], rpy, 5
     ), "Controller didn't make it to the right orientation"
+
 
 def test_manual_dynamics(env):
     """Test to make sure it goes to the linear and angular acceleration we set"""

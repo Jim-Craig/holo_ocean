@@ -3,38 +3,37 @@
 #pragma once
 
 #include "Holodeck.h"
-
-#include "HolodeckPawnController.h"
 #include "CougUV.h"
 #include "CougUVControlFins.h"
 
 #include "CougUVController.generated.h"
 
 /**
-* A Holodeck Turtle Agent Controller
-*/
+ * A Holodeck Turtle Agent Controller
+ */
 UCLASS()
-class HOLODECK_API ACougUVController : public AHolodeckPawnController
-{
+class HOLODECK_API ACougUVController : public AHolodeckPawnController {
 	GENERATED_BODY()
 
 public:
 	/**
-	* Default Constructor
-	*/
-	ACougUVController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	 * Default Constructor
+	 */
+	ACougUVController(
+		const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/**
-	* Default Destructor
-	*/
+	 * Default Destructor
+	 */
 	~ACougUVController();
 
 	void AddControlSchemes() override {
-		// The default controller currently in ControlSchemes index 0 is the dynamics one. We push it back to index 1 with this code.
+		// The default controller currently in ControlSchemes index 0 is the
+		// dynamics one. We push it back to index 1 with this code.
 
 		// Thruster controller
 		UCougUVControlFins* Thrusters = NewObject<UCougUVControlFins>();
 		Thrusters->SetController(this);
-		ControlSchemes.Insert(Thrusters, 0);	
+		ControlSchemes.Insert(Thrusters, 0);
 	}
 };

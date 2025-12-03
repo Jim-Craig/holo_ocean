@@ -2,9 +2,9 @@
 
 #include "Holodeck.h"
 
+#include "HolodeckControlScheme.h"
 #include "HolodeckPawnController.h"
 #include "HoveringAUV.h"
-#include "HolodeckControlScheme.h"
 #include "SimplePID.h"
 #include <math.h>
 
@@ -38,8 +38,8 @@ const float AUV_ROT_Y_I = 0.001;
 const float AUV_ROT_Y_D = 0.15;
 
 /**
-* UHoveringAUVControlPD
-*/
+ * UHoveringAUVControlPD
+ */
 UCLASS()
 class HOLODECK_API UHoveringAUVControlPD : public UHolodeckControlScheme {
 public:
@@ -47,17 +47,20 @@ public:
 
 	UHoveringAUVControlPD(const FObjectInitializer& ObjectInitializer);
 
-	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) override;
+	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds)
+		override;
 
 	unsigned int GetControlSchemeSizeInBytes() const override {
 		return 6 * sizeof(float);
 	}
 
-	void SetController(AHolodeckPawnController* const Controller) { HoveringAUVController = Controller; };
+	void SetController(AHolodeckPawnController* const Controller) {
+		HoveringAUVController = Controller;
+	};
 
 private:
 	AHolodeckPawnController* HoveringAUVController;
-	AHoveringAUV* HoveringAUV;
+	AHoveringAUV*			 HoveringAUV;
 
 	SimplePID PositionController_X;
 	SimplePID PositionController_Y;

@@ -5,42 +5,41 @@
 #include "CoreMinimal.h"
 
 #include "HandAgent.h" // TODO Delete This
+#include "HandAgentMaxTorqueFloat.h"
 #include "HolodeckPawnController.h"
 #include "JointMaxTorqueControlScheme.h"
 #include "PhysicsEngine/ConstraintInstance.h"
-#include "HandAgentMaxTorqueFloat.h"
 
 #include "HandAgentController.generated.h"
 
 UCLASS()
-class HOLODECK_API AHandAgentController : public AHolodeckPawnController
-{
+class HOLODECK_API AHandAgentController : public AHolodeckPawnController {
 	GENERATED_BODY()
 
 public:
 	/**
-	* Default Constructor
-	*/
-	AHandAgentController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	 * Default Constructor
+	 */
+	AHandAgentController(
+		const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/**
-	* Default Destructor
-	*/
+	 * Default Destructor
+	 */
 	~AHandAgentController() {};
 
 	/**
-	* Possess
-	* Called when the controller possesses the pawn.
-	* @param Pawn the pawn being possessed.
-	*/
+	 * Possess
+	 * Called when the controller possesses the pawn.
+	 * @param Pawn the pawn being possessed.
+	 */
 	void OnPossess(APawn* Pawn) override;
 
 	void AddControlSchemes();
 
 private:
-
-	USkeletalMeshComponent* SkeletalMeshComponent;
-	float* ActionBufferFloatPtr;
+	USkeletalMeshComponent*		  SkeletalMeshComponent;
+	float*						  ActionBufferFloatPtr;
 	UJointMaxTorqueControlScheme* JointTorqueControlScheme;
-	UHandAgentMaxTorqueFloat* HandAgentFloatControlScheme;
+	UHandAgentMaxTorqueFloat*	  HandAgentFloatControlScheme;
 };

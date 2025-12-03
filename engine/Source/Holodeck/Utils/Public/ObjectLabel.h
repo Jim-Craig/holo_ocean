@@ -11,13 +11,13 @@
 namespace holoocean {
 
 	enum class ObjectLabel : uint8_t {
-		None         =    0u,
-		Boat		 =    1u,
-		Ground		 =	  2u,
-		Yacht		 =	  3u,
-		ContainerBoat =   4u,
-		DamEnvironment =  5u,
-		Landscape	 =	  6u,
-		Any          =  0xFF
-	  };
-} 
+		None = 0u,
+		Boat = 1u,
+		Ground = 2u,
+		Yacht = 3u,
+		ContainerBoat = 4u,
+		DamEnvironment = 5u,
+		Landscape = 6u,
+		Any = 0xFF
+	};
+} // namespace holoocean

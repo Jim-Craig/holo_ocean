@@ -3,23 +3,23 @@
 #pragma once
 
 #include "GameFramework/WorldSettings.h"
+
 #include "HolodeckWorldSettings.generated.h"
 
 /**
-  * AHolodeckWorldSettings
-  * The global settings being used by the simulator.
-  * This is where the tick time is set.
-  */
+ * AHolodeckWorldSettings
+ * The global settings being used by the simulator.
+ * This is where the tick time is set.
+ */
 UCLASS()
-class AHolodeckWorldSettings : public AWorldSettings
-{
+class AHolodeckWorldSettings : public AWorldSettings {
 	GENERATED_BODY()
 
 public:
 	/**
-	  * FixupDeltaSeconds
-	  * Overidden to ensure a tick is 0.033 seconds.
-	  */
+	 * FixupDeltaSeconds
+	 * Overidden to ensure a tick is 0.033 seconds.
+	 */
 	float FixupDeltaSeconds(float DeltaSeconds, float RealDeltaSeconds) override;
 
 	AHolodeckWorldSettings() {
@@ -30,17 +30,17 @@ public:
 	};
 
 	/**
-	  * GetConstantTimeDeltaBetweenTicks
-	  * Gets the time between ticks.
-	  * @return the time between ticks in seconds.
-	  */
+	 * GetConstantTimeDeltaBetweenTicks
+	 * Gets the time between ticks.
+	 * @return the time between ticks in seconds.
+	 */
 	float GetConstantTimeDeltaBetweenTicks();
 
 	/**
-	  * SetConstantTimeDeltaBetweenTicks(float Delta)
-	  * Sets the time of one tick.
-	  * @param Delta the time for one tick.
-	  */
+	 * SetConstantTimeDeltaBetweenTicks(float Delta)
+	 * Sets the time of one tick.
+	 * @param Delta the time for one tick.
+	 */
 	void SetConstantTimeDeltaBetweenTicks(float Delta);
 
 private:

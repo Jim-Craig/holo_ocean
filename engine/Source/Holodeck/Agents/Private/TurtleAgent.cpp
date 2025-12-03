@@ -1,15 +1,15 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "TurtleAgent.h"
-
+#include "Holodeck.h"
 
 // Sets default values
 ATurtleAgent::ATurtleAgent() {
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Set the defualt controller
-	AIControllerClass = LoadClass<AController>(NULL, TEXT("/Script/Holodeck.TurtleAgentController"), NULL, LOAD_None, NULL);
+	AIControllerClass = LoadClass<AController>(
+		NULL, TEXT("/Script/Holodeck.TurtleAgentController"), NULL, LOAD_None, NULL);
 	AutoPossessAI = EAutoPossessAI::PlacedInWorld;
 }
 
@@ -41,6 +41,3 @@ void ATurtleAgent::Tick(float DeltaSeconds) {
 		this->IsAbused = true;
 	}
 }
-
-
-

@@ -8,11 +8,9 @@
 
 #include "LidarDescription.generated.h"
 USTRUCT()
-struct HOLODECK_API FLidarDescription
-{
+struct HOLODECK_API FLidarDescription {
 	GENERATED_BODY()
 public:
-
 	// Number of lasers
 	UPROPERTY(EditAnywhere)
 	uint32 Channels = 32u;
@@ -38,7 +36,7 @@ public:
 	/// horizontal line.
 	UPROPERTY(EditAnywhere)
 	float LowerFovLimit = -30.0f;
-  
+
 	/// Horizontal field of view
 	UPROPERTY(EditAnywhere)
 	float HorizontalFov = 360.0f;
@@ -69,5 +67,4 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float NoiseStdDev = 0.0f;
-	
 };

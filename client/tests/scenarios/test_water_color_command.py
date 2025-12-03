@@ -21,26 +21,27 @@ base_cfg = {
                 {
                     "sensor_type": "RGBCamera",
                     "sensor_name": "RGBCamera",
-                    "socket":"CameraRightSocket"
+                    "socket": "CameraRightSocket",
                 }
             ],
             "control_scheme": 3,
             "location": [0, -52, -1],
-            "rotation": [0, 0, 0]
+            "rotation": [0, 0, 0],
         }
-    ]
+    ],
 }
+
 
 def test_change_watercolor(request):
     global base_cfg
     cfg = copy.deepcopy(base_cfg)
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
     with holoocean.environments.HoloOceanEnvironment(
-        scenario = cfg,
-        binary_path = binary_path,
-        show_viewport = False,
-        verbose = True,
-        uuid = str(uuid.uuid4())
+        scenario=cfg,
+        binary_path=binary_path,
+        show_viewport=False,
+        verbose=True,
+        uuid=str(uuid.uuid4()),
     ) as env:
         env.reset()
         for _ in range(20):

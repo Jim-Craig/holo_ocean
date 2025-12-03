@@ -1,5 +1,5 @@
-#include "Holodeck.h"
 #include "LocationTask.h"
+#include "Holodeck.h"
 #include "Json.h"
 
 // Set default values
@@ -11,8 +11,9 @@ void ULocationTask::InitializeSensor() {
 void ULocationTask::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::String>("LocationActor")) {
@@ -24,16 +25,20 @@ void ULocationTask::ParseSensorParms(FString ParmsJson) {
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Array>("GoalLocation")) {
-			TArray<TSharedPtr<FJsonValue>> LocationArray = JsonParsed->GetArrayField("GoalLocation");
+			TArray<TSharedPtr<FJsonValue>> LocationArray =
+				JsonParsed->GetArrayField("GoalLocation");
 			if (LocationArray.Num() == 3) {
 				double X, Y, Z;
-				if (LocationArray[0]->TryGetNumber(X) && LocationArray[1]->TryGetNumber(Y) && LocationArray[2]->TryGetNumber(Z))
+				if (LocationArray[0]->TryGetNumber(X)
+					&& LocationArray[1]->TryGetNumber(Y)
+					&& LocationArray[2]->TryGetNumber(Z))
 					GoalLocation = ConvertLinearVector(FVector(X, Y, Z), ClientToUE);
 			}
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Number>("GoalDistance")) {
-			GoalDistance = ConvertClientDistanceToUnreal(JsonParsed->GetNumberField("GoalDistance"));
+			GoalDistance = ConvertClientDistanceToUnreal(
+				JsonParsed->GetNumberField("GoalDistance"));
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Boolean>("NegativeReward")) {
@@ -44,33 +49,37 @@ void ULocationTask::ParseSensorParms(FString ParmsJson) {
 			HasTerminal = JsonParsed->GetBoolField("HasTerminal");
 		}
 	} else {
-		UE_LOG(LogHolodeck, Warning, TEXT("ULocationTask::ParseSensorParms:: Unable to parse json."));
+		UE_LOG(
+			LogHolodeck,
+			Warning,
+			TEXT("ULocationTask::ParseSensorParms:: Unable to parse json."));
 	}
 }
 
 // Called every frame
-void ULocationTask::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void ULocationTask::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	if (LocationActor == nullptr && LocationActorTag != "")
 		LocationActor = FindActorWithTag(LocationActorTag);
 	if (GoalActor == nullptr && GoalActorTag != "")
 		GoalActor = FindActorWithTag(GoalActorTag);
 
-	if ((LocationActor || LocationActorTag == "") && (GoalActor || GoalActorTag == "")) {
+	if ((LocationActor || LocationActorTag == "")
+		&& (GoalActor || GoalActorTag == "")) {
 		float Distance = CalcDistance();
 
 		if (Distance < GoalDistance) {
 			if (!NegativeReward) {
 				Reward = 1;
-			}
-			else {
+			} else {
 				Reward = -1;
 			}
 
 			if (HasTerminal)
 				Terminal = true;
-
-		}
-		else {
+		} else {
 			Reward = 0;
 			Terminal = false;
 		}

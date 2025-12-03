@@ -1,11 +1,13 @@
-#include "Holodeck.h"
 #include "RenderRequest.h"
+#include "Holodeck.h"
 
 DEFINE_STAT(STAT_CameraExecuteTask);
 DEFINE_STAT(STAT_CameraExecuteTask_ReadSurfaceData);
 DEFINE_STAT(STAT_CameraExecuteTask_Memcpy);
 
-void FRenderRequest::RetrievePixels(FColor* PixelBuffer, UTextureRenderTarget2D* Texture) {
+void FRenderRequest::RetrievePixels(
+	FColor*					PixelBuffer,
+	UTextureRenderTarget2D* Texture) {
 	this->Buffer = PixelBuffer;
 	this->TargetTexture = Texture;
 	CheckNotBlockedOnRenderThread(); // not the issue
@@ -14,7 +16,10 @@ void FRenderRequest::RetrievePixels(FColor* PixelBuffer, UTextureRenderTarget2D*
 	TGraphTask<FRenderRequest>::CreateTask().ConstructAndDispatchWhenReady(*this);
 }
 
-void FRenderRequest::RetrievePixels(FColor* PixelBuffer, UTextureRenderTarget2D* Texture, bool ShouldConvertToPalette) {
+void FRenderRequest::RetrievePixels(
+	FColor*					PixelBuffer,
+	UTextureRenderTarget2D* Texture,
+	bool					ShouldConvertToPalette) {
 	this->Buffer = PixelBuffer;
 	this->TargetTexture = Texture;
 	this->ConvertToPalette = ShouldConvertToPalette;
@@ -25,19 +30,18 @@ void FRenderRequest::RetrievePixels(FColor* PixelBuffer, UTextureRenderTarget2D*
 	TGraphTask<FRenderRequest>::CreateTask().ConstructAndDispatchWhenReady(*this);
 }
 
-void FRenderRequest::ExecuteTask() const
-{
+void FRenderRequest::ExecuteTask() const {
 	SCOPE_CYCLE_COUNTER(STAT_CameraExecuteTask);
 
-
-	TArray<FColor> SurfaceData;
+	TArray<FColor>			  SurfaceData;
 	FRHICommandListImmediate& RHICmdList = GetImmediateCommandList_ForRenderCommand();
-	FTextureRenderTargetResource*  rt_resource = TargetTexture->GetRenderTargetResource();
+	FTextureRenderTargetResource* rt_resource =
+		TargetTexture->GetRenderTargetResource();
 
 	if (rt_resource != nullptr) {
 		const FTexture2DRHIRef& rhi_texture = rt_resource->GetRenderTargetTexture();
-		//FIntPoint size;
-		FReadSurfaceDataFlags flags(RCM_UNorm, CubeFace_MAX);
+		// FIntPoint size;
+		FReadSurfaceDataFlags	flags(RCM_UNorm, CubeFace_MAX);
 		flags.SetLinearToGamma(false);
 
 		{
@@ -53,21 +57,20 @@ void FRenderRequest::ExecuteTask() const
 		{
 			SCOPE_CYCLE_COUNTER(STAT_CameraExecuteTask_Memcpy);
 
-			if (ConvertToPalette)
-			{
+			if (ConvertToPalette) {
 				// Translate the surface data using the palette
-				for (int i = 0; i < SurfaceData.Num(); i++)
-				{
-					//UE_LOG(LogHolodeck, Warning, TEXT("%d"), SurfaceData[i].R);
+				for (int i = 0; i < SurfaceData.Num(); i++) {
+					// UE_LOG(LogHolodeck, Warning, TEXT("%d"), SurfaceData[i].R);
 					const unsigned char* color = Palette.GetColor(SurfaceData[i].R);
 					SurfaceData[i] = FColor(color[0], color[1], color[2]);
-					
 				}
 			}
 
-			FMemory::Memcpy(this->Buffer, &SurfaceData[0], SurfaceData.Num() * sizeof(FColor)); // this line isn't the problem
+			FMemory::Memcpy(
+				this->Buffer,
+				&SurfaceData[0],
+				SurfaceData.Num() * sizeof(FColor)); // this line isn't the problem
 		}
-
 	}
 }
 

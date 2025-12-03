@@ -13,7 +13,7 @@ config_water = {
     "main_agent": "auv0",
     "ticks_per_sec": 60,
     "frames_per_sec": 60,
-    "agents":[
+    "agents": [
         {
             "agent_name": "auv0",
             "agent_type": "BlueROV2",
@@ -21,14 +21,14 @@ config_water = {
                 {
                     "sensor_type": "RGBCamera",
                     "sensor_name": "Camera",
-                    "socket": "CameraSocket"
+                    "socket": "CameraSocket",
                 }
             ],
             "control_scheme": 0,
             "location": [6.0, -47.0, -2.5],
-            "rotation": [0.0, 0.0, 220.0]
+            "rotation": [0.0, 0.0, 220.0],
         }
-    ]
+    ],
 }
 
 config_air = {
@@ -38,7 +38,7 @@ config_air = {
     "main_agent": "auv0",
     "ticks_per_sec": 60,
     "frames_per_sec": 60,
-    "agents":[
+    "agents": [
         {
             "agent_name": "auv0",
             "agent_type": "SurfaceVessel",
@@ -46,34 +46,36 @@ config_air = {
                 {
                     "sensor_type": "RGBCamera",
                     "sensor_name": "Camera",
-                    "socket": "Platform"
+                    "socket": "Platform",
                 }
             ],
             "control_scheme": 0,
             "location": [0.0, -53.0, 0.5],
-            "rotation": [0.0, 0.0, 220.0]
+            "rotation": [0.0, 0.0, 220.0],
         }
-    ]
+    ],
 }
 
 """Test to make sure that water fog gets set correctly"""
+
+
 def test_water_fog(request):
     global config_water
     cfg = copy.deepcopy(config_water)
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
     with holoocean.environments.HoloOceanEnvironment(
-        scenario = cfg,
-        binary_path = binary_path,
-        show_viewport = False,
-        verbose = True,
-        uuid = str(uuid.uuid4())
+        scenario=cfg,
+        binary_path=binary_path,
+        show_viewport=False,
+        verbose=True,
+        uuid=str(uuid.uuid4()),
     ) as env:
         env.reset()
         env.tick()
-        #Let simulation environment set 
+        # Let simulation environment set
         for _ in range(20):
             env.tick()
-        pixels = env.tick()["Camera"][:,:,0:3]
+        pixels = env.tick()["Camera"][:, :, 0:3]
         filepath = str("/baseline_images/standard_fog.png")
         baseline = cv2.imread(str(request.fspath.dirname + filepath))
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
@@ -82,10 +84,10 @@ def test_water_fog(request):
         assert err < 2500, f"Default fog set incorrectly"
 
         # Change to purple fog
-        env.water_fog(5,0.5,1.0,0.0,1.0)
+        env.water_fog(5, 0.5, 1.0, 0.0, 1.0)
         for _ in range(200):
             env.tick()
-        pixels = env.tick()["Camera"][:,:,0:3]
+        pixels = env.tick()["Camera"][:, :, 0:3]
         filepath = str("/baseline_images/purple_fog.png")
         baseline = cv2.imread(str(request.fspath.dirname + filepath))
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
@@ -98,24 +100,27 @@ def test_water_fog(request):
         err = mean_square_err(pixels, baseline)
         assert err < 2500, f"Purple fog set incorrectly"
 
+
 """Test to make sure that air fog gets set correctly"""
+
+
 def test_air_fog(request):
     global config_air
     cfg = copy.deepcopy(config_air)
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
     with holoocean.environments.HoloOceanEnvironment(
-        scenario = cfg,
-        binary_path = binary_path,
-        show_viewport = False,
-        verbose = True,
-        uuid = str(uuid.uuid4())
+        scenario=cfg,
+        binary_path=binary_path,
+        show_viewport=False,
+        verbose=True,
+        uuid=str(uuid.uuid4()),
     ) as env:
         env.reset()
         env.tick()
         # No default fog, so no fog at beggining of simulation
         for _ in range(20):
             env.tick()
-        pixels = env.tick()["Camera"][:,:,0:3]
+        pixels = env.tick()["Camera"][:, :, 0:3]
         filepath = str("/baseline_images/no_air_fog.png")
         baseline = cv2.imread(str(request.fspath.dirname + filepath))
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
@@ -124,10 +129,10 @@ def test_air_fog(request):
         assert err < 2500, f"Air should be clear at the start"
 
         # Add air fog
-        env.air_fog(1.5,2,0.0,0.5,1.0)
+        env.air_fog(1.5, 2, 0.0, 0.5, 1.0)
         for _ in range(200):
             env.tick()
-        pixels = env.tick()["Camera"][:,:,0:3]
+        pixels = env.tick()["Camera"][:, :, 0:3]
         filepath = str("/baseline_images/air_fog.png")
         baseline = cv2.imread(str(request.fspath.dirname + filepath))
         assert baseline is not None, f"Failed to load baseline image from {filepath}"

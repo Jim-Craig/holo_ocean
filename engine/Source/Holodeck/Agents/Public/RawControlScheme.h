@@ -8,8 +8,8 @@
 #include "RawControlScheme.generated.h"
 
 /**
-* URawControlScheme
-*/
+ * URawControlScheme
+ */
 UCLASS()
 class HOLODECK_API URawControlScheme : public UHolodeckControlScheme {
 	GENERATED_BODY()
@@ -20,7 +20,8 @@ public:
 
 	URawControlScheme(AHolodeckAgentInterface* const ControlledAgent);
 
-	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) override;
+	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds)
+		override;
 
 	unsigned int GetControlSchemeSizeInBytes() const {
 		return Agent->GetRawActionSizeInBytes();

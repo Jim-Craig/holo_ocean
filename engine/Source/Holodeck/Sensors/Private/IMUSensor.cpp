@@ -1,7 +1,7 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "IMUSensor.h"
+#include "Holodeck.h"
 
 UIMUSensor::UIMUSensor() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -11,8 +11,9 @@ UIMUSensor::UIMUSensor() {
 void UIMUSensor::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::Boolean>("ReturnBias")) {
@@ -74,10 +75,11 @@ void UIMUSensor::ParseSensorParms(FString ParmsJson) {
 		if (JsonParsed->HasTypedField<EJson::Array>("AngVelBiasCov")) {
 			mvnBiasOmega.initCov(JsonParsed->GetArrayField("AngVelBiasCov"));
 		}
-
-	}
-	else {
-		UE_LOG(LogHolodeck, Fatal, TEXT("UIMUSensor::ParseSensorParms:: Unable to parse json."));
+	} else {
+		UE_LOG(
+			LogHolodeck,
+			Fatal,
+			TEXT("UIMUSensor::ParseSensorParms:: Unable to parse json."));
 	}
 }
 
@@ -97,8 +99,10 @@ void UIMUSensor::InitializeSensor() {
 	AngularVelocityVector = FVector();
 }
 
-
-void UIMUSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) {
+void UIMUSensor::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	if (Parent != nullptr && bOn) {
 		CalculateAccelerationVector(DeltaTime);
 		CalculateAngularVelocityVector();
@@ -106,14 +110,15 @@ void UIMUSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActo
 		float* FloatBuffer = static_cast<float*>(Buffer);
 
 		// Convert before sending to user side.
-		LinearAccelerationVector = ConvertLinearVector(LinearAccelerationVector, UEToClient);
+		LinearAccelerationVector =
+			ConvertLinearVector(LinearAccelerationVector, UEToClient);
 		AngularVelocityVector = ConvertAngularVector(AngularVelocityVector, NoScale);
 
 		// Introduce noise
 		BiasAccel += mvnBiasAccel.sampleFVector();
 		BiasOmega += mvnBiasOmega.sampleFVector();
 		LinearAccelerationVector += BiasAccel + mvnAccel.sampleFVector();
-		AngularVelocityVector    += BiasOmega + mvnOmega.sampleFVector();
+		AngularVelocityVector += BiasOmega + mvnOmega.sampleFVector();
 
 		FloatBuffer[0] = LinearAccelerationVector.X;
 		FloatBuffer[1] = LinearAccelerationVector.Y;
@@ -122,7 +127,7 @@ void UIMUSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActo
 		FloatBuffer[4] = AngularVelocityVector.Y;
 		FloatBuffer[5] = AngularVelocityVector.Z;
 
-		if(ReturnBias){
+		if (ReturnBias) {
 			FloatBuffer[6] = BiasAccel.X;
 			FloatBuffer[7] = BiasAccel.Y;
 			FloatBuffer[8] = BiasAccel.Z;
@@ -135,7 +140,7 @@ void UIMUSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UIMUSensor::CalculateAccelerationVector(float DeltaTime) {
 	VelocityThen = VelocityNow;
-	VelocityNow  = Parent->GetPhysicsLinearVelocityAtPoint(this->GetComponentLocation());
+	VelocityNow = Parent->GetPhysicsLinearVelocityAtPoint(this->GetComponentLocation());
 
 	RotationNow = this->GetComponentRotation();
 
@@ -144,7 +149,8 @@ void UIMUSensor::CalculateAccelerationVector(float DeltaTime) {
 
 	LinearAccelerationVector += FVector(0.0, 0.0, -WorldGravity);
 
-	LinearAccelerationVector = RotationNow.UnrotateVector(LinearAccelerationVector); //changes world axis to local axis
+	LinearAccelerationVector = RotationNow.UnrotateVector(
+		LinearAccelerationVector); // changes world axis to local axis
 }
 
 void UIMUSensor::CalculateAngularVelocityVector() {
@@ -154,8 +160,8 @@ void UIMUSensor::CalculateAngularVelocityVector() {
 	AngularVelocityVector.Y = AngularVelocityVector.Y;
 	AngularVelocityVector.Z = AngularVelocityVector.Z;
 
-	AngularVelocityVector = RotationNow.UnrotateVector(AngularVelocityVector); //Rotate from world angles to local angles.
-
+	AngularVelocityVector = RotationNow.UnrotateVector(
+		AngularVelocityVector); // Rotate from world angles to local angles.
 }
 
 FVector UIMUSensor::GetAccelerationVector() {

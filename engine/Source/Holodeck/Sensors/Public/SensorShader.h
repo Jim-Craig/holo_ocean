@@ -9,8 +9,7 @@
 
 /// A shader in UShaderBasedSensor.
 USTRUCT(BlueprintType)
-struct HOLODECK_API FSensorShader
-{
+struct HOLODECK_API FSensorShader {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

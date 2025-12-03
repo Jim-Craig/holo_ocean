@@ -11,26 +11,27 @@
 #include "TorpedoAUVController.generated.h"
 
 /**
-* A Holodeck Turtle Agent Controller
-*/
+ * A Holodeck Turtle Agent Controller
+ */
 UCLASS()
-class HOLODECK_API ATorpedoAUVController : public AHolodeckPawnController
-{
+class HOLODECK_API ATorpedoAUVController : public AHolodeckPawnController {
 	GENERATED_BODY()
 
 public:
 	/**
-	* Default Constructor
-	*/
-	ATorpedoAUVController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	 * Default Constructor
+	 */
+	ATorpedoAUVController(
+		const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/**
-	* Default Destructor
-	*/
+	 * Default Destructor
+	 */
 	~ATorpedoAUVController();
 
 	void AddControlSchemes() override {
-		// The default controller currently in ControlSchemes index 0 is the dynamics one. We push it back to index 1 with this code.
+		// The default controller currently in ControlSchemes index 0 is the
+		// dynamics one. We push it back to index 1 with this code.
 
 		// Thruster controller
 		UTorpedoAUVControlFins* Thrusters = NewObject<UTorpedoAUVControlFins>();

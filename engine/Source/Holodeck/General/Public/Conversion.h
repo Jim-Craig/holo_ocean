@@ -6,7 +6,11 @@
 const float UEUnitsPerMeter = 100.0;
 const float UEUnitsPerMeterSquared = 10000;
 
-enum ConvertType {UEToClient, ClientToUE, NoScale};
+enum ConvertType {
+	UEToClient,
+	ClientToUE,
+	NoScale
+};
 
 FRotator RPYToRotator(float Roll, float Pitch, float Yaw);
 

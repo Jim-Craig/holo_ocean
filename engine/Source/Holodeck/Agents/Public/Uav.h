@@ -3,10 +3,11 @@
 
 #include "GameFramework/Pawn.h"
 #include "HolodeckAgent.h"
+
 #include "Uav.generated.h"
 
-//All in radians. (rad/s, rad/s^2, etc.)
-const float UAV_MASS = 1.375; //Kilograms
+// All in radians. (rad/s, rad/s^2, etc.)
+const float UAV_MASS = 1.375; // Kilograms
 const float UAV_MU = 1;
 const float UAV_MAX_ROLL = 6.5080;
 const float UAV_MAX_PITCH = 5.087;
@@ -15,15 +16,14 @@ const float UAV_MAX_FORCE = 5984.4;
 
 UCLASS()
 /**
-* AUav
-* Inherits from the HolodeckAgent class
-* On any tick this object will:
-*     Calculate the forces to apply using PID controllers, desired values, and current values.
-*     Apply the given forces. 
-* Desired values must be set by a controller. 
-*/
-class HOLODECK_API AUav : public AHolodeckAgent
-{
+ * AUav
+ * Inherits from the HolodeckAgent class
+ * On any tick this object will:
+ *     Calculate the forces to apply using PID controllers, desired values, and
+ * current values. Apply the given forces. Desired values must be set by a
+ * controller.
+ */
+class HOLODECK_API AUav : public AHolodeckAgent {
 	GENERATED_BODY()
 public:
 	AUav();
@@ -33,17 +33,17 @@ public:
 	void UpdateForcesAndMoments(float DeltaTime);
 	void ApplyForces();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Desired)
-		float DesiredAltitude;
+	float DesiredAltitude;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Desired)
-		float DesiredYawRate;
+	float DesiredYawRate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Desired)
-		float DesiredPitch;
+	float DesiredPitch;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Desired)
-		float DesiredRoll;
+	float DesiredRoll;
 	UPROPERTY(BlueprintReadWrite, Category = UAVMesh)
-		UStaticMeshComponent* RootMesh;
+	UStaticMeshComponent* RootMesh;
 
-	//See HolodeckAgent.h for descriptions of these overriden functions
+	// See HolodeckAgent.h for descriptions of these overriden functions
 
 	float GetRollTorqueToApply() { return -CommandArray[0]; };
 	float GetPitchTorqueToApply() { return -CommandArray[1]; };
@@ -57,22 +57,21 @@ public:
 	float GetAccelerationLimit() override { return 200; }
 
 protected:
-	//See HolodeckAgent.h for descriptions of these overriden functions
+	// See HolodeckAgent.h for descriptions of these overriden functions
 
 private:
 	/**
-	  * 0: RollTorqueToApply
-	  * 1: PitchTorqueToApply
-	  * 2: YawTorqueToApply
-	  * 3: ThrustToApply
-	  */
+	 * 0: RollTorqueToApply
+	 * 1: PitchTorqueToApply
+	 * 2: YawTorqueToApply
+	 * 3: ThrustToApply
+	 */
 	float CommandArray[4];
 
 	FCalculateCustomPhysics OnCalculateCustomPhysics;
 
 	/**
-	  * InitializePIDControllers
-	  */
+	 * InitializePIDControllers
+	 */
 	void InitializePIDControllers();
-
 };

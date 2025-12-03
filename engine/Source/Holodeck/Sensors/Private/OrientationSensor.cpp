@@ -1,7 +1,7 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "OrientationSensor.h"
+#include "Holodeck.h"
 
 UOrientationSensor::UOrientationSensor() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -11,7 +11,8 @@ UOrientationSensor::UOrientationSensor() {
 void UOrientationSensor::InitializeSensor() {
 	Super::InitializeSensor();
 
-	Controller = static_cast<AHolodeckPawnController*>(this->GetAttachmentRootActor()->GetInstigator()->Controller);
+	Controller = static_cast<AHolodeckPawnController*>(
+		this->GetAttachmentRootActor()->GetInstigator()->Controller);
 	Parent = static_cast<UPrimitiveComponent*>(this->GetAttachParent());
 	RootMesh = static_cast<UStaticMeshComponent*>(this->GetAttachParent());
 
@@ -19,7 +20,10 @@ void UOrientationSensor::InitializeSensor() {
 }
 
 // Called every frame
-void UOrientationSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void UOrientationSensor::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	if (Parent != nullptr && RootMesh != nullptr) {
 		FVector Forward = this->GetForwardVector();
 		FVector Right = this->GetRightVector();

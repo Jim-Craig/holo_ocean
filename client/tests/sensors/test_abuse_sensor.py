@@ -29,7 +29,7 @@ def test_abuse_turtle(abuse_world):
 def test_abuse_falling(agent_abuse_world):
     """Test that the uav, turtle, and android are abused when they are dropped from a height"""
     agent, abuse_world = agent_abuse_world
-    abuse_world.agents[agent].teleport([0, 0, 30], [0, 0,0])
+    abuse_world.agents[agent].teleport([0, 0, 30], [0, 0, 0])
     abuse_world.tick()
     abused = False
     for _ in range(100):

@@ -3,14 +3,14 @@ import copy
 import uuid
 import cv2
 
-config= {
+config = {
     "name": "test_weather",
     "world": "TestWorld",
     "package_name": "TestWorlds",
     "main_agent": "auv0",
     "ticks_per_sec": 60,
     "frames_per_sec": 60,
-    "agents":[
+    "agents": [
         {
             "agent_name": "auv0",
             "agent_type": "SurfaceVessel",
@@ -18,14 +18,14 @@ config= {
                 {
                     "sensor_type": "RGBCamera",
                     "sensor_name": "Camera",
-                    "socket": "Platform"
+                    "socket": "Platform",
                 }
             ],
             "control_scheme": 0,
             "location": [-1.0, -55.0, 0.0],
-            "rotation": [0.0, 0.0, 135.0]
+            "rotation": [0.0, 0.0, 135.0],
         }
-    ]
+    ],
 }
 
 config_under = {
@@ -35,7 +35,7 @@ config_under = {
     "main_agent": "auv0",
     "ticks_per_sec": 60,
     "frames_per_sec": 60,
-    "agents":[
+    "agents": [
         {
             "agent_name": "auv0",
             "agent_type": "HoveringAUV",
@@ -43,31 +43,32 @@ config_under = {
                 {
                     "sensor_type": "RGBCamera",
                     "sensor_name": "Camera",
-                    "socket": "CameraLeftSocket"
+                    "socket": "CameraLeftSocket",
                 }
             ],
             "control_scheme": 0,
             "location": [-1.0, -55.0, -1.0],
-            "rotation": [0.0, 0.0, 135.0]
+            "rotation": [0.0, 0.0, 135.0],
         }
-    ]
+    ],
 }
+
 
 def test_weather_sunny():
     global config
     cfg = copy.deepcopy(config)
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
     with holoocean.environments.HoloOceanEnvironment(
-        scenario = cfg,
-        binary_path = binary_path,
-        show_viewport = False,
-        verbose = True,
-        uuid = str(uuid.uuid4())
+        scenario=cfg,
+        binary_path=binary_path,
+        show_viewport=False,
+        verbose=True,
+        uuid=str(uuid.uuid4()),
     ) as env:
         env.reset()
         env.tick()
         env.change_weather(0)
-        #Let simulation environment set 
+        # Let simulation environment set
         for _ in range(2000):
             env.tick()
 
@@ -81,11 +82,11 @@ def test_weather_cloudy():
     cfg = copy.deepcopy(config)
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
     with holoocean.environments.HoloOceanEnvironment(
-        scenario = cfg,
-        binary_path = binary_path,
-        show_viewport = False,
-        verbose = True,
-        uuid = str(uuid.uuid4())
+        scenario=cfg,
+        binary_path=binary_path,
+        show_viewport=False,
+        verbose=True,
+        uuid=str(uuid.uuid4()),
     ) as env:
         env.reset()
         env.tick()
@@ -98,16 +99,17 @@ def test_weather_cloudy():
         filepath = str("cloudy.png")
         cv2.imwrite(filepath, pixels)
 
+
 def test_weather_rain_under():
     global config_under
     cfg = copy.deepcopy(config_under)
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
     with holoocean.environments.HoloOceanEnvironment(
-        scenario = cfg,
-        binary_path = binary_path,
-        show_viewport = False,
-        verbose = True,
-        uuid = str(uuid.uuid4())
+        scenario=cfg,
+        binary_path=binary_path,
+        show_viewport=False,
+        verbose=True,
+        uuid=str(uuid.uuid4()),
     ) as env:
         env.reset()
         env.tick()

@@ -1,7 +1,7 @@
 // MIT License (c) 2021 BYU FRoStLab see LICENSE file
 
-#include "Holodeck.h"
 #include "ProfilingSonar.h"
+#include "Holodeck.h"
 // #pragma warning (disable : 4101)
 
 UProfilingSonar::UProfilingSonar() {
@@ -14,16 +14,20 @@ void UProfilingSonar::ParseSensorParms(FString ParmsJson) {
 	RangeMin = 0.5 * 100;
 	RangeMax = 75 * 100;
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 		// If they haven't set RangeRes or RangeBins, input our default RangeBins
-		if (!JsonParsed->HasTypedField<EJson::Number>("RangeRes") && !JsonParsed->HasTypedField<EJson::Number>("RangeBins")) {
+		if (!JsonParsed->HasTypedField<EJson::Number>("RangeRes")
+			&& !JsonParsed->HasTypedField<EJson::Number>("RangeBins")) {
 			RangeBins = 750;
 		}
 
-		// If they haven't set AzimuthRes or AzimuthBins, input our default AzimuthBins
-		if (!JsonParsed->HasTypedField<EJson::Number>("AzimuthRes") && !JsonParsed->HasTypedField<EJson::Number>("AzimuthBins")) {
+		// If they haven't set AzimuthRes or AzimuthBins, input our default
+		// AzimuthBins
+		if (!JsonParsed->HasTypedField<EJson::Number>("AzimuthRes")
+			&& !JsonParsed->HasTypedField<EJson::Number>("AzimuthBins")) {
 			AzimuthBins = 480;
 		}
 	}

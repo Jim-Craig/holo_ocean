@@ -1,4 +1,4 @@
-import holoocean  
+import holoocean
 
 import holoocean.environments
 import numpy as np
@@ -12,12 +12,14 @@ def bio_fx(location):
         result = 1
     return result
 
+
 def sal_fx(location):
     x, y, z = location
     result = 0
     if y > 0:
         result = 1
     return result
+
 
 def temp_fx(location):
     x, y, z = location
@@ -34,25 +36,32 @@ scenario = {
     "main_agent": "auv0",
     "ticks_per_sec": 60,
     "agents": [
-            {
-                "agent_name": "auv0",
-                "agent_type": "HoveringAUV",
-                "sensors": [
-                    {
-                        "sensor_type": "BSTSensor",
-                        "socket": "COM",
-                        "configuration": {
-                            "biomass_clusters": [{"position":[10, 10, -10], "strength": 2, "falloff": 10}],
-                            "salinity_clusters": [{"position":[10, 10, -10], "strength": 2, "falloff": 10}],
-                            "temperature_clusters": [{"position":[10, 10, -10], "strength": 2, "falloff": 10}]
-                        }
+        {
+            "agent_name": "auv0",
+            "agent_type": "HoveringAUV",
+            "sensors": [
+                {
+                    "sensor_type": "BSTSensor",
+                    "socket": "COM",
+                    "configuration": {
+                        "biomass_clusters": [
+                            {"position": [10, 10, -10], "strength": 2, "falloff": 10}
+                        ],
+                        "salinity_clusters": [
+                            {"position": [10, 10, -10], "strength": 2, "falloff": 10}
+                        ],
+                        "temperature_clusters": [
+                            {"position": [10, 10, -10], "strength": 2, "falloff": 10}
+                        ],
                     },
-                ],
+                },
+            ],
             "control_scheme": 0,
-            "location": [5, 10, -10]
-            }
-        ],
-    }
+            "location": [5, 10, -10],
+        }
+    ],
+}
+
 
 def test_clusters():
     """
@@ -81,7 +90,9 @@ def test_clusters():
         assert bst_data[1] == 34.508522, "Salinity data doesn't match test case"
         assert bst_data[2] == 24.283293, "Temperature data doesn't match test case"
 
+
 # test_clusters()
+
 
 def custom_functions():
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")

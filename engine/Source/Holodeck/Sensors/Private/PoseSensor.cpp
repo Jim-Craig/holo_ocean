@@ -1,7 +1,7 @@
 // MIT License (c) 2021 BYU FRoStLab see LICENSE file
 
-#include "Holodeck.h"
 #include "PoseSensor.h"
+#include "Holodeck.h"
 
 UPoseSensor::UPoseSensor() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -11,7 +11,8 @@ UPoseSensor::UPoseSensor() {
 void UPoseSensor::InitializeSensor() {
 	Super::InitializeSensor();
 
-	Controller = static_cast<AHolodeckPawnController*>(this->GetAttachmentRootActor()->GetInstigator()->Controller);
+	Controller = static_cast<AHolodeckPawnController*>(
+		this->GetAttachmentRootActor()->GetInstigator()->Controller);
 	Parent = static_cast<UPrimitiveComponent*>(this->GetAttachParent());
 	RootMesh = static_cast<UStaticMeshComponent*>(this->GetAttachParent());
 
@@ -19,7 +20,10 @@ void UPoseSensor::InitializeSensor() {
 }
 
 // Called every frame
-void UPoseSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void UPoseSensor::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	if (Parent != nullptr && RootMesh != nullptr) {
 		FVector Forward = this->GetForwardVector();
 		FVector Right = this->GetRightVector();

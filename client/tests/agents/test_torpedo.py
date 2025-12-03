@@ -79,7 +79,9 @@ def test_fossen_dynamics(env):
 
     fossen_interface.set_control_mode("auv0", "manualControl")
 
-    u_control = np.array([-0.087, -0.087, 0.087, 0.087, 800])  # [RudderAngle, SternAngle,Thruster]
+    u_control = np.array(
+        [-0.087, -0.087, 0.087, 0.087, 800]
+    )  # [RudderAngle, SternAngle,Thruster]
     fossen_interface.set_u_control("auv0", u_control)
 
     for i in range(numSteps):
@@ -113,8 +115,10 @@ def test_fossen_autopilot(env):
     fossen_interface = FossenInterface(fossen_agents, scenario)
 
     fossen_interface.set_control_mode("auv0", "depthHeadingAutopilot")
-    fossen_interface.set_goal("auv0", depth, heading, 1300)  # Changes depth (positive depth), heading, thruster RPM goals for controller
-    
+    fossen_interface.set_goal(
+        "auv0", depth, heading, 1300
+    )  # Changes depth (positive depth), heading, thruster RPM goals for controller
+
     for i in range(numSteps):
         state = env.step(accel)
         accel = fossen_interface.update("auv0", state)

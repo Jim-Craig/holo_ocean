@@ -1,4 +1,5 @@
 """Shared memory with memory mapping"""
+
 import ctypes
 import mmap
 import os
@@ -19,11 +20,12 @@ class Shmem:
         dtype (type, optional): data type of the shared memory. Defaults to np.float32
         uuid (:obj:`str`, optional): UUID of the memory block. Defaults to ""
     """
+
     _numpy_to_ctype = {
         np.float32: ctypes.c_float,
         np.uint8: ctypes.c_uint8,
         np.bool_: ctypes.c_bool,
-        np.byte: ctypes.c_byte
+        np.byte: ctypes.c_byte,
     }
 
     def __init__(self, name, shape, dtype=np.float32, uuid=""):
@@ -51,7 +53,11 @@ class Shmem:
         else:
             raise HoloOceanException("Currently unsupported os: " + os.name)
 
-        self.np_array = np.ndarray(shape, dtype=dtype, buffer=(Shmem._numpy_to_ctype[dtype] * size).from_buffer(self._mem_pointer))
+        self.np_array = np.ndarray(
+            shape,
+            dtype=dtype,
+            buffer=(Shmem._numpy_to_ctype[dtype] * size).from_buffer(self._mem_pointer),
+        )
 
     def unlink(self):
         """unlinks the shared memory"""

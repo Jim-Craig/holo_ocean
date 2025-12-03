@@ -2,13 +2,16 @@
 
 #include "HolodeckControlScheme.h"
 
-
 UHolodeckControlScheme::UHolodeckControlScheme() {}
 
-UHolodeckControlScheme::UHolodeckControlScheme(const FObjectInitializer& ObjectInitializer) :
-		Super(ObjectInitializer) {}
+UHolodeckControlScheme::UHolodeckControlScheme(
+	const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer) {}
 
-void UHolodeckControlScheme::Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) {
+void UHolodeckControlScheme::Execute(
+	void* const CommandArray,
+	void* const InputCommand,
+	float		DeltaSeconds) {
 	check(0 && "You must override Execute");
 }
 

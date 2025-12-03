@@ -1,14 +1,17 @@
-from  holoocean.command import TideCommand
+from holoocean.command import TideCommand
 from holoocean.exceptions import HoloOceanException
 import numpy
 import random
 
+
 class TideController:
 
-    def __init__(self, client, amplitude = 100.0, frequency = 2000, tide_type = 'TideNormal', active = 0):
-        self.amplitude = amplitude # in cm
-        self.frequency = frequency # in ticks
-        self.tide_type = tide_type # might use later
+    def __init__(
+        self, client, amplitude=100.0, frequency=2000, tide_type="TideNormal", active=0
+    ):
+        self.amplitude = amplitude  # in cm
+        self.frequency = frequency  # in ticks
+        self.tide_type = tide_type  # might use later
         self.active = active
         self._client = client
         self._start_time = 0
@@ -26,19 +29,21 @@ class TideController:
     def set_tide_type(self, tide_type):
         self.tide_type = tide_type
 
-    #lambda function that gets the tick data from env
+    # lambda function that gets the tick data from env
     def get_ticks(self, tick_source):
         self._tick = tick_source
 
     def get_height(self):
         sim_age = self._tick() - self._start_time
-        if self.tide_type == 'TideNormal':
-            return (self.amplitude * numpy.sin(((2 * numpy.pi) / self.frequency) * sim_age))
-        if self.tide_type == 'TideFreaky':
+        if self.tide_type == "TideNormal":
+            return self.amplitude * numpy.sin(
+                ((2 * numpy.pi) / self.frequency) * sim_age
+            )
+        if self.tide_type == "TideFreaky":
             return random.randint(-self.amplitude * 100, self.amplitude * 100)
         return 0
 
-    #if self.a
+    # if self.a
     def update_tide(self):
         if self.active:
             height = self.get_height()

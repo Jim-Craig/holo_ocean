@@ -1,9 +1,11 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "HolodeckWorldSettings.h"
+#include "Holodeck.h"
 
-float AHolodeckWorldSettings::FixupDeltaSeconds(float DeltaSeconds, float RealDeltaSeconds) {
+float AHolodeckWorldSettings::FixupDeltaSeconds(
+	float DeltaSeconds,
+	float RealDeltaSeconds) {
 	return ConstantTimeDeltaBetweenTicks;
 }
 

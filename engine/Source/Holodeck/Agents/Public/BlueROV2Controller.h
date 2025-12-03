@@ -3,38 +3,36 @@
 #pragma once
 
 #include "Holodeck.h"
-
-#include "HolodeckPawnController.h"
-#include "BlueROV2ControlThrusters.h"
-#include "BlueROV2ControlPD.h"
 #include "BlueROV2.h"
-//#include "BlueROV2.generated.h"
-
+#include "BlueROV2ControlPD.h"
+#include "BlueROV2ControlThrusters.h"
+#include "HolodeckPawnController.h"
 
 #include "BlueROV2Controller.generated.h"
 
 /**
-* A Holodeck Turtle Agent Controller
-*/
+ * A Holodeck Turtle Agent Controller
+ */
 UCLASS()
 
-class HOLODECK_API ABlueROV2Controller : public AHolodeckPawnController
-{
+class HOLODECK_API ABlueROV2Controller : public AHolodeckPawnController {
 	GENERATED_BODY()
 
 public:
 	/**
-	* Default Constructor
-	*/
-	ABlueROV2Controller(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	 * Default Constructor
+	 */
+	ABlueROV2Controller(
+		const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/**
-	* Default Destructor
-	*/
+	 * Default Destructor
+	 */
 	~ABlueROV2Controller();
 
 	void AddControlSchemes() override {
-		// The default controller currently in ControlSchemes index 0 is the dynamics one. We push it back to index 2 with this code.
+		// The default controller currently in ControlSchemes index 0 is the
+		// dynamics one. We push it back to index 2 with this code.
 
 		// Thruster controller
 
@@ -48,4 +46,3 @@ public:
 		ControlSchemes.Insert(PD, 1);
 	}
 };
-

@@ -4,34 +4,36 @@
 
 #include "Holodeck.h"
 
-#include "UavControlSchemeTargetRollPitch.h"
 #include "HolodeckPawnController.h"
+#include "UavControlSchemeTargetRollPitch.h"
 
 #include "UavController.generated.h"
 
 /**
-  * AHolodeckUAVController
-  * Controller for the Holodeck UAV
-  * Gets the commands to give the the UAV from the action buffer
-  * Sets the desired commands on the UAV. 
-  */
+ * AHolodeckUAVController
+ * Controller for the Holodeck UAV
+ * Gets the commands to give the the UAV from the action buffer
+ * Sets the desired commands on the UAV.
+ */
 UCLASS()
 class HOLODECK_API AUavController : public AHolodeckPawnController {
 	GENERATED_BODY()
 
 public:
 	/**
-	  * Default Constructor.
-	  */
-	AUavController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	 * Default Constructor.
+	 */
+	AUavController(
+		const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/**
-	  * Default Destructor.
-	  */
+	 * Default Destructor.
+	 */
 	~AUavController();
 
 	void AddControlSchemes() {
-		UUavControlSchemeTargetRollPitch* ControlScheme = NewObject<UUavControlSchemeTargetRollPitch>();
+		UUavControlSchemeTargetRollPitch* ControlScheme =
+			NewObject<UUavControlSchemeTargetRollPitch>();
 		ControlScheme->SetController(this);
 		ControlSchemes.Add(ControlScheme);
 	}

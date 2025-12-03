@@ -1,24 +1,21 @@
-#include "Holodeck.h"
 #include "DistanceTask.h"
+#include "Holodeck.h"
 #include "Json.h"
 
 // Set default values
 void UDistanceTask::InitializeSensor() {
 	Super::InitializeSensor();
 
-
 	NextDistance = this->ComputeNextDistance();
-
 }
 
 float UDistanceTask::ComputeNextDistance() {
-	
+
 	float Distance = CalcDistance();
 
 	if (MaximizeDistance) {
 		return Distance + Interval;
-	}
-	else {
+	} else {
 		return Distance - Interval;
 	}
 }
@@ -27,8 +24,9 @@ float UDistanceTask::ComputeNextDistance() {
 void UDistanceTask::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::String>("DistanceActor")) {
@@ -40,21 +38,25 @@ void UDistanceTask::ParseSensorParms(FString ParmsJson) {
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Array>("GoalLocation")) {
-			TArray<TSharedPtr<FJsonValue>> LocationArray = JsonParsed->GetArrayField("GoalLocation");
+			TArray<TSharedPtr<FJsonValue>> LocationArray =
+				JsonParsed->GetArrayField("GoalLocation");
 			if (LocationArray.Num() == 3) {
 				double X, Y, Z;
-				if (LocationArray[0]->TryGetNumber(X) && LocationArray[1]->TryGetNumber(Y) && LocationArray[2]->TryGetNumber(Z))
+				if (LocationArray[0]->TryGetNumber(X)
+					&& LocationArray[1]->TryGetNumber(Y)
+					&& LocationArray[2]->TryGetNumber(Z))
 					GoalLocation = ConvertLinearVector(FVector(X, Y, Z), ClientToUE);
 			}
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Number>("Interval")) {
-			Interval = ConvertClientDistanceToUnreal(JsonParsed->GetNumberField("Interval"));
-
+			Interval =
+				ConvertClientDistanceToUnreal(JsonParsed->GetNumberField("Interval"));
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Number>("GoalDistance")) {
-			GoalDistance = ConvertClientDistanceToUnreal(JsonParsed->GetNumberField("GoalDistance"));
+			GoalDistance = ConvertClientDistanceToUnreal(
+				JsonParsed->GetNumberField("GoalDistance"));
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Boolean>("MaximizeDistance")) {
@@ -64,19 +66,24 @@ void UDistanceTask::ParseSensorParms(FString ParmsJson) {
 			UseZ = JsonParsed->GetBoolField("3dDistance");
 		}
 	} else {
-		UE_LOG(LogHolodeck, Warning, TEXT("UDistanceTask::ParseSensorParms:: Unable to parse json."));
+		UE_LOG(
+			LogHolodeck,
+			Warning,
+			TEXT("UDistanceTask::ParseSensorParms:: Unable to parse json."));
 	}
 }
 
 // Called every frame
-void UDistanceTask::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void UDistanceTask::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	if (DistanceActor == nullptr && DistanceActorTag != "") {
 		DistanceActor = FindActorWithTag(DistanceActorTag);
 
 		if (DistanceActor) {
 			NextDistance = ComputeNextDistance();
 		}
-
 	}
 
 	if (GoalActor == nullptr && GoalActorTag != "") {
@@ -85,28 +92,25 @@ void UDistanceTask::TickSensorComponent(float DeltaTime, ELevelTick TickType, FA
 		if (GoalActor) {
 			NextDistance = ComputeNextDistance();
 		}
-
 	}
 
-	if ((DistanceActor || DistanceActorTag == "") && (GoalActor || GoalActorTag == "")) {
+	if ((DistanceActor || DistanceActorTag == "")
+		&& (GoalActor || GoalActorTag == "")) {
 		float Distance = CalcDistance();
 
 		if (MaximizeDistance) {
 			if (Distance > NextDistance) {
 				Reward = 1;
 				NextDistance = Distance + Interval;
-			}
-			else {
+			} else {
 				Reward = 0;
 			}
 			Terminal = Distance > GoalDistance;
-		}
-		else {
+		} else {
 			if (Distance < NextDistance) {
 				Reward = 1;
 				NextDistance = Distance - Interval;
-			}
-			else {
+			} else {
 				Reward = 0;
 			}
 			Terminal = Distance < GoalDistance;
@@ -129,7 +133,7 @@ float UDistanceTask::CalcDistance() {
 		ToLocation = GoalActor->GetActorLocation();
 	}
 
-	if(!UseZ) {
+	if (!UseZ) {
 		ToLocation[2] = 0;
 		FromLocation[2] = 0;
 	}

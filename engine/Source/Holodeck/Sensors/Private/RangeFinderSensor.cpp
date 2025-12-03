@@ -1,7 +1,7 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "RangeFinderSensor.h"
+#include "Holodeck.h"
 #include "Json.h"
 
 URangeFinderSensor::URangeFinderSensor() {
@@ -12,8 +12,9 @@ URangeFinderSensor::URangeFinderSensor() {
 void URangeFinderSensor::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::Number>("LaserCount")) {
@@ -21,29 +22,36 @@ void URangeFinderSensor::ParseSensorParms(FString ParmsJson) {
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Number>("LaserAngle")) {
-			LaserAngle = -JsonParsed->GetNumberField("LaserAngle");  // in client positive angles point up
+			LaserAngle = -JsonParsed->GetNumberField(
+				"LaserAngle"); // in client positive angles point up
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Number>("LaserMaxDistance")) {
-			LaserMaxDistance = JsonParsed->GetNumberField("LaserMaxDistance") * 100;  // meters to centimeters
+			LaserMaxDistance = JsonParsed->GetNumberField("LaserMaxDistance")
+				* 100; // meters to centimeters
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Boolean>("LaserDebug")) {
 			LaserDebug = JsonParsed->GetBoolField("LaserDebug");
 		}
-	}
-	else {
-		UE_LOG(LogHolodeck, Fatal, TEXT("URangeFinderSensor::ParseSensorParms:: Unable to parse json."));
+	} else {
+		UE_LOG(
+			LogHolodeck,
+			Fatal,
+			TEXT("URangeFinderSensor::ParseSensorParms:: Unable to parse json."));
 	}
 }
 
 void URangeFinderSensor::InitializeSensor() {
 	Super::InitializeSensor();
-	//You need to get the pointer to the object you are attached to. 
+	// You need to get the pointer to the object you are attached to.
 	Parent = this->GetAttachmentRootActor();
 }
 
-void URangeFinderSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void URangeFinderSensor::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 
 	float* FloatBuffer = static_cast<float*>(Buffer);
 
@@ -64,12 +72,22 @@ void URangeFinderSensor::TickSensorComponent(float DeltaTime, ELevelTick TickTyp
 
 		FHitResult Hit = FHitResult();
 
-		bool TraceResult = GetWorld()->LineTraceSingleByChannel(Hit, start, end, ECollisionChannel::ECC_Visibility, QueryParams);
-		
-		FloatBuffer[i] = (TraceResult ? Hit.Distance : -100.0) / 100.0;  // centimeter to meters
+		bool TraceResult = GetWorld()->LineTraceSingleByChannel(
+			Hit, start, end, ECollisionChannel::ECC_Visibility, QueryParams);
+
+		FloatBuffer[i] =
+			(TraceResult ? Hit.Distance : -100.0) / 100.0; // centimeter to meters
 
 		if (LaserDebug) {
-			DrawDebugLine(GetWorld(), start, end, FColor::Green, false, .01, ECC_WorldStatic, 1.f);
+			DrawDebugLine(
+				GetWorld(),
+				start,
+				end,
+				FColor::Green,
+				false,
+				.01,
+				ECC_WorldStatic,
+				1.f);
 		}
 	}
 }

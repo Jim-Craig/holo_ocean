@@ -1,15 +1,15 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "SphereRobot.h"
-
+#include "Holodeck.h"
 
 // Sets default values
 ASphereRobot::ASphereRobot() {
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Set the defualt controller
-	AIControllerClass = LoadClass<AController>(NULL, TEXT("/Script/Holodeck.SphereRobotController"), NULL, LOAD_None, NULL);
+	AIControllerClass = LoadClass<AController>(
+		NULL, TEXT("/Script/Holodeck.SphereRobotController"), NULL, LOAD_None, NULL);
 	AutoPossessAI = EAutoPossessAI::PlacedInWorld;
 }
 
@@ -23,7 +23,8 @@ void ASphereRobot::Tick(float DeltaSeconds) {
 	ForwardSpeed = FMath::Clamp(CommandArray[0], -MAX_FORWARD_SPEED, MAX_FORWARD_SPEED);
 	RotSpeed = FMath::Clamp(CommandArray[1], -MAX_ROTATION_SPEED, MAX_ROTATION_SPEED);
 
-	FVector DeltaLocation = GetActorForwardVector() * ForwardSpeed *100 ; // 100 is the conversion factor from m/s to cm/s
+	FVector DeltaLocation = GetActorForwardVector() * ForwardSpeed
+		* 100; // 100 is the conversion factor from m/s to cm/s
 	// DeltaLocation = ConvertLinearVector(DeltaLocation, ClientToUE);
 
 	AddActorWorldOffset(DeltaLocation, true);

@@ -1,11 +1,11 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "ViewportCapture.h"
+#include "Holodeck.h"
 #include "Json.h"
 
 // Sets default values for this component's properties
-UViewportCapture::UViewportCapture(){
+UViewportCapture::UViewportCapture() {
 	PrimaryComponentTick.bCanEverTick = true;
 	SensorName = "ViewportCapture";
 }
@@ -14,8 +14,9 @@ UViewportCapture::UViewportCapture(){
 void UViewportCapture::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::Boolean>("bGrayScale")) {
@@ -30,7 +31,10 @@ void UViewportCapture::ParseSensorParms(FString ParmsJson) {
 			Height = JsonParsed->GetIntegerField("Height");
 		}
 	} else {
-		UE_LOG(LogHolodeck, Fatal, TEXT("URGBCamera::ParseSensorParms:: Unable to parse json."));
+		UE_LOG(
+			LogHolodeck,
+			Fatal,
+			TEXT("URGBCamera::ParseSensorParms:: Unable to parse json."));
 	}
 }
 
@@ -51,9 +55,10 @@ void UViewportCapture::InitializeSensor() {
 	ViewportClient->SetBuffer(Buffer);
 }
 
-void UViewportCapture::TickSensorComponent(float DeltaTime,
-														   ELevelTick TickType,
-														   FActorComponentTickFunction* ThisTickFunction) {
+void UViewportCapture::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	// The pixel data is captured on the rendering thread.
 	// All this class needs to do is set the buffer at begin play.
 	if (!ViewportClient->BufferIsSet())

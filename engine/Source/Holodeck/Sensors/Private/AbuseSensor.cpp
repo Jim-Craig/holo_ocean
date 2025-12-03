@@ -1,7 +1,7 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "AbuseSensor.h"
+#include "Holodeck.h"
 
 UAbuseSensor::UAbuseSensor() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -17,8 +17,9 @@ void UAbuseSensor::InitializeSensor() {
 void UAbuseSensor::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 
 	this->AccelerationLimit = Agent->GetAccelerationLimit();
 
@@ -27,23 +28,26 @@ void UAbuseSensor::ParseSensorParms(FString ParmsJson) {
 		if (JsonParsed->HasTypedField<EJson::Number>("AccelerationLimit")) {
 			this->AccelerationLimit = JsonParsed->GetNumberField("AccelerationLimit");
 		}
-	}
-	else {
-		UE_LOG(LogHolodeck, Warning, TEXT("%s Unable to parse json."), *FString(__func__));
+	} else {
+		UE_LOG(
+			LogHolodeck, Warning, TEXT("%s Unable to parse json."), *FString(__func__));
 	}
 }
 
-void UAbuseSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void UAbuseSensor::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	if (Agent != nullptr && bOn) {
 		int32 Abused = 0;
-		
-		if(Agent->IsAbused){
+
+		if (Agent->IsAbused) {
 			Abused = 1;
 		}
 
 		if (!(Abused == 1) && AccelerationLimit != -1) {
 			FVector CurrentSpeed = Agent->GetVelocity();
-			
+
 			// a = (delta v / delta t)
 			float Acceleration = (CurrentSpeed - PrevSpeed).Size() / DeltaTime;
 			Acceleration /= 100; // Convert cm/s2 to m/s2

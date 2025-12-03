@@ -9,6 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
+
 class DepthSensor(object):
     __slots__ = ["timestamp", "depth"]
 
@@ -30,36 +31,44 @@ class DepthSensor(object):
         buf.write(struct.pack(">qf", self.timestamp, self.depth))
 
     def decode(data):
-        if hasattr(data, 'read'):
+        if hasattr(data, "read"):
             buf = data
         else:
             buf = BytesIO(data)
         if buf.read(8) != DepthSensor._get_packed_fingerprint():
             raise ValueError("Decode error")
         return DepthSensor._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = DepthSensor()
         self.timestamp, self.depth = struct.unpack(">qf", buf.read(12))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     def _get_hash_recursive(parents):
-        if DepthSensor in parents: return 0
-        tmphash = (0xd97fd0672fc2dc8a) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
+        if DepthSensor in parents:
+            return 0
+        tmphash = (0xD97FD0672FC2DC8A) & 0xFFFFFFFFFFFFFFFF
+        tmphash = (
+            ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)
+        ) & 0xFFFFFFFFFFFFFFFF
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
     def _get_packed_fingerprint():
         if DepthSensor._packed_fingerprint is None:
-            DepthSensor._packed_fingerprint = struct.pack(">Q", DepthSensor._get_hash_recursive([]))
+            DepthSensor._packed_fingerprint = struct.pack(
+                ">Q", DepthSensor._get_hash_recursive([])
+            )
         return DepthSensor._packed_fingerprint
+
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
     def get_hash(self):
         """Get the LCM hash of the struct"""
         return struct.unpack(">Q", DepthSensor._get_packed_fingerprint())[0]
-

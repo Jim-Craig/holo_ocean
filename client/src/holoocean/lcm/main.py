@@ -1,10 +1,21 @@
-from holoocean.lcm import DVLSensor, IMUSensor, GPSSensor, \
-                        AcousticBeaconSensor, ImagingSonar, DepthSensor, \
-                        RGBCamera, PoseSensor, LocationSensor, \
-                        RangeFinderSensor, RotationSensor, OrientationSensor, \
-                        VelocitySensor
+from holoocean.lcm import (
+    DVLSensor,
+    IMUSensor,
+    GPSSensor,
+    AcousticBeaconSensor,
+    ImagingSonar,
+    DepthSensor,
+    RGBCamera,
+    PoseSensor,
+    LocationSensor,
+    RangeFinderSensor,
+    RotationSensor,
+    OrientationSensor,
+    VelocitySensor,
+)
 import numpy as np
 import os
+
 
 class SensorData:
     """Wrapper class for the various types of publishable sensor data.
@@ -13,6 +24,7 @@ class SensorData:
         sensor_type (:obj:`str`): Type of sensor to be imported
         channel (:obj:`str`): Name of channel to publish to.
     """
+
     _sensor_keys_ = {
         "DVLSensor": DVLSensor,
         "IMUSensor": IMUSensor,
@@ -40,7 +52,7 @@ class SensorData:
         Parameters:
             timestamp (:obj:`int`): Number of milliseconds since last data was published
             value (:obj:`list`): List of sensor data to put into LCM sensor class
-            """
+        """
         self.msg.timestamp = timestamp
 
         if self.type == "DVLSensor":
@@ -61,13 +73,19 @@ class SensorData:
         elif self.type == "GPSSensor":
             self.msg.position = value.tolist()
         elif self.type == "AcousticBeaconSensor":
-            self.msg.msg_type    = value[0]
+            self.msg.msg_type = value[0]
             self.msg.from_beacon = value[1]
             # TODO Eventually somehow handle data passed through in value[2]
-            self.msg.azimuth   = value[3] if value[0] not in ["OWAY", "MSG_REQ", "MSG_RESP"] else np.nan
-            self.msg.elevation = value[4] if value[0] not in ["OWAY", "MSG_REQ", "MSG_RESP"] else np.nan
-            self.msg.range     = value[5] if value[0] in ["MSG_RESPU", "MSG_RESPX"] else np.nan
-            self.msg.z         = value[-1] if value[0] in ["MSG_REQX", "MSG_RESPX"] else np.nan
+            self.msg.azimuth = (
+                value[3] if value[0] not in ["OWAY", "MSG_REQ", "MSG_RESP"] else np.nan
+            )
+            self.msg.elevation = (
+                value[4] if value[0] not in ["OWAY", "MSG_REQ", "MSG_RESP"] else np.nan
+            )
+            self.msg.range = (
+                value[5] if value[0] in ["MSG_RESPU", "MSG_RESPX"] else np.nan
+            )
+            self.msg.z = value[-1] if value[0] in ["MSG_REQX", "MSG_RESPX"] else np.nan
         elif self.type == "ImagingSonar":
             self.msg.bins_range = value.shape[0]
             self.msg.bins_azimuth = value.shape[1]
@@ -97,23 +115,24 @@ class SensorData:
         else:
             raise ValueError("That sensor hasn't been implemented in LCM yet")
 
-def gen(lang, path='.', headers=None):
-    """Generates LCM files for sensors in whatever language requested. 
+
+def gen(lang, path=".", headers=None):
+    """Generates LCM files for sensors in whatever language requested.
 
     Args:
         lang (:obj:`str`): One of "cpp", "c", "java", "python", "lua", "csharp", "go"
         path (:obj:`str`, optional): Location to save files in. Defaults to current directory.
         headers (:obj:`str`, optional): Where to store .h files for C . Defaults to same as c files, given by path arg.
     """
-    #set up all paths
-    lcm_path = os.path.join( os.path.dirname(os.path.realpath(__file__)), 'sensors.lcm' )
+    # set up all paths
+    lcm_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "sensors.lcm")
     path = os.path.abspath(path)
     if headers is None:
         headers = path
     else:
         headers = os.path.abspath(headers)
 
-    #determine flags to send with it
+    # determine flags to send with it
     if lang == "c":
         flags = f"-c --c-cpath {path} --c-hpath {headers}"
     elif lang == "cpp":
@@ -130,6 +149,6 @@ def gen(lang, path='.', headers=None):
         flags = f"--go --go-path {path}"
     else:
         raise ValueError("Not a valid language for LCM files.")
-    
-    #run the command
+
+    # run the command
     os.system(f"lcm-gen {lcm_path} {flags}")

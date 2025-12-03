@@ -22,6 +22,7 @@ def compare_agent_states(state1, state2, thresh=0.01, is_close=True, to_ignore=N
             print("--------------------------------")
             assert is_close != close
 
+
 def extract_poses_from_config(scenario) -> list:
     init_positions = []
     init_rotations = []
@@ -39,7 +40,7 @@ def is_full_state(state):
 
 def test_main_agent_after_resetting():
     """Validate that sensor data for the main agent is the same after calling .reset()
-        and that random location initialization isn't being carried over after resets.
+    and that random location initialization isn't being carried over after resets.
     """
     scenario_config = {
         "name": "test_location_sensor",
@@ -55,12 +56,12 @@ def test_main_agent_after_resetting():
                 "control_scheme": 0,
                 "location": [0, 0, 0],
                 "rotation": [0, 0, 0],
-                "location_randomization": [.5, .5, 0],
-                "rotation_randomization": [.1, .1, 0],
+                "location_randomization": [0.5, 0.5, 0],
+                "rotation_randomization": [0.1, 0.1, 0],
             }
         ],
     }
-    
+
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
 
     env = holoocean.environments.HoloOceanEnvironment(
@@ -87,9 +88,17 @@ def test_main_agent_after_resetting():
         env.reset()
         state = env._get_full_state()[main_agent]
 
-        compare_agent_states(init_state, state, 0.3, is_close=True, to_ignore=["RGBCamera", "BallLocationSensor"])
+        compare_agent_states(
+            init_state,
+            state,
+            0.3,
+            is_close=True,
+            to_ignore=["RGBCamera", "BallLocationSensor"],
+        )
         assert agent_count == len(env.agents)
-        assert sensor_count == sum([len(env.agents[agent].sensors) for agent in env.agents])
+        assert sensor_count == sum(
+            [len(env.agents[agent].sensors) for agent in env.agents]
+        )
 
         poses = extract_poses_from_config(env._scenario)
         assert poses == init_poses

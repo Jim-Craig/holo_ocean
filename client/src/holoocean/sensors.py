@@ -1,4 +1,5 @@
 """Definition of all of the sensor information. The UE settings for sensors are such that the motion ticks happen before the sensor ticks."""
+
 import json
 
 import numpy as np
@@ -162,9 +163,9 @@ class ViewportCapture(HoloOceanSensor):
 
 class OrientationSensor(HoloOceanSensor):
     """Gets the forward, right, and up vector for the agent.
-    Note that this is based on the sensor's frame, not the agent's frame so in the IMU socket, 
+    Note that this is based on the sensor's frame, not the agent's frame so in the IMU socket,
     it will be NED, and in COM socket it will NWU. Our provided configurations have the sensor in the IMU socket.
-    
+
     Returns a 2D numpy array of
 
     ::
@@ -760,11 +761,12 @@ class RGBCamera(HoloOceanSensor):
 ######################## HOLOOCEAN CUSTOM SENSORS ###########################
 # Make sure to also add your new sensor to SensorDefinition below
 
+
 class PoseSensor(HoloOceanSensor):
     """Gets the forward, right, and up vector for the agent.
-    Note that this is based on the sensor's frame, not the agent's frame so in the IMU socket, 
+    Note that this is based on the sensor's frame, not the agent's frame so in the IMU socket,
     it will be NED, and in COM socket it will NWU. Our provided configurations have the sensor in the IMU socket.
-    
+
     Returns a 2D numpy array of
 
     ::
@@ -1640,7 +1642,9 @@ class CameraSensor(HoloOceanSensor):
 
     sensor_type = "CameraSensor"
 
-    def __init__(self, client, agent_name, agent_type, name="CameraSensor", config=None):
+    def __init__(
+        self, client, agent_name, agent_type, name="CameraSensor", config=None
+    ):
         self.config = {} if config is None else config
 
         width = 256
@@ -1687,9 +1691,9 @@ class CameraSensor(HoloOceanSensor):
         self._client.command_center.enqueue_command(command_to_send)
         self.tick_every = ticks_per_capture
 
-        
+
 class RGBDCamera(HoloOceanSensor):
-    """ ***WIP: need to fully test this sensor***
+    """***WIP: need to fully test this sensor***
     Captures agent's view.
 
     The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
@@ -1788,33 +1792,32 @@ class RGBDCamera(HoloOceanSensor):
     def sensor_data(self):
         # data: self._sensor_data_buffer
         # It already is a camera_width x camera_height x 4, so we just need to add another channel for converted distances
-        
+
         # return self._sensor_data_buffer
 
         # self._sensor_data_buffer[..., 1] = np.zeros(shape=(self.shape[0], self.shape[1]))
-        
+
         # print(np.concatenate((self._sensor_data_buffer, np.zeros(shape=(self.shape[0], self.shape[1], 1))), axis=2).shape)
-        
+
         data = {}
         data["image"] = self._sensor_data_buffer
 
-
-        if (self.config["convertToDistance"]):
+        if self.config["convertToDistance"]:
             distances = []
             alpha_channel = self._sensor_data_buffer[..., 3]
 
             for i in range(len(alpha_channel)):
                 distances.append([])
                 for j in range(len(alpha_channel[i])):
-                    distances[i].append(int((alpha_channel[i][j] * 1000) / 255.0)) 
-                    # distances[i][j] = 
+                    distances[i].append(int((alpha_channel[i][j] * 1000) / 255.0))
+                    # distances[i][j] =
             data["depth"] = distances
 
         return data
 
 
 class SemanticSegmentationCamera(HoloOceanSensor):
-    """ ***WIP: need to fully test this sensor***
+    """***WIP: need to fully test this sensor***
     Captures agent's view.
 
     The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
@@ -1832,7 +1835,14 @@ class SemanticSegmentationCamera(HoloOceanSensor):
 
     sensor_type = "SemanticSegmentationCamera"
 
-    def __init__(self, client, agent_name, agent_type, name="SemanticSegmentationCamera", config=None):
+    def __init__(
+        self,
+        client,
+        agent_name,
+        agent_type,
+        name="SemanticSegmentationCamera",
+        config=None,
+    ):
         self.config = {} if config is None else config
 
         width = 256
@@ -1881,7 +1891,7 @@ class SemanticSegmentationCamera(HoloOceanSensor):
 
 
 class RaycastLidar(HoloOceanSensor):
-    """ ***WIP: need to fully test this sensor***
+    """***WIP: need to fully test this sensor***
     Runs Agent's Lidar
 
     **Configuration**
@@ -1908,7 +1918,9 @@ class RaycastLidar(HoloOceanSensor):
 
     sensor_type = "RaycastLidar"
 
-    def __init__(self, client, agent_name, agent_type, name="RaycastLidar", config=None):
+    def __init__(
+        self, client, agent_name, agent_type, name="RaycastLidar", config=None
+    ):
         self.config = {} if config is None else config
 
         self.shape = [30000]
@@ -1949,7 +1961,7 @@ class RaycastLidar(HoloOceanSensor):
 
 
 class RaycastSemanticLidar(HoloOceanSensor):
-    """ ***WIP: need to fully test this sensor***
+    """***WIP: need to fully test this sensor***
     Runs Agent's Lidar
 
     **Configuration**
@@ -1957,7 +1969,7 @@ class RaycastSemanticLidar(HoloOceanSensor):
     The ``configuration`` block (see :ref:`configuration-block`) accepts the following
     options:
 
-    
+
     - ``Channels`` (int): Number of lasers (default: 32)
     - ``Range`` (float): How far each of the lasers can go (default: 500.0)
     - ``PointsPerSecond`` (int): Number of points per second (default: 56000)
@@ -1977,7 +1989,9 @@ class RaycastSemanticLidar(HoloOceanSensor):
 
     sensor_type = "RaycastSemanticLidar"
 
-    def __init__(self, client, agent_name, agent_type, name="RaycastSemanticLidar", config=None):
+    def __init__(
+        self, client, agent_name, agent_type, name="RaycastSemanticLidar", config=None
+    ):
         self.config = {} if config is None else config
 
         self.shape = [60000]
@@ -2020,31 +2034,29 @@ class RaycastSemanticLidar(HoloOceanSensor):
 
 class BSTSensor(HoloOceanSensor):
     """Biomass, Salinity, Temperature Sensor
-    
+
     Gets the biomass, salinity, and temperature values at the agent's location.
     Returns values as [biomass, salinity, temperature].
     """
 
     sensor_type = "BSTSensor"
 
-    def __init__(
-        self, client, agent_name, agent_type, name="BSTSensor", config=None
-    ):
+    def __init__(self, client, agent_name, agent_type, name="BSTSensor", config=None):
         self.config = {} if config is None else config
-        
+
         # Initialize biomass configuration
         self.biomass = {
             "config": {
                 "max_biomass": 1.0,
                 "max_concentration_depth": 100.0,
                 "biomass_attenuation_exponent": 0.858,
-                "biomass_clusters": []
+                "biomass_clusters": [],
             },
-            "biomass_function": self.config.get("biomass_function", None)
+            "biomass_function": self.config.get("biomass_function", None),
         }
-        self.biomass["config"].update({
-            k: v for k, v in self.config.items() if k in self.biomass["config"]
-        })
+        self.biomass["config"].update(
+            {k: v for k, v in self.config.items() if k in self.biomass["config"]}
+        )
 
         # Initialize salinity configuration
         self.salinity = {
@@ -2053,13 +2065,13 @@ class BSTSensor(HoloOceanSensor):
                 "deep_psu": 34.5,
                 "halocline_depth": 100,
                 "halocline_thickness": 20,
-                "salinity_clusters": []
+                "salinity_clusters": [],
             },
-            "salinity_function": self.config.get("salinity_function", None)
+            "salinity_function": self.config.get("salinity_function", None),
         }
-        self.salinity["config"].update({
-            k: v for k, v in self.config.items() if k in self.salinity["config"]
-        })
+        self.salinity["config"].update(
+            {k: v for k, v in self.config.items() if k in self.salinity["config"]}
+        )
 
         # Initialize temperature configuration
         self.temperature = {
@@ -2068,13 +2080,13 @@ class BSTSensor(HoloOceanSensor):
                 "deep_temp": 4,
                 "thermocline_depth": 100,
                 "thermocline_thickness": 20,
-                "temperature_clusters": []
+                "temperature_clusters": [],
             },
-            "temperature_function": self.config.get("temperature_function", None)
+            "temperature_function": self.config.get("temperature_function", None),
         }
-        self.temperature["config"].update({
-            k: v for k, v in self.config.items() if k in self.temperature["config"]
-        })
+        self.temperature["config"].update(
+            {k: v for k, v in self.config.items() if k in self.temperature["config"]}
+        )
 
         # Grab statistic ranges from config
         self.biomass_range = self.config.get("biomass_range", (0, 3))
@@ -2105,16 +2117,16 @@ class BSTSensor(HoloOceanSensor):
                                                     {thermocline\_thickness}\\right)}}
         """
         location = np.array(args.get("location", [0, 0, 0]))
-        
+
         # Ensure location is 2D array for consistent processing
         if location.ndim == 1:
             location = location[np.newaxis, :]  # Convert (3,) to (1, 3)
             single_point = True
         else:
             single_point = False
-        
+
         depth = np.maximum(-location[:, 2], 0)  # Ensure positive depth
-        
+
         # Get parameters
         surface_temp = args.get("surface_temp", 23)
         deep_temp = args.get("deep_temp", 4)
@@ -2129,36 +2141,36 @@ class BSTSensor(HoloOceanSensor):
 
         # Initialize influence array with same shape as base_temp
         influence = np.zeros_like(base_temp, dtype=np.float64)
-        
+
         # Add cluster influences
         for cluster in temperature_clusters:
             try:
                 pos = np.array(cluster["position"])
                 strength = float(cluster.get("strength", 0))
                 falloff = float(cluster.get("falloff", 10))
-                
+
                 if falloff <= 0:
                     continue
-                    
+
                 # Calculate distances
                 dists = np.linalg.norm(location - pos, axis=1)
-                
+
                 # Calculate influence with proper broadcasting
                 cluster_influence = strength * np.exp(-dists / falloff)
-                
+
                 # Ensure shapes match before addition
                 if cluster_influence.shape == influence.shape:
                     influence += cluster_influence
                 else:
                     # Handle broadcasting issues
                     influence = influence + cluster_influence
-                    
+
             except Exception as e:
                 print(f"Warning: Error processing thermal cluster: {e}")
                 continue
 
         result = base_temp + influence
-        
+
         # Set values above surface (z > 0) to zero
         result[location[:, 2] > 0] = 0.0
 
@@ -2170,7 +2182,7 @@ class BSTSensor(HoloOceanSensor):
     @staticmethod
     def salinity_model(**args):
         """Calculate salinity based on depth and halocline clusters
-        
+
         Possible Arguments:
         surface_psu (:obj:`float`): The practical salinity unit at the surface of the water.
         deep_psu (:obj:`float`): The practical salinity unit approached as depth increases.
@@ -2178,25 +2190,25 @@ class BSTSensor(HoloOceanSensor):
         halocline_thickness (:obj:`float`): The depth that the halocline spans across.
 
         Equation:
-        
+
         .. math::
 
-            \\text{base_salinity} = \\text{surface_psu} + 
+            \\text{base_salinity} = \\text{surface_psu} +
                                     \\frac{\\text{deep_psu} - \\text{surface_psu}}
                                         {1 + e^{\\left(-\\frac{\\text{depth} - \\text{halocline_depth}}
                                                             {\\text{halocline_thickness}}\\right)}}
         """
         location = np.array(args.get("location", [0, 0, 0]))
-        
+
         # Ensure location is 2D array for consistent processing
         if location.ndim == 1:
             location = location[np.newaxis, :]
             single_point = True
         else:
             single_point = False
-            
+
         depth = np.maximum(-location[:, 2], 0)  # Ensure positive depth
-        
+
         # Get parameters
         surface_psu = args.get("surface_psu", 33)
         deep_psu = args.get("deep_psu", 34.5)
@@ -2211,35 +2223,35 @@ class BSTSensor(HoloOceanSensor):
 
         # Initialize influence array with same shape as base_salinity
         influence = np.zeros_like(base_salinity, dtype=np.float64)
-        
+
         # Add cluster influences
         for cluster in salinity_clusters:
             try:
                 pos = np.array(cluster["position"])
                 strength = float(cluster.get("strength", 0))
                 falloff = float(cluster.get("falloff", 10))
-                
+
                 if falloff <= 0:
                     continue
-                    
+
                 # Calculate distances
                 dists = np.linalg.norm(location - pos, axis=1)
-                
+
                 # Calculate influence with proper broadcasting
                 cluster_influence = strength * np.exp(-dists / falloff)
-                
+
                 # Ensure shapes match before addition
                 if cluster_influence.shape == influence.shape:
                     influence += cluster_influence
                 else:
                     influence = influence + cluster_influence
-                    
+
             except Exception as e:
                 print(f"Warning: Error processing salinity cluster: {e}")
                 continue
 
         result = base_salinity + influence
-        
+
         # Set values above surface (z > 0) to zero
         result[location[:, 2] > 0] = 0.0
 
@@ -2251,7 +2263,7 @@ class BSTSensor(HoloOceanSensor):
     @staticmethod
     def biomass_model(**args):
         """Calculate biomass with realistic subsurface maximum and biocline
-        
+
         Possible Arguments:
         max_biomass (:obj:`float`): The peak biomass value across the model (kg/m^3).
         surface_biomass (:obj:`float`): The biomass level at surface level.
@@ -2279,44 +2291,54 @@ class BSTSensor(HoloOceanSensor):
 
         .. math::
 
-            \\text{base_biomass} = \\text{photic_biomass} \\cdot \\text{biocline_factor} 
+            \\text{base_biomass} = \\text{photic_biomass} \\cdot \\text{biocline_factor}
                                     + \\text{deep_biomass} \\cdot (1 - \\text{biocline_factor})
         """
         location = np.array(args.get("location", [0, 0, 0]))
         # print(f"biomass_model: location shape: {location.shape}")  # Debug
-        
+
         # Ensure location is 2D array for consistent processing
         if location.ndim == 1:
             location = location[np.newaxis, :]
             single_point = True
         else:
             single_point = False
-            
-        depth = np.maximum(-location[:, 2], 1e-3)  # Ensure positive depth, avoid division by zero
-        
+
+        depth = np.maximum(
+            -location[:, 2], 1e-3
+        )  # Ensure positive depth, avoid division by zero
+
         # Get parameters - realistic photic zone biomass distribution
         max_biomass = args.get("max_biomass", 2.5)  # Peak biomass value
-        peak_depth = args.get("peak_depth", 50.0)   # Subsurface chlorophyll maximum
+        peak_depth = args.get("peak_depth", 50.0)  # Subsurface chlorophyll maximum
         surface_biomass = args.get("surface_biomass", 1.2)  # Surface biomass level
         width_factor = args.get("width_factor", 25)  # Controls spread of the peak
         photic_zone_depth = args.get("photic_zone_depth", 200.0)  # End of photic zone
-        biocline_sharpness = args.get("biocline_sharpness", 20.0)  # Steepness of biocline drop
+        biocline_sharpness = args.get(
+            "biocline_sharpness", 20.0
+        )  # Steepness of biocline drop
         deep_biomass = args.get("deep_biomass", 0.1)  # Minimal deep water biomass
         biomass_clusters = args.get("biomass_clusters", [])
 
         # Photic zone: Gaussian subsurface maximum
-        gaussian_component = (max_biomass - surface_biomass) * np.exp(-((depth - peak_depth) ** 2) / (2 * width_factor ** 2))
+        gaussian_component = (max_biomass - surface_biomass) * np.exp(
+            -((depth - peak_depth) ** 2) / (2 * width_factor**2)
+        )
         photic_biomass = surface_biomass + gaussian_component
-        
+
         # Biocline: Sharp transition at photic zone boundary using sigmoid
-        biocline_factor = 1 / (1 + np.exp((depth - photic_zone_depth) / biocline_sharpness))
-        
+        biocline_factor = 1 / (
+            1 + np.exp((depth - photic_zone_depth) / biocline_sharpness)
+        )
+
         # Deep water: Minimal biomass in aphotic zone
-        base_biomass = photic_biomass * biocline_factor + deep_biomass * (1 - biocline_factor)
+        base_biomass = photic_biomass * biocline_factor + deep_biomass * (
+            1 - biocline_factor
+        )
 
         # Initialize influence array with same shape as base_biomass
         influence = np.zeros_like(base_biomass, dtype=np.float64)
-        
+
         # Add cluster influences
         for cluster in biomass_clusters:
             try:
@@ -2324,31 +2346,31 @@ class BSTSensor(HoloOceanSensor):
                 pos = np.array(cluster["position"])
                 strength = float(cluster.get("strength", 0))
                 falloff = float(cluster.get("falloff", 10))
-                
+
                 if falloff <= 0:
                     continue
-                    
+
                 # Calculate distances
                 dists = np.linalg.norm(location - pos, axis=1)
-                
+
                 # Calculate influence with proper broadcasting
                 cluster_influence = strength * np.exp(-dists / falloff)
-                
+
                 # Ensure shapes match before addition
                 if cluster_influence.shape == influence.shape:
                     influence += cluster_influence
                 else:
                     influence = influence + cluster_influence
-                    
+
             except Exception as e:
                 print(f"Warning: Error processing biomass cluster: {e}")
                 continue
 
         result = base_biomass + influence
-        
+
         # Set values above surface (z > 0) to zero
         result[location[:, 2] > 0] = 0.0
-        
+
         # Return scalar if input was single point
         if single_point:
             return float(result[0])
@@ -2364,53 +2386,69 @@ class BSTSensor(HoloOceanSensor):
         """
         try:
             location = self._sensor_data_buffer
-            
+
             # Ensure location is valid
             if location is None or len(location) < 3:
                 print(f"Warning: Invalid location data: {location}")
                 return np.array([0.0, 35.0, 20.0], dtype=np.float32)
-            
+
             # Update configurations with current location
             self.biomass["config"]["location"] = location
             self.salinity["config"]["location"] = location
             self.temperature["config"]["location"] = location
-            
+
             # Calculate biomass
             try:
                 if self.biomass["biomass_function"]:
-                    bio_data = self.biomass["biomass_function"](**self.biomass["config"])
+                    bio_data = self.biomass["biomass_function"](
+                        **self.biomass["config"]
+                    )
                 else:
                     bio_data = self.biomass_model(**self.biomass["config"])
-                bio_data = float(bio_data) if np.isscalar(bio_data) else float(bio_data[0])
+                bio_data = (
+                    float(bio_data) if np.isscalar(bio_data) else float(bio_data[0])
+                )
             except Exception as e:
                 print(f"Error calculating biomass: {e}")
                 bio_data = 0.0
-            
+
             # Calculate salinity
             try:
                 if self.salinity["salinity_function"]:
-                    salinity_data = self.salinity["salinity_function"](**self.salinity["config"])
+                    salinity_data = self.salinity["salinity_function"](
+                        **self.salinity["config"]
+                    )
                 else:
                     salinity_data = self.salinity_model(**self.salinity["config"])
-                salinity_data = float(salinity_data) if np.isscalar(salinity_data) else float(salinity_data[0])
+                salinity_data = (
+                    float(salinity_data)
+                    if np.isscalar(salinity_data)
+                    else float(salinity_data[0])
+                )
             except Exception as e:
                 print(f"Error calculating salinity: {e}")
                 salinity_data = 35.0
-            
+
             # Calculate temperature
             try:
                 if self.temperature["temperature_function"]:
-                    temp_data = self.temperature["temperature_function"](**self.temperature["config"])
+                    temp_data = self.temperature["temperature_function"](
+                        **self.temperature["config"]
+                    )
                 else:
                     temp_data = self.temperature_model(**self.temperature["config"])
-                temp_data = float(temp_data) if np.isscalar(temp_data) else float(temp_data[0])
+                temp_data = (
+                    float(temp_data) if np.isscalar(temp_data) else float(temp_data[0])
+                )
             except Exception as e:
                 print(f"Error calculating temperature: {e}")
                 temp_data = 20.0
-            
-            sensor_data = np.array([bio_data, salinity_data, temp_data], dtype=np.float32)
+
+            sensor_data = np.array(
+                [bio_data, salinity_data, temp_data], dtype=np.float32
+            )
             return sensor_data
-            
+
         except Exception as e:
             print(f"Critical error in BSTSensor.sensor_data: {e}")
             return np.array([0.0, 35.0, 20.0], dtype=np.float32)
@@ -2480,7 +2518,7 @@ class SensorDefinition:
         "SinglebeamSonar": SinglebeamSonar,
         "RaycastLidar": RaycastLidar,
         "RaycastSemanticLidar": RaycastSemanticLidar,
-        "BSTSensor": BSTSensor
+        "BSTSensor": BSTSensor,
     }
 
     # Sensors that need timeout turned off

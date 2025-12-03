@@ -17,9 +17,7 @@ def pytest_generate_tests(metafunc):
     elif "rotation_env" in metafunc.fixturenames:
         metafunc.parametrize("rotation_env", ["rotation_env"], indirect=True)
     elif "agent_abuse_world" in metafunc.fixturenames:
-        metafunc.parametrize(
-            "agent_abuse_world", ["turtle0", "uav0"], indirect=True
-        )
+        metafunc.parametrize("agent_abuse_world", ["turtle0", "uav0"], indirect=True)
 
 
 shared_1024_env = None
