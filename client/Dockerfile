@@ -12,14 +12,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # OpenCV's runtime dependencies (and other dependencies)
 RUN apt-get install -y libglib2.0-0 libsm6 libxrender-dev libxext6
 
-# Install all python versions to test on
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt-get update && apt-get install -y python3-dev python3-pip \
-    python3.9-dev python3.9-distutils \
-    python3.10-dev python3.10-distutils \
-    python3.11-dev python3.11-distutils \
-    python3.12-dev \
-    python3.13-dev 
+# Install Pyenv and its dependancies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    make build-essential libssl-dev zlib1g-dev \
+    libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+    libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev git
+ENV PYENV_ROOT="/opt/pyenv"
+ENV PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH"
+RUN curl https://pyenv.run | bash && chmod -R 755 /opt/pyenv
+
+# Install all required Python versions, set to global, rehash to fix permissions
+RUN pyenv install 3.9.19 && \
+    pyenv install 3.10.16 && \
+    pyenv install 3.11.11 && \
+    pyenv install 3.12.8 && \
+    pyenv install 3.13.1 && \
+    pyenv global 3.13.1 3.12.8 3.11.11 3.10.16 3.9.19 && \
+    pyenv rehash && \
+    chmod -R 777 /opt/pyenv
 
 RUN pip3 install setuptools wheel tox posix_ipc numpy
 
