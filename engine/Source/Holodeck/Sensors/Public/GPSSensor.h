@@ -4,16 +4,19 @@
 #include "Holodeck.h"
 
 #include "HolodeckSensor.h"
-#include "MultivariateNormal.h"
+
 #include <limits>
+#include "MultivariateNormal.h"
+
+#include "HolodeckBuoyantAgent.h"
 
 #include "GPSSensor.generated.h"
 
 /**
  * GPSSensor
  * Inherits from the HolodeckSensor class
- * Check out the parent class for documentation on all of the overridden
- * functions. Reports the XYZ coordinate of the parent agent.
+ * Check out the parent class for documentation on all of the overridden functions.
+ * Reports the XYZ coordinate of the parent agent.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class HOLODECK_API UGPSSensor : public UHolodeckSensor {
@@ -54,7 +57,9 @@ private:
 	 * After initialization, Parent contains a pointer to whatever the sensor is
 	 * attached to.
 	 */
-	USceneComponent*	  Parent;
-	MultivariateNormal<3> mvn;
-	MultivariateNormal<1> depthMVN;
+	AActor*				   Agent;
+	AHolodeckBuoyantAgent* BuoyantAgent;
+	USceneComponent*	   Parent;
+	MultivariateNormal<3>  mvn;
+	MultivariateNormal<1>  depthMVN;
 };

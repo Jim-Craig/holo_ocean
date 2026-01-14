@@ -1,6 +1,7 @@
 // MIT License (c) 2021 BYU FRoStLab see LICENSE file
 
 #include "GPSSensor.h"
+#include "HolodeckBuoyantAgent.h"
 #include "Holodeck.h"
 
 UGPSSensor::UGPSSensor() {
@@ -55,6 +56,14 @@ void UGPSSensor::InitializeSensor() {
 
 	// You need to get the pointer to the object you are attached to.
 	Parent = this->GetAttachParent();
+	// Need to get the agent you are attached to for receiving a GPS measurement with
+	// changing water level
+	if (Parent) {
+		Agent = Parent->GetOwner();
+	}
+	if (Agent) {
+		BuoyantAgent = Cast<AHolodeckBuoyantAgent>(Agent);
+	}
 }
 
 void UGPSSensor::TickSensorComponent(
@@ -69,17 +78,22 @@ void UGPSSensor::TickSensorComponent(
 		// Get location
 		float* FloatBuffer = static_cast<float*>(Buffer);
 		Location = ConvertLinearVector(Location, UEToClient);
-
-		// Check to make sure we're not any deeper than depth
 		float depth = -1 * Location.Z + depthMVN.sampleFloat();
+		if (BuoyantAgent == nullptr) {
+			UE_LOG(
+				LogHolodeck,
+				Log,
+				TEXT(
+					"BuoyantAgent is a nullptr -- GPSSensor does not account for changing tide"));
+		} else {
+			depth += (BuoyantAgent->SurfaceLevel / 100);
+		}
 		if (depth < GPSDepth) {
 			Location += mvn.sampleFVector();
 			FloatBuffer[0] = Location.X;
 			FloatBuffer[1] = Location.Y;
 			FloatBuffer[2] = Location.Z;
-		}
-		// If we are, we get nothing back
-		else {
+		} else {
 			FloatBuffer[0] = std::numeric_limits<double>::quiet_NaN();
 			FloatBuffer[1] = std::numeric_limits<double>::quiet_NaN();
 			FloatBuffer[2] = std::numeric_limits<double>::quiet_NaN();
