@@ -1,8 +1,10 @@
 import holoocean
+import pytest
+import uuid
 import numpy as np
 
-
-def test_currents():
+@pytest.fixture(scope="module")
+def env():
     scenario = {
         "name": "test_currents",
         "package_name": "TestWorlds",
@@ -30,97 +32,76 @@ def test_currents():
             }
         ],
     }
-
-    with holoocean.make(
-        scenario_cfg=scenario, frames_per_sec=False, show_viewport=False, verbose=True
+    binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
+    with holoocean.environments.HoloOceanEnvironment(
+        scenario=scenario,
+        binary_path=binary_path,
+        show_viewport=False,
+        verbose=True,
+        uuid=str(uuid.uuid4()),
+        ticks_per_sec=60,
     ) as env:
-        data = env.tick()
-        dynamics_data = data["DynamicsSensor"]
-        acceleration = dynamics_data[:3]
-        # print(acceleration)
+        yield env
 
-        assert np.allclose(acceleration, [0, 0, 0]), "Null current failed"
 
-        env.set_ocean_currents("auv0", [1, 0, 0])
-        data = env.tick()
-        dynamics_data = data["DynamicsSensor"]
-        acceleration = dynamics_data[:3]
-        # print(acceleration)
+def test_currents_underwater(env):
+    """ Test currents acting on underwater vehicle"""
 
-        assert np.allclose(acceleration, [0.06320976, 0, 0]), "X current failed"
+    env.reset()
+    data = env.tick()
+    dynamics_data = data["DynamicsSensor"]
+    acceleration = dynamics_data[:3]
+    assert np.allclose(acceleration, [0, 0, 0]), "Null current failed"
 
-        env.set_ocean_currents("auv0", [0, 1, 0])
-        data = env.tick()
-        dynamics_data = data["DynamicsSensor"]
-        acceleration = dynamics_data[:3]
-        # print(acceleration)
+    env.reset()
+    env.set_ocean_currents("auv0", [1, 0, 0])
+    data = env.tick()
+    dynamics_data = data["DynamicsSensor"]
+    acceleration = dynamics_data[:3]
+    assert np.allclose(
+        acceleration, [0.06320982, 0, 0]
+    ), "X current failed"
 
-        assert np.allclose(
-            acceleration, [-0.00112009, 0.06320979, 0]
-        ), "Y current failed"
+    env.reset()
+    env.set_ocean_currents("auv0", [0, 1, 0])
+    data = env.tick()
+    dynamics_data = data["DynamicsSensor"]
+    acceleration = dynamics_data[:3]
+    assert np.allclose(
+        acceleration, [0, 0.06320982, 0]
+    ), "Y current failed"
 
-        env.set_ocean_currents("auv0", [0, 0, 1])
-        data = env.tick()
-        dynamics_data = data["DynamicsSensor"]
-        acceleration = dynamics_data[:3]
-        # print(acceleration)
+    env.reset()
+    env.set_ocean_currents("auv0", [0, 0, 1])
+    data = env.tick()
+    dynamics_data = data["DynamicsSensor"]
+    acceleration = dynamics_data[:3]
+    assert np.allclose(
+        acceleration, [0, 0, 0.06320982]
+    ), "Z current failed"
 
-        assert np.allclose(
-            acceleration, [-0.00110024, -0.00112009, 0.06320982]
-        ), "Z current failed"
+def test_currents_surface(env):
+    """ Test currents acting on surface vessel"""
 
-    scenario = {
-        "name": "test_currents",
-        "package_name": "TestWorlds",
-        "world": "TestWorld",
-        "main_agent": "auv0",
-        "current": {
-            "vehicle_debugging": False,
-        },
-        "ticks_per_sec": 60,
-        "agents": [
-            {
-                "agent_name": "auv0",
-                "agent_type": "SurfaceVessel",
-                "sensors": [
-                    {
-                        "sensor_type": "DynamicsSensor",
-                        "configuration": {
-                            "UseCOM": True,
-                            "UseRPY": False,
-                        },
-                    }
-                ],
-                "control_scheme": 0,
-                "location": [50, -50, 0.1],
-            }
-        ],
-    }
+    env._scenario["agents"][0]["agent_type"] = "SurfaceVessel"
+    env._scenario["agents"][0]["location"] = [10, 10, 0.1]
 
-    with holoocean.make(
-        scenario_cfg=scenario, frames_per_sec=False, show_viewport=False, verbose=True
-    ) as env:
-        for _ in range(500):
-            env.tick()
+    env.reset()
+    env.tick(500)  # Let the vessel settle
+    env.set_ocean_currents("auv0", [1, 0, 0])
+    data = env.tick(10)
+    dynamics_data = data["DynamicsSensor"]
+    acceleration = dynamics_data[:3]
+    assert np.allclose(
+        acceleration[:2], [0.00199408, 0], rtol=2e-2
+    ), "Surface Vessel X Current Failed"
 
-        for _ in range(10):
-            env.set_ocean_currents("auv0", [1, 0, 0])
-            data = env.tick()
-            dynamics_data = data["DynamicsSensor"]
-            acceleration = dynamics_data[:3]
-
-        # print(acceleration)
-        assert np.allclose(
-            acceleration[:2], [0.00199408, 0], atol=5e-5
-        ), "Surface Vessel X Current Failed"
-
-        for _ in range(10):
-            data = env.tick()
-            env.set_ocean_currents("auv0", [0, 1, 0])
-            dynamics_data = data["DynamicsSensor"]
-            acceleration = dynamics_data[:3]
-
-        # print(acceleration)
-        assert np.allclose(
-            acceleration[:2], [-0.00090362, 0.00209909], atol=5e-5
-        ), "Surface Vessel Y Current Failed"
+    env.reset()
+    env.tick(500)  # Let the vessel settle
+    env.set_ocean_currents("auv0", [0, 1, 0])
+    data = env.tick(10)
+    dynamics_data = data["DynamicsSensor"]
+    acceleration = dynamics_data[:3]
+    assert np.allclose(
+        acceleration[:2], [0, 0.00197457], rtol=2e-2
+    ), "Surface Vessel Y Current Failed"
