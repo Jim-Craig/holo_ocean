@@ -423,6 +423,24 @@ class RGBCameraRateCommand(Command):
         self.add_number_parameters(ticks_per_capture)
 
 
+class RaycastLidarRateCommand(Command):
+    """Set the number of ticks between captures of the Raycast Lidar.
+
+    Args:
+        agent_name (:obj:`str`): name of the agent to modify
+        sensor_name (:obj:`str`): name of the sensor to modify
+        ticks_per_capture (:obj:`int`): number of ticks between captures
+
+    """
+
+    def __init__(self, agent_name, sensor_name, ticks_per_capture):
+        Command.__init__(self)
+        self._command_type = "RaycastLidarRate"
+        self.add_string_parameters(agent_name)
+        self.add_string_parameters(sensor_name)
+        self.add_number_parameters(ticks_per_capture)
+
+
 class RenderQualityCommand(Command):
     """Adjust the rendering quality of HoloOcean
 

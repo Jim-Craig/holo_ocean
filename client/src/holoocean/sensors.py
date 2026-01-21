@@ -11,6 +11,7 @@ from holoocean.command import (
     CustomCommand,
     SendAcousticMessageCommand,
     SendOpticalMessageCommand,
+    RaycastLidarRateCommand,
 )
 from holoocean.exceptions import HoloOceanConfigurationException
 from holoocean.lcm import SensorData
@@ -1692,8 +1693,8 @@ class CameraSensor(HoloOceanSensor):
         self.tick_every = ticks_per_capture
 
 
-class RGBDCamera(HoloOceanSensor):
-    """***WIP: need to fully test this sensor***
+class DepthCamera(HoloOceanSensor):
+    """
     Captures agent's view.
 
     The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
@@ -1739,9 +1740,9 @@ class RGBDCamera(HoloOceanSensor):
     - ``MaxViewDistanceOverride`` (float): if > 0, sets a maximum render distance override.  Can be used to cull distant objects from a reflection if the reflecting plane is in an enclosed area like a hallway or room (default: disabled, min: 100, max: 10000)
     """
 
-    sensor_type = "RGBDCamera"
+    sensor_type = "DepthCamera"
 
-    def __init__(self, client, agent_name, agent_type, name="RGBDCamera", config=None):
+    def __init__(self, client, agent_name, agent_type, name="DepthCamera", config=None):
         self.config = {} if config is None else config
 
         width = 256
@@ -1755,7 +1756,7 @@ class RGBDCamera(HoloOceanSensor):
 
         self.shape = (height, width, 4)
 
-        super(RGBDCamera, self).__init__(
+        super(DepthCamera, self).__init__(
             client, agent_name, agent_type, name=name, config=config
         )
 
@@ -1768,7 +1769,7 @@ class RGBDCamera(HoloOceanSensor):
         return self.shape
 
     def set_ticks_per_capture(self, ticks_per_capture):
-        """Sets this RGBDCamera to capture a new frame every ticks_per_capture.
+        """Sets this DepthCamera to capture a new frame every ticks_per_capture.
 
         The sensor's image will remain unchanged between captures.
 
@@ -1801,23 +1802,23 @@ class RGBDCamera(HoloOceanSensor):
 
         data = {}
         data["image"] = self._sensor_data_buffer
+        depth = np.copy(self._sensor_data_buffer).astype(np.uint32)
 
-        if self.config["convertToDistance"]:
-            distances = []
-            alpha_channel = self._sensor_data_buffer[..., 3]
+        # (R+G* 256 + B * 256*256) / (256*256*256 - 1)
+        # in meters = 1000 * normalized
+        # note that the data is returned in bgr order
+        normalized = (
+            depth[..., 2] + depth[..., 1] * 256 + depth[..., 0] * 256 * 256
+        ) / (256 * 256 * 256 - 1)
 
-            for i in range(len(alpha_channel)):
-                distances.append([])
-                for j in range(len(alpha_channel[i])):
-                    distances[i].append(int((alpha_channel[i][j] * 1000) / 255.0))
-                    # distances[i][j] =
-            data["depth"] = distances
+        in_meters = 1000 * normalized
+        data["depth"] = in_meters
 
         return data
 
 
 class SemanticSegmentationCamera(HoloOceanSensor):
-    """***WIP: need to fully test this sensor***
+    """
     Captures agent's view.
 
     The default capture resolution is 256x256x256x4, corresponding to the RGBA channels.
@@ -1891,8 +1892,13 @@ class SemanticSegmentationCamera(HoloOceanSensor):
 
 
 class RaycastLidar(HoloOceanSensor):
-    """***WIP: need to fully test this sensor***
-    Runs Agent's Lidar
+    """Runs Agent's Lidar
+
+    Returns a 2D numpy array of shape ``[num_points, 5]`` where the rows contain:
+
+    - ``x, y, z``: 3D coordinates of the point in the world in meters (see :ref:`coordinate-system`)
+    - ``intensity``: Intensity of the point (a float between 0 and 1)
+    - ``ring``: Ring index or channel of the point (0 to number of channels-1)
 
     **Configuration**
 
@@ -1900,20 +1906,19 @@ class RaycastLidar(HoloOceanSensor):
     options:
 
     - ``Channels`` (int): Number of lasers (default: 32)
-    - ``Range`` (float): How far each of the lasers can go (default: 500.0)
+    - ``Range`` (float): How far each of the lasers can go in meters (default: 500.0)
     - ``PointsPerSecond`` (int): Number of points per second (default: 56000)
     - ``RotationFrequency`` (float): Lidar rotation frequency (default: 10.0)
-    - ``UpperFovLimit`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 10.0)
-    - ``LowerFovLimit`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: -30.0)
-    - ``HorizontalFov`` (float): Horizontal field of view (default: 360.0)
-    - ``AtmospAttenRate`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0.004)
-    - ``RandomSeed`` (int): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0)
+    - ``UpperFovLimit`` (float): Upper laser angle in degrees, counts from horizontal, positive values mean above horizontal line (default: 10.0)
+    - ``LowerFovLimit`` (float): Lower laser angle in degrees, counts from horizontal, negative values mean below horizontal line (default: -30.0)
+    - ``HorizontalFov`` (float): Horizontal field of view in degrees (default: 360.0)
+    - ``AtmospAttenRate`` (float): Atmospheric attenuation rate in m^-1. Used to calculate atmospheric effects on intensity based on the equation I = e^(-AtmospAttenRate * d) (default: 0.4)
+    - ``RandomSeed`` (int): Random seed for noise/drop-off generation (default: 0)
     - ``DropOffGenRate`` (float): General drop off rate (default: 0.45)
-    - ``DropOffGenRate`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0.45)
-    - ``DropOffIntensityLimit`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0.8)
-    - ``DropOffAtZeroIntensity`` (float): General drop off rate. (default: 0.4)
-    - ``ShowDebugPoints`` (bool): Whether to show debug points of laser hits in simulator. (default: false)
-    - ``NoiseStdDev`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0)
+    - ``DropOffIntensityLimit`` (float): Intensity value below which intensity-based-drop-off starts. Between 0 and 1 (default: 0.8)
+    - ``DropOffAtZeroIntensity`` (float): Drop-off rate at zero intensity. Between 0 and 1 (default: 0.4)
+    - ``ShowDebugPoints`` (bool): Whether to show debug points of laser hits in simulator (default: false)
+    - ``NoiseStdDev`` (float): Standard deviation of the zero mean gaussian noise applied to each point in m (default: 0)
     """
 
     sensor_type = "RaycastLidar"
@@ -1923,7 +1928,20 @@ class RaycastLidar(HoloOceanSensor):
     ):
         self.config = {} if config is None else config
 
-        self.shape = [30000]
+        self.numcomponents = 5  # x, y, z, intensity, ring
+        if self.config.get("PointsPerSecond") and self.config.get("RotationFrequency"):
+            self.shape = [
+                int(
+                    1.5
+                    * self.numcomponents
+                    * self.config["PointsPerSecond"]
+                    / self.config["RotationFrequency"]
+                )
+            ]
+        else:
+            self.shape = [
+                int(1.5 * self.numcomponents * 56000 / 10.0)
+            ]  # default values
 
         self.previous_frame = []
 
@@ -1941,28 +1959,44 @@ class RaycastLidar(HoloOceanSensor):
 
     @property
     def sensor_data(self):
-        reshaped_data = np.reshape(self._sensor_data_buffer, (-1, 4))
-        num_points = (int)(reshaped_data[0][0])
+        reshaped_data = np.reshape(self._sensor_data_buffer, (-1, self.numcomponents))
+        num_points = int(reshaped_data[0][0])
+        return reshaped_data[1 : num_points + 1, :]  # +1 to include last point
 
-        data_this_frame = reshaped_data[1:num_points, :]
+    def set_ticks_per_capture(self, ticks_per_capture):
+        """Sets this RaycastLidar to capture a new frame every ticks_per_capture.
 
-        # Subtract 1, since we removed the first point
-        i = len(data_this_frame) - 1
+        The sensor's image will remain unchanged between captures.
 
-        if i < len(self.previous_frame) and i >= 0:
-            while (data_this_frame[i] == self.previous_frame[i]).all() and i > 0:
-                i -= 1
-        elif i < 0:
-            i = 0
-        self.previous_frame = data_this_frame
+        This method must be called after every call to env.reset.
 
-        # Need to remove the num_points that is being sent along with everything. Also convert to meters
-        return data_this_frame[:i, :] / 100
+        Args:
+            ticks_per_capture (:obj:`int`): The amount of ticks to wait between camera captures.
+        """
+        print("Setting ticks per capture for RaycastLidar to: ", ticks_per_capture)
+
+        if not isinstance(ticks_per_capture, int) or ticks_per_capture < 1:
+            raise HoloOceanConfigurationException(
+                "Invalid ticks_per_capture value " + str(ticks_per_capture)
+            )
+
+        command_to_send = RaycastLidarRateCommand(
+            self.agent_name, self.name, ticks_per_capture
+        )
+        self._client.command_center.enqueue_command(command_to_send)
+        self.tick_every = ticks_per_capture
 
 
 class RaycastSemanticLidar(HoloOceanSensor):
-    """***WIP: need to fully test this sensor***
-    Runs Agent's Lidar
+    """Runs Agent's Semantic Lidar
+
+    Returns a 2D numpy array of shape ``[num_points, 7]`` where the rows contain:
+
+    - ``x, y, z``: 3D coordinates of the point in the world in meters (see :ref:`coordinate-system`)
+    - ``intensity``: Intensity of the point (a float between 0 and 1)
+    - ``ring``: Ring index or channel of the point (0 to Channels-1)
+    - ``objectID``: ID of the object the point belongs to (int)
+    - ``objectTag``: Tag of the object the point belongs to (int)
 
     **Configuration**
 
@@ -1971,20 +2005,19 @@ class RaycastSemanticLidar(HoloOceanSensor):
 
 
     - ``Channels`` (int): Number of lasers (default: 32)
-    - ``Range`` (float): How far each of the lasers can go (default: 500.0)
+    - ``Range`` (float): How far each of the lasers can go in meters (default: 500.0)
     - ``PointsPerSecond`` (int): Number of points per second (default: 56000)
     - ``RotationFrequency`` (float): Lidar rotation frequency (default: 10.0)
-    - ``UpperFovLimit`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 10.0)
-    - ``LowerFovLimit`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: -30.0)
+    - ``UpperFovLimit`` (float): Upper laser angle in degrees, counts from horizontal, positive values mean above horizontal line (default: 10.0)
+    - ``LowerFovLimit`` (float): Lower laser angle in degrees, counts from horizontal, negative values mean below horizontal line (default: -30.0)
     - ``HorizontalFov`` (float): Horizontal field of view (default: 360.0)
-    - ``AtmospAttenRate`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0.004)
-    - ``RandomSeed`` (int): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0)
+    - ``AtmospAttenRate`` (float): Atmospheric attenuation rate in m^-1. Used to calculate atmospheric effects on intensity based on the equation I = e^(-AtmospAttenRate * d) (default: 0.4)
+    - ``RandomSeed`` (int): Random seed for noise/drop-off generation (default: 0)
     - ``DropOffGenRate`` (float): General drop off rate (default: 0.45)
-    - ``DropOffGenRate`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0.45)
-    - ``DropOffIntensityLimit`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0.8)
-    - ``DropOffAtZeroIntensity`` (float): General drop off rate. (default: 0.4)
-    - ``ShowDebugPoints`` (bool): Whether to show debug points of laser hits in simulator. (default: false)
-    - ``NoiseStdDev`` (float): Upper laser angle, counts from horizontal, positive values means above horizontal line (default: 0)
+    - ``DropOffIntensityLimit`` (float): Intensity value below which intensity-based-drop-off starts. Between 0 and 1 (default: 0.8)
+    - ``DropOffAtZeroIntensity`` (float): Drop-off rate at zero intensity. Between 0 and 1 (default: 0.4)
+    - ``ShowDebugPoints`` (bool): Whether to show debug points of laser hits in simulator (default: false)
+    - ``NoiseStdDev`` (float): Standard deviation of the zero mean gaussian noise applied to each point in meters (default: 0)
     """
 
     sensor_type = "RaycastSemanticLidar"
@@ -1994,7 +2027,20 @@ class RaycastSemanticLidar(HoloOceanSensor):
     ):
         self.config = {} if config is None else config
 
-        self.shape = [60000]
+        self.numcomponents = 7  # x, y, z, intensity, ring, objectID, objectTag
+        if self.config.get("PointsPerSecond") and self.config.get("RotationFrequency"):
+            self.shape = [
+                int(
+                    1.5
+                    * self.numcomponents
+                    * self.config["PointsPerSecond"]
+                    / self.config["RotationFrequency"]
+                )
+            ]
+        else:
+            self.shape = [
+                int(1.5 * self.numcomponents * 56000 / 10.0)
+            ]  # default values
 
         self.previous_frame = []
 
@@ -2012,24 +2058,30 @@ class RaycastSemanticLidar(HoloOceanSensor):
 
     @property
     def sensor_data(self):
-        reshaped_data = np.reshape(self._sensor_data_buffer, (-1, 6))
-        num_points = (int)(reshaped_data[0][0])
+        reshaped_data = np.reshape(self._sensor_data_buffer, (-1, self.numcomponents))
+        num_points = int(reshaped_data[0][0])
+        return reshaped_data[1 : num_points + 1, :]  # +1 to include last point
 
-        data_this_frame = reshaped_data[1:num_points, :]
+    def set_ticks_per_capture(self, ticks_per_capture):
+        """Sets this RaycastSemanticLidar to capture a new frame every ticks_per_capture.
 
-        # Subtract 1, since we removed the first point
-        i = len(data_this_frame) - 1
+        The sensor's image will remain unchanged between captures.
 
-        if i < len(self.previous_frame) and i >= 0:
-            while (data_this_frame[i] == self.previous_frame[i]).all() and i > 0:
-                i -= 1
-        elif i < 0:
-            i = 0
-        self.previous_frame = data_this_frame
+        This method must be called after every call to env.reset.
 
-        # TODO: Need to only convert the X, Y, Z. Not the angle, object tag or object instance
-        # Also convert to meters
-        return data_this_frame[:i, :]
+        Args:
+            ticks_per_capture (:obj:`int`): The amount of ticks to wait between camera captures.
+        """
+        if not isinstance(ticks_per_capture, int) or ticks_per_capture < 1:
+            raise HoloOceanConfigurationException(
+                "Invalid ticks_per_capture value " + str(ticks_per_capture)
+            )
+
+        command_to_send = RaycastLidarRateCommand(
+            self.agent_name, self.name, ticks_per_capture
+        )
+        self._client.command_center.enqueue_command(command_to_send)
+        self.tick_every = ticks_per_capture
 
 
 class BSTSensor(HoloOceanSensor):
@@ -2482,7 +2534,7 @@ class SensorDefinition:
     _sensor_keys_ = {
         "RGBCamera": RGBCamera,
         "CameraSensor": CameraSensor,
-        "RGBDCamera": RGBDCamera,
+        "DepthCamera": DepthCamera,
         "SemanticSegmentationCamera": SemanticSegmentationCamera,
         "DistanceTask": DistanceTask,
         "LocationTask": LocationTask,
@@ -2531,7 +2583,11 @@ class SensorDefinition:
 
     # Sensors that are ticked at their rate on the C++ too
     # Generally sensors with a heavy computational cost
-    _heavy_sensors = _sonar_sensors + ["RGBCamera"]
+    _heavy_sensors = _sonar_sensors + [
+        "RGBCamera",
+        "RaycastLidar",
+        "RaycastSemanticLidar",
+    ]
 
     def get_config_json_string(self):
         """Gets the configuration dictionary as a string ready for transport

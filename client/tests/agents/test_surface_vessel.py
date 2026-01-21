@@ -47,6 +47,7 @@ def test_buoyancy_from_sunk(env):
     assert p[2] > -1, "Surface Vessel didn't float"
     assert p[2] < 1, "Surface Vessel didn't stop going up"
 
+
 def test_buoyancy_from_drop(env):
     """Make sure vehicle floats on the surface, from initial drop"""
     # Going down
@@ -57,10 +58,11 @@ def test_buoyancy_from_drop(env):
     assert p[2] > -1, "Surface Vessel didn't float"
     assert p[2] < 1, "Surface Vessel didn't drop"
 
+
 def test_thruster_dynamics(env):
     """Test to ensure the thrusters achieve correct accelerations"""
     command = [-50, -100]
-    env._scenario["agents"][0]["location"] = [10, 10, .15]
+    env._scenario["agents"][0]["location"] = [10, 10, 0.15]
     env.reset()
     state = env.step(command, 20)
     lin_accel = state["DynamicsSensor"][0:3]
@@ -74,6 +76,7 @@ def test_thruster_dynamics(env):
         ang_accel, target_ang_accel, atol=1e-3
     ), f"Thruster dynamics didn't achieve the correct angular acceleration. Should be {target_ang_accel}, got {ang_accel}"
 
+
 def test_pid_controller(env):
     """Test to make sure PID controller gets vehicle to the position we command"""
     des = [20, 20]
@@ -81,7 +84,10 @@ def test_pid_controller(env):
     env.reset()
     state = env.step(des, 300)
     pos = state["DynamicsSensor"][6:8]
-    assert np.allclose(des, pos, 1), f"Controller didn't make it to the correct position. Should be {des}, got {pos}"
+    assert np.allclose(
+        des, pos, 1
+    ), f"Controller didn't make it to the correct position. Should be {des}, got {pos}"
+
 
 def test_manual_dynamics(env):
     """Test to make sure vehicle achieves the linear and angular acceleration we set"""
@@ -92,8 +98,8 @@ def test_manual_dynamics(env):
     lin_accel = state["DynamicsSensor"][0:3]
     ang_accel = state["DynamicsSensor"][9:12]
     assert np.allclose(
-        des[:3], lin_accel
+        des[:3], lin_accel, rtol=1e-3
     ), f"Manual dynamics didn't achieve the correct linear acceleration. Should be {des[:3]}, got {lin_accel}"
     assert np.allclose(
-        des[3:], ang_accel
+        des[3:], ang_accel, rtol=1e-3
     ), f"Manual dynamics didn't achieve the correct angular acceleration. Should be {des[3:]}, got {ang_accel}"

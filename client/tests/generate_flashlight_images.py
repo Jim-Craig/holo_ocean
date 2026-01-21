@@ -37,6 +37,12 @@ config = {
             "color_G": 0,
             "color_R": 0,  # blue
         },
+        {
+            "flashlight_name": "flashlight3",
+            "intensity": 10000,
+            "color_R": 0,
+            "color_B": 0,  # green
+        },
         # flashlight 6 does not exist, should give a warning but not crash.
         {
             "flashlight_name": "flashlight6",

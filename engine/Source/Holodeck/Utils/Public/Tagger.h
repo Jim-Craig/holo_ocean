@@ -5,7 +5,6 @@
 // For a copy, see <https://opensource.org/licenses/MIT>.
 #pragma once
 #include "ObjectLabel.h"
-
 #include "Tagger.generated.h"
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class HOLODECK_API ATagger : public AActor {
@@ -69,14 +68,70 @@ public:
 		const FString	Path = Object->GetPathName();
 		TArray<FString> StringArray;
 		Path.ParseIntoArray(StringArray, TEXT("/"), false);
+		UE_LOG(
+			LogHolodeck,
+			Log,
+			TEXT("Raw Path: %s"),
+			*Object
+				 ->GetPathName()); // LogHolodeck: Raw Path:
+								   // /Engine/BasicShapes/Plane.Plane //it's getting the
+								   // wrong path, not the level path but the asset path
 
 		if (StringArray.Num() > 4) {
+			const FString&		   FolderName = StringArray[StringArray.Num() - 3];
 			holoocean::ObjectLabel folderLabel =
 				GetLabelByFolderName(StringArray[StringArray.Num() - 3]);
 			return folderLabel;
 		}
 		return holoocean::ObjectLabel::None;
 	}
+
+	static holoocean::ObjectLabel
+	GetLabelBylevelPath(const TObjectPtr<UObject> Object) {
+		if (!Object)
+			return holoocean::ObjectLabel::None;
+		// UE_LOG(LogHolodeck, Warning, TEXT("Object class: %s | name: %s"),
+		// *Object->GetClass()->GetName(), *Object->GetName());
+		FName FolderPath;
+
+// IMPORTANT: can only access the GetFolderPath() function from within the editor!!!!!!!
+// so if you are trying to tag objects using folder names, make sure the tagger.cpp is
+// in your level then click on the tagger from the outliner and select "Trigger Tag
+// Objects"
+#if WITH_EDITOR
+		// Find folder path for actors
+		if (const AActor* Actor = Cast<AActor>(Object)) {
+			FolderPath = Actor->GetFolderPath();
+		}
+		// Find folder path for actor components
+		else if (const UActorComponent* Component = Cast<UActorComponent>(Object)) {
+			if (const AActor* Owner = Component->GetOwner()) {
+				FolderPath = Owner->GetFolderPath();
+			}
+		}
+
+		// Tag returned is the last folder in the path
+		if (!FolderPath.IsNone()) {
+			// UE_LOG(LogHolodeck, Log, TEXT("Level folder path: %s"),
+			// *FolderPath.ToString());
+
+			// grab just the last folder in the path:
+			TArray<FString> Parts;
+			FolderPath.ToString().ParseIntoArray(Parts, TEXT("/"), true);
+			if (Parts.Num() > 0) {
+				// UE_LOG(LogHolodeck, Error, TEXT("FOLDER TAG FOUND!: %s"),
+				// *Parts.Last());
+				return GetLabelByFolderName(Parts.Last());
+			}
+		}
+#endif
+
+		return holoocean::ObjectLabel::None;
+	}
+
+	static void AddActorTagToAsset(
+		UPrimitiveComponent&		  Component,
+		const holoocean::ObjectLabel& Label);
 
 	static void SetStencilValue(
 		UPrimitiveComponent&		  Component,

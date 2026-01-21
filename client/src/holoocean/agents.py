@@ -1184,10 +1184,29 @@ class TorpedoAUV(HoloOceanAgent):
         limits_fins = [self.__MAX_FIN] * 4 + [self.__MAX_THRUST]
 
         scheme_accel = "[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]"
-        limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
-        
-        return [(scheme_fins, ContinuousActionSpace([5], low=[-i for i in limits_fins], high=limits_fins)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel))]
+        limits_accel = [
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+        ]
+
+        return [
+            (
+                scheme_fins,
+                ContinuousActionSpace(
+                    [5], low=[-i for i in limits_fins], high=limits_fins
+                ),
+            ),
+            (
+                scheme_accel,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_accel], high=limits_accel
+                ),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
@@ -1248,10 +1267,29 @@ class CougUV(HoloOceanAgent):
         limits_fins = [self.__MAX_FIN] * 4 + [self.__MAX_THRUST]
 
         scheme_accel = "[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]"
-        limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
-        
-        return [(scheme_fins, ContinuousActionSpace([5], low=[-i for i in limits_fins], high=limits_fins)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel))]
+        limits_accel = [
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+        ]
+
+        return [
+            (
+                scheme_fins,
+                ContinuousActionSpace(
+                    [5], low=[-i for i in limits_fins], high=limits_fins
+                ),
+            ),
+            (
+                scheme_accel,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_accel], high=limits_accel
+                ),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None

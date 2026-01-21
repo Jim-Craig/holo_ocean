@@ -126,3 +126,4 @@ def test_weather_rain_under():
 if __name__ == "__main__":
     test_weather_sunny()
     test_weather_cloudy()
+    test_weather_rain_under()

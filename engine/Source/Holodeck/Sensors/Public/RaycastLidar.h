@@ -12,12 +12,20 @@
 #include "LidarData.h"
 #include "LidarDescription.h"
 #include "RandomEngine.h"
-#include "RaycastSemanticLidar.h"
-#include "SemanticLidarData.h"
+
+DECLARE_STATS_GROUP(
+	TEXT("HoloOceanRaycasting"),
+	STATGROUP_RaycastFunction,
+	STATCAT_Advanced);
+DECLARE_CYCLE_STAT(TEXT("CopyBuffer"), STAT_CopyBuffer, STATGROUP_RaycastFunction);
+DECLARE_CYCLE_STAT(
+	TEXT("ParallelFor"),
+	STAT_ParallelForHoloocean,
+	STATGROUP_RaycastFunction);
 
 #include "RaycastLidar.generated.h"
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class HOLODECK_API URaycastLidar : public URaycastSemanticLidar {
+class HOLODECK_API URaycastLidar : public UHolodeckSensor {
 	GENERATED_BODY()
 
 	using FLidarData = holoocean::data::LidarData;
@@ -40,37 +48,50 @@ public:
 	 */
 	virtual void ParseSensorParms(FString ParmsJson) override;
 
-	virtual void Set(const FLidarDescription& LidarDescription) override;
+	virtual void Set(const FLidarDescription& LidarDescription);
+
+	UPROPERTY(EditAnywhere)
+	int TicksPerCapture = 1;
 
 protected:
+	// See HolodeckSensor for the documentation of these overridden functions.
+	int virtual GetNumItems() override { return Description.PointsPerSecond; };
+	int virtual GetItemSize() override { return sizeof(float); };
+
+	/// Start the tick function for the sensor component.
 	virtual void TickSensorComponent(
 		float						 DeltaTime,
 		ELevelTick					 TickType,
 		FActorComponentTickFunction* ThisTickFunction) override;
-	int virtual GetNumItems() override { return LidarDescription.PointsPerSecond * 4; };
-	int virtual GetItemSize() override { return sizeof(float); };
 
-	float*	   Buffer;
-	FLidarData Data;
+	/// Creates a Laser for each channel.
+	void CreateLasers();
 
-private:
-	FSemanticLidarData SemanticLidarData;
+	/// Updates LidarMeasurement with the points read in DeltaTime.
+	void SimulateLidar(const float DeltaTime);
 
-	FLidarDescription LidarDescription;
+	/// Shoot a laser ray-trace, return whether the laser hit something.
+	bool ShootLaser(
+		const float			   VerticalAngle,
+		float				   HorizontalAngle,
+		FHitResult&			   HitResult,
+		FCollisionQueryParams& TraceParams) const;
 
-	/// Compute the received intensity of the point
-	float ComputeIntensity(const FSemanticDetection& RawDetection) const;
-	FDetection
-	ComputeDetection(const FHitResult& HitInfo, const FTransform& SensorTransf) const;
+	/// Method that allow to preprocess if the rays will be traced.
+	virtual void PreprocessRays(uint32_t Channels, uint32_t MaxPointsPerChannel);
 
-	virtual void
-	PreprocessRays(uint32_t Channels, uint32_t MaxPointsPerChannel) override;
+	/// Postprocess the detection, this method can be used to filter out detections
 	bool PostprocessDetection(FDetection& Detection) const;
 
-	virtual void ComputeAndSaveDetections(const FTransform& SensorTransform) override;
+	/// Saving the hits the raycast returns per channel
+	void WritePointAsync(uint32_t Channel, FHitResult& Detection);
 
-	// FLidarData* Buffer;
-	FLidarData TempData;
+	/// Clear the recorded data structure
+	void ResetRecordedHits(uint32_t Channels, uint32_t MaxPointsPerChannel);
+
+	/// This method uses all the saved FHitResults, computes the RawDetections and then
+	/// sends it to the LidarData structure.
+	virtual void ComputeAndSaveDetections(const FTransform& SensorTransform);
 
 	/// Enable/Disable general dropoff of lidar points
 	bool DropOffGenActive;
@@ -79,9 +100,37 @@ private:
 	/// throught the dropoff limit and the dropoff at zero intensity
 	/// The points is kept with a probality alpha*Intensity + beta where
 	/// alpha = (1 - dropoff_zero_intensity) / droppoff_limit
-	/// beta = (1 - dropoff_zero_intensity)
+	/// beta = dropoff_zero_intensity
 	float DropOffAlpha;
 	float DropOffBeta;
 
+	UPROPERTY(EditAnywhere)
+	FLidarDescription Description;
+
+	/// Array of angles that each laser will use to shoot rays.
+	TArray<float> LaserAngles;
+
+	std::vector<std::vector<FHitResult>> RecordedHits;
+	std::vector<std::vector<bool>>		 RayPreprocessCondition;
+	std::vector<uint32_t>				 PointsPerChannel;
+
+	/// Random Engine used to provide noise for sensor output.
+	UPROPERTY(VisibleAnywhere)
+	URandomEngine* RandomEngine = nullptr;
+
+	bool  ShouldInitialize = true;
+	int	  TickCounter = 0;
+	float DeltaTime = 0.0f;
+
+private:
+	/// Compute all raw detection information
+	FDetection ComputeRawDetection(
+		const FHitResult& HitInfo,
+		const FTransform& SensorTransf) const;
+
+	/// After initialization, Parent contains a pointer to whatever the sensor is
+	/// attached to.
 	TUniquePtr<AActor> Parent;
+	float*			   LidarBuffer;
+	FLidarData		   Data;
 };

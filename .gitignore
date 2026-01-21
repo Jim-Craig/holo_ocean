@@ -7,6 +7,11 @@ engine/Content/WorldsHowdy
 engine/Saved/Crashes
 engine/Saved/Config/CrashReportClient
 engine/Saved/logs
+engine/Saved/temp
+engine/Saved/Cooked
+engine/Saved/StagedBuilds
+engine/Saved/Shaders
+
 
 *.VC.db
 

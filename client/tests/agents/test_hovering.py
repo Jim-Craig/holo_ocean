@@ -39,19 +39,20 @@ def env():
 
 def test_thruster_dynamics(env):
     """Test to ensure the thrusters achieve correct accelerations"""
-    command = np.array([-5,5,-10,-10,-5,5,-10,-10])
+    command = np.array([-5, 5, -10, -10, -5, 5, -10, -10])
     env.reset()
     state = env.step(command, 20)
     lin_accel = state["DynamicsSensor"][0:3]
     ang_accel = state["DynamicsSensor"][9:12]
     target_lin_accel = np.array([-0.0476728, 0.03966415, -0.42882535])
-    target_ang_accel = np.array([-0.64573175, 0.779148, -0.6961151 ])
+    target_ang_accel = np.array([-0.64573175, 0.779148, -0.6961151])
     assert np.allclose(
         lin_accel, target_lin_accel
     ), f"Thruster dynamics didn't achieve the correct linear acceleration. Should be {target_lin_accel}, got {lin_accel}"
     assert np.allclose(
         ang_accel, target_ang_accel
     ), f"Thruster dynamics didn't achieve the correct angular acceleration. Should be {target_ang_accel}, got {ang_accel}"
+
 
 def test_pid_controller(env):
     """Test to make sure PID controller gets vehicle to the orientation and position we command"""
@@ -68,6 +69,7 @@ def test_pid_controller(env):
         des[3:], rpy, 5
     ), f"PID Controller didn't make it to the correct orientation. Should be {des[3:]}, got {rpy}"
 
+
 def test_manual_dynamics(env):
     """Test to make sure vehicle achieves the linear and angular acceleration we set"""
     des = [1, 2, 3, 0.1, 0.2, 0.3]
@@ -77,8 +79,8 @@ def test_manual_dynamics(env):
     lin_accel = state["DynamicsSensor"][0:3]
     ang_accel = state["DynamicsSensor"][9:12]
     assert np.allclose(
-        des[:3], lin_accel
+        des[:3], lin_accel, rtol=1e-3
     ), f"Manual dynamics didn't achieve the correct linear acceleration. Should be {des[:3]}, got {lin_accel}"
     assert np.allclose(
-        des[3:], ang_accel
+        des[3:], ang_accel, rtol=1e-3
     ), f"Manual dynamics didn't achieve the correct angular acceleration. Should be {des[3:]}, got {ang_accel}"

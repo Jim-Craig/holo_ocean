@@ -20,7 +20,7 @@ public:
 	/**
 	 * Allows parameters to be set dynamically
 	 **/
-	virtual void ParseSensorParms(FString ParmsJson) override {};
+	virtual void ParseSensorParms(FString ParmsJson) override;
 
 	/// Load the UMaterialInstanceDynamic at the given @a Path and
 	/// append it to the list of shaders with @a Weight.

@@ -25,7 +25,7 @@ def env():
                             "UseCOM": True,
                             "UseRPY": False,
                         },
-                    }
+                    },
                 ],
                 "control_scheme": 0,
                 "location": [18.5, -25.5, -10],

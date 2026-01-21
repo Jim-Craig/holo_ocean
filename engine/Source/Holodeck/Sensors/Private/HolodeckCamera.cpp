@@ -53,7 +53,7 @@ void UHolodeckCamera::InitializeSensor() {
 		// Higher = brighter captured image. Lower = darker
 		// This is a magic number that has been fine tuned to the default worlds. Do
 		// not edit without thourough testing.
-		SceneCapture->PostProcessSettings.AutoExposureBias = 4;
+		SceneCapture->PostProcessSettings.AutoExposureBias = 3;
 	}
 
 	TargetTexture = NewObject<UTextureRenderTarget2D>(this);

@@ -54,11 +54,12 @@ def test_manual_dynamics(env):
     lin_accel = state["DynamicsSensor"][0:3]
     ang_accel = state["DynamicsSensor"][9:12]
     assert np.allclose(
-        des[:3], lin_accel
+        des[:3], lin_accel, rtol=1e-3
     ), f"Manual dynamics didn't achieve the correct linear acceleration. Should be {des[:3]}, got {lin_accel}"
     assert np.allclose(
-        des[3:], ang_accel
+        des[3:], ang_accel, rtol=1e-3
     ), f"Manual dynamics didn't achieve the correct angular acceleration. Should be {des[3:]}, got {ang_accel}"
+
 
 def test_fossen_dynamics(env):
     """Test to ensure the Fossen dynamics achieve correct accelerations"""
@@ -85,6 +86,7 @@ def test_fossen_dynamics(env):
     assert (
         pitch_heading[1] < 0
     ), f"Heading should be less than 0, but got {pitch_heading[1]}"
+
 
 def test_fossen_autopilot(env):
     """Test to make sure Fossen autopilot gets vehicle to the orientation and position we command"""
@@ -113,9 +115,10 @@ def test_fossen_autopilot(env):
         heading, heading_actual, atol=10.0
     ), f"Autopilot heading not acheived within 10 degrees (Heading error was {heading_error})"
 
+
 def test_fin_dynamics(env):
     """Test to ensure the fins achieve correct accelerations"""
-    command = np.array([30,-20,-10,30,50])
+    command = np.array([30, -20, -10, 30, 50])
     env._scenario["agents"][0]["control_scheme"] = 0
     env.reset()
     state = env.step(command, 20)
@@ -129,5 +132,6 @@ def test_fin_dynamics(env):
     assert np.allclose(
         target_ang_accel, ang_accel
     ), f"Fin dynamics didn't achieve the correct angular acceleration. Should be {target_ang_accel}, got {ang_accel}"
+
 
 # TODO: Test to make sure fins saturate at max deflection

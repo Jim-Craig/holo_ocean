@@ -41,3 +41,22 @@ void UShaderBasedSensor::InitializeSensor() {
 	Super::InitializeSensor();
 	SetUpSceneCaptureComponent();
 }
+
+void UShaderBasedSensor::ParseSensorParms(FString ParmsJson) {
+	Super::ParseSensorParms(ParmsJson);
+
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
+
+		if (JsonParsed->HasTypedField<EJson::Number>("TicksPerCapture")) {
+			TicksPerCapture = JsonParsed->GetIntegerField("TicksPerCapture");
+		}
+	} else {
+		UE_LOG(
+			LogHolodeck,
+			Fatal,
+			TEXT("UShaderBasedSensor::ParseSensorParms:: Unable to parse json."));
+	}
+}

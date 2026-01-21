@@ -72,7 +72,7 @@ void UAddSensorCommand::Execute() {
 		{ "MagnetometerSensor", UMagnetometerSensor::StaticClass() },
 		{ "OpticalModemSensor", UOpticalModemSensor::StaticClass() },
 		{ "CameraSensor", UCameraSensor::StaticClass() },
-		{ "RGBDCamera", URGBDCamera::StaticClass() },
+		{ "DepthCamera", UDepthCamera::StaticClass() },
 		{ "SemanticSegmentationCamera", USemanticSegmentationCamera::StaticClass() },
 		{ "RaycastLidar", URaycastLidar::StaticClass() },
 		{ "RaycastSemanticLidar", URaycastSemanticLidar::StaticClass() },
