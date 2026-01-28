@@ -312,6 +312,7 @@ class HoloOceanEnvironment:
         if self._scenario is None:
             return
 
+        bmain_agent_check = False
         for agent in self._scenario["agents"]:
             sensors = []
             for sensor in agent["sensors"]:
@@ -388,9 +389,12 @@ class HoloOceanEnvironment:
 
             agent_config.update(agent)
             is_main_agent = False
-
             if "main_agent" in self._scenario:
                 is_main_agent = self._scenario["main_agent"] == agent["agent_name"]
+            else:
+                if not bmain_agent_check:
+                    is_main_agent = True
+                    bmain_agent_check = True
 
             agent_location = copy.deepcopy(agent_config["location"])
             agent_rotation = copy.deepcopy(agent_config["rotation"])
