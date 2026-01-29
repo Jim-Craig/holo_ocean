@@ -1,6 +1,5 @@
 import holoocean
 import uuid
-import numpy as np
 import pytest
 
 
@@ -98,9 +97,9 @@ def test_within_max_distance(env):
     for i in range(20):
         env.send_acoustic_message(0, 1, "OWAY", "my_message")
         state = env.tick()
-        assert (
-            "AcousticBeaconSensor" not in state["auv1"]
-        ), "Receiving beacon received data when it should not have done so."
+        assert "AcousticBeaconSensor" not in state["auv1"], (
+            "Receiving beacon received data when it should not have done so."
+        )
 
 
 @pytest.mark.parametrize(
@@ -146,9 +145,9 @@ def test_obstructed_view(env):
     for _ in range(20):
         env.send_acoustic_message(0, 1, "OWAY", "my_message")
         state = env.tick()
-        assert (
-            "AcousticBeaconSensor" not in state["auv1"]
-        ), "Receiving beacon received data when it should not have done so."
+        assert "AcousticBeaconSensor" not in state["auv1"], (
+            "Receiving beacon received data when it should not have done so."
+        )
 
 
 @pytest.mark.parametrize(
@@ -194,9 +193,9 @@ def test_distance_noise(env):
         if "AcousticBeaconSensor" in state["auv1"]:
             tests_passed += 1
 
-    assert (
-        tests_passed < num_tests
-    ), "All messages sent when some should have failed due to noise variation."
-    assert (
-        tests_passed > 0
-    ), "All messages failed when some should have passed due to noise variation."
+    assert tests_passed < num_tests, (
+        "All messages sent when some should have failed due to noise variation."
+    )
+    assert tests_passed > 0, (
+        "All messages failed when some should have passed due to noise variation."
+    )

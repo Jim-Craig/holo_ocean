@@ -69,12 +69,12 @@ def test_thruster_dynamics(env):
     ang_accel = state["DynamicsSensor"][9:12]
     target_lin_accel = np.array([-0.091, 0.002])
     target_ang_accel = np.array([-1.3e-03, -2.3e-06, -2.10e-02])
-    assert np.allclose(
-        lin_accel[0:2], target_lin_accel, atol=1e-3
-    ), f"Thruster dynamics didn't achieve the correct linear acceleration. Should be {target_lin_accel}, got {lin_accel}"
-    assert np.allclose(
-        ang_accel, target_ang_accel, atol=1e-3
-    ), f"Thruster dynamics didn't achieve the correct angular acceleration. Should be {target_ang_accel}, got {ang_accel}"
+    assert np.allclose(lin_accel[0:2], target_lin_accel, atol=1e-3), (
+        f"Thruster dynamics didn't achieve the correct linear acceleration. Should be {target_lin_accel}, got {lin_accel}"
+    )
+    assert np.allclose(ang_accel, target_ang_accel, atol=1e-3), (
+        f"Thruster dynamics didn't achieve the correct angular acceleration. Should be {target_ang_accel}, got {ang_accel}"
+    )
 
 
 def test_pid_controller(env):
@@ -84,9 +84,9 @@ def test_pid_controller(env):
     env.reset()
     state = env.step(des, 300)
     pos = state["DynamicsSensor"][6:8]
-    assert np.allclose(
-        des, pos, 1
-    ), f"Controller didn't make it to the correct position. Should be {des}, got {pos}"
+    assert np.allclose(des, pos, 1), (
+        f"Controller didn't make it to the correct position. Should be {des}, got {pos}"
+    )
 
 
 def test_manual_dynamics(env):
@@ -97,9 +97,10 @@ def test_manual_dynamics(env):
     state = env.step(des, 20)
     lin_accel = state["DynamicsSensor"][0:3]
     ang_accel = state["DynamicsSensor"][9:12]
-    assert np.allclose(
-        des[:3], lin_accel, rtol=1e-3
-    ), f"Manual dynamics didn't achieve the correct linear acceleration. Should be {des[:3]}, got {lin_accel}"
-    assert np.allclose(
-        des[3:], ang_accel, rtol=1e-3
-    ), f"Manual dynamics didn't achieve the correct angular acceleration. Should be {des[3:]}, got {ang_accel}"
+
+    assert np.allclose(des[:3], lin_accel), (
+        f"Manual dynamics didn't achieve the correct linear acceleration. Should be {des[:3]}, got {lin_accel}"
+    )
+    assert np.allclose(des[3:], ang_accel), (
+        f"Manual dynamics didn't achieve the correct angular acceleration. Should be {des[3:]}, got {ang_accel}"
+    )

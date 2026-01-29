@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 import warnings
 import matplotlib
 from holoocean.sensors import BSTSensor
@@ -155,7 +154,7 @@ class BST_Visualizer:
 
             self.fig.canvas.draw()
             self.initialized = True
-            
+
         # This is a fail safe in case the graph doesn't load correctly. It will try a couple other methods before giving up.
         except Exception as e:
             print(f"Error setting up plots: {e}")
@@ -181,10 +180,10 @@ class BST_Visualizer:
     def generate_data_xy(self, func):
         """Generate XY plane data using vectorized locations"""
         try:
-            # This creates 1d arrays in the x and y direction around the current position. Then, these arrays 
-            # are meshed into separate coordinate planes that can be manipulated in matrix operations, which 
+            # This creates 1d arrays in the x and y direction around the current position. Then, these arrays
+            # are meshed into separate coordinate planes that can be manipulated in matrix operations, which
             # is much more efficient than going point by point. For example, if the range was 1, and pos was (0,0):
-            # Y = [[-1, -1, -1], [0, 0, 0], [[1, 1, 1]] X = [[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]], and you can 
+            # Y = [[-1, -1, -1], [0, 0, 0], [[1, 1, 1]] X = [[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]], and you can
             # multiply them together to evaluate an equation at all possible X and Y coordinates.
             pos = self.position
             x_range = np.linspace(
@@ -194,17 +193,13 @@ class BST_Visualizer:
                 pos[1] - self.range_val, pos[1] + self.range_val, self.resolution
             )
             X, Y = np.meshgrid(x_range, y_range)
-            
-            # .ravel() makes the two 2D grids of X and Y coordinates into 1D arrays of those same X and Y values 
-            # to be more easily iterated over. Ex: [[x1, x2, x3],[x1,x2,x3]...] -> [x1, x2, x3, x1, x2...]. Then, 
-            # a 1D z array of equal size is created, and a 2nd dimension is added with column_stack(), grouping 
+
+            # .ravel() makes the two 2D grids of X and Y coordinates into 1D arrays of those same X and Y values
+            # to be more easily iterated over. Ex: [[x1, x2, x3],[x1,x2,x3]...] -> [x1, x2, x3, x1, x2...]. Then,
+            # a 1D z array of equal size is created, and a 2nd dimension is added with column_stack(), grouping
             # each group of three coordinates into their own coordinate to be evaluated. Ex: [[x1, y1, z0]...]
-            locations = np.column_stack([
-                X.ravel(), 
-                Y.ravel(), 
-                np.full(X.size, pos[2])
-            ])
-            
+            locations = np.column_stack([X.ravel(), Y.ravel(), np.full(X.size, pos[2])])
+
             # Access correct bst_sensor to probe at
             agents = self.config["agents"]
             for agent in agents:
@@ -218,14 +213,15 @@ class BST_Visualizer:
                     bst_sensor = sensor
                     break
 
-            # Evaluate function across entire vector at once, then turn that 1D array into a 2D array where matrix 
-            # position represents location for the values. Ex: If positions were 3x3...[[val1, val2, val3],[val4, 
+            # Evaluate function across entire vector at once, then turn that 1D array into a 2D array where matrix
+            # position represents location for the values. Ex: If positions were 3x3...[[val1, val2, val3],[val4,
             # val5, val6]...]
-            Z_data = func(location=locations, **bst_sensor["configuration"]).reshape(X.shape)
-            
+            Z_data = func(location=locations, **bst_sensor["configuration"]).reshape(
+                X.shape
+            )
+
             # This format of return helps map the correct values to their coordinates
             return X, Y, Z_data
-
 
         except Exception as e:
             print(f"Error generating XY data: {e}")
@@ -348,9 +344,7 @@ class BST_Visualizer:
                                 self.biomass_range,
                                 self.salinity_range,
                                 self.temperature_range,
-                            ][
-                                i
-                            ]  # biomass, salinity, temperature
+                            ][i]  # biomass, salinity, temperature
                             self.images[i][0].set_clim(limits[0], limits[1])
 
                     # Remove old crosshair and value text
@@ -473,9 +467,7 @@ class BST_Visualizer:
                                 self.biomass_range,
                                 self.salinity_range,
                                 self.temperature_range,
-                            ][
-                                i
-                            ]  # biomass, salinity, temperature
+                            ][i]  # biomass, salinity, temperature
                             self.images[i][1].set_clim(limits[0], limits[1])
 
                     # Remove old crosshair and value text

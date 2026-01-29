@@ -1,7 +1,4 @@
 import holoocean
-import cv2
-import copy
-import os
 import uuid
 import pytest
 import numpy as np
@@ -111,28 +108,28 @@ def test_raycast_semantic_lidar_sensor(cfg1):
         )
 
         # Verify that the x, y, and z is in the expected range 200
-        assert np.all(actual[:, 0] >= -200) and np.all(
-            actual[:, 0] <= 200
-        ), "X values are not in the range [-200, 200]!"
-        assert np.all(actual[:, 1] >= -200) and np.all(
-            actual[:, 1] <= 200
-        ), "Y values are not in the range [-200, 200]!"
-        assert np.all(actual[:, 2] >= -200) and np.all(
-            actual[:, 2] <= 200
-        ), "Z values are not in the range [-200, 200]!"
+        assert np.all(actual[:, 0] >= -200) and np.all(actual[:, 0] <= 200), (
+            "X values are not in the range [-200, 200]!"
+        )
+        assert np.all(actual[:, 1] >= -200) and np.all(actual[:, 1] <= 200), (
+            "Y values are not in the range [-200, 200]!"
+        )
+        assert np.all(actual[:, 2] >= -200) and np.all(actual[:, 2] <= 200), (
+            "Z values are not in the range [-200, 200]!"
+        )
 
         # Verify that the intensity and ring values are in the expected range
-        assert np.all(actual[:, 3] >= 0) and np.all(
-            actual[:, 3] <= 1
-        ), "Intensity values are not in the range [0, 1]!"
-        assert np.all(actual[:, 4] >= 0) and np.all(
-            actual[:, 4] <= 127
-        ), "Ring values are not in the range [0, 127]!"
+        assert np.all(actual[:, 3] >= 0) and np.all(actual[:, 3] <= 1), (
+            "Intensity values are not in the range [0, 1]!"
+        )
+        assert np.all(actual[:, 4] >= 0) and np.all(actual[:, 4] <= 127), (
+            "Ring values are not in the range [0, 127]!"
+        )
 
         # Dropout and noise are applied correctly due to RandomSeed
-        assert (
-            actual.shape == expected.shape
-        ), f"Lidar data shape {actual.shape} does not match expected shape {expected.shape}!"
+        assert actual.shape == expected.shape, (
+            f"Lidar data shape {actual.shape} does not match expected shape {expected.shape}!"
+        )
         # Ignore object IDS for comparison
         assert np.allclose(
             np.delete(actual, 5, axis=1), np.delete(expected, 5, axis=1), atol=1e-4
@@ -146,9 +143,9 @@ def test_raycast_semantic_lidar_sensor(cfg1):
         # Verify that the number of unique object IDs detected matches expected
         unique_ids = np.unique(actual[:, 5])
         unique_expected_ids = np.unique(expected[:, 5])
-        assert len(unique_ids) == len(
-            unique_expected_ids
-        ), f"Number of unique object IDs detected ({len(unique_ids)}) does not match expected ({len(unique_expected_ids)})!"
+        assert len(unique_ids) == len(unique_expected_ids), (
+            f"Number of unique object IDs detected ({len(unique_ids)}) does not match expected ({len(unique_expected_ids)})!"
+        )
 
 
 def test_lidar_with_landscape(cfg2):
@@ -186,10 +183,10 @@ def test_lidar_with_landscape(cfg2):
         unique_ids = last_two[np.sort(idx)]
 
         # Should have 3 tags, one for each material layer
-        assert (
-            len(tags) == 3
-        ), f"Number of tags detected ({len(tags)}) does not match expected ({len(expected_tags)})!"
+        assert len(tags) == 3, (
+            f"Number of tags detected ({len(tags)}) does not match expected ({len(expected_tags)})!"
+        )
         # Should have 1 unique ID for the single landscape
-        assert (
-            len(unique_ids) == 1
-        ), f"Number of unique object IDs detected ({len(unique_ids)}) does not match expected ({len(unique_expected_ids)})!"
+        assert len(unique_ids) == 1, (
+            f"Number of unique object IDs detected ({len(unique_ids)}) does not match expected ({len(unique_expected_ids)})!"
+        )

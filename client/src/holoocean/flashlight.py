@@ -1,5 +1,4 @@
 from holoocean.command import TurnOnFlashlightCommand
-from holoocean.exceptions import HoloOceanException
 
 
 class FlashlightController:

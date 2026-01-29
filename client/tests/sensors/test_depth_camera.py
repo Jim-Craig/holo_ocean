@@ -1,13 +1,10 @@
 import holoocean
 import cv2
 import copy
-import os
 import uuid
 import pytest
 import numpy as np
-
 from tests.utils.equality import mean_square_err
-from tests.utils.equality import almost_equal
 
 
 base_cfg = {
@@ -161,9 +158,9 @@ def test_depth_output():
 
         real_wall_distance = 2.0
 
-        assert np.isclose(
-            pixels[128, 128], real_wall_distance, 1e-2
-        ), "Depth camera return is not correct!"
+        assert np.isclose(pixels[128, 128], real_wall_distance, 1e-2), (
+            "Depth camera return is not correct!"
+        )
 
 
 shared_ticks_per_capture_env = None

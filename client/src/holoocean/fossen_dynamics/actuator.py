@@ -245,7 +245,6 @@ class thruster:
         # KQ ~= KQ_0 + (KQ_max-KQ_0)/Ja_max * Ja
 
         if n_rps > 0:  # forward thrust
-
             X_prop = (
                 self.rho
                 * pow(D_prop, 4)
@@ -264,7 +263,6 @@ class thruster:
             )
 
         else:  # reverse thrust (braking)
-
             X_prop = self.rho * pow(D_prop, 4) * KT_0 * abs(n_rps) * n_rps
             K_prop = self.rho * pow(D_prop, 5) * KQ_0 * abs(n_rps) * n_rps
 

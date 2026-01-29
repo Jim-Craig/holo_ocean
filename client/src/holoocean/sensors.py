@@ -15,7 +15,6 @@ from holoocean.command import (
 )
 from holoocean.exceptions import HoloOceanConfigurationException
 from holoocean.lcm import SensorData
-from copy import deepcopy
 
 
 class HoloOceanSensor:
@@ -504,7 +503,7 @@ class CleanUpTask(HoloOceanSensor):
                 all trash will spawn on the ground. Defaults to False.
         """
 
-        if self.config is not None or self.config is not {}:
+        if self.config is not None or self.config != {}:
             raise HoloOceanConfigurationException(
                 "Called CleanUpTask start_task when configuration block already \
                 specified. Must remove configuration block before calling."

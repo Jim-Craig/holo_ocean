@@ -1,7 +1,6 @@
 import holoocean
 import uuid
 import cv2
-import pytest
 import copy
 
 from tests.utils.equality import mean_square_err
@@ -87,7 +86,7 @@ def test_weather_sunny(request):
         # cv2.waitKey(0)
 
         err = mean_square_err(pixels, baseline)
-        assert err < 5000, f"Sunny weather set incorrectly"
+        assert err < 5000, "Sunny weather set incorrectly"
 
 
 """Test to make sure that cloudy weather gets set correctly"""
@@ -121,7 +120,7 @@ def test_weather_cloudy(request):
         # cv2.waitKey(0)
 
         err = mean_square_err(pixels, baseline)
-        assert err < 2000, f"Cloudy weather set incorrectly"
+        assert err < 2000, "Cloudy weather set incorrectly"
 
 
 """Test to make sure that rainy weather gets set correctly. Rain above surface"""
@@ -157,7 +156,7 @@ def test_weather_rain_above(request):
 
         err = mean_square_err(pixels, pixels2)
 
-        assert err > 25, f"Rainy weather set incorrectly"
+        assert err > 25, "Rainy weather set incorrectly"
 
 
 """Test to make sure that rainy weather gets set correctly. No rain underwater"""
@@ -191,4 +190,4 @@ def test_weather_rain_under(request):
         # cv2.waitKey(0)
 
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"Rainy weather set incorrectly."
+        assert err < 2500, "Rainy weather set incorrectly."

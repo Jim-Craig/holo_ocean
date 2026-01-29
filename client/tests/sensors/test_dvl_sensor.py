@@ -53,9 +53,9 @@ def test_dvl_sensor_straight():
         # Move forward, making sure y is relatively small, and x is increasing
         for i in range(30):
             new_x_velocity, y_velocity, z_velocity = env.step([100, 0])["DVLSensor"][:3]
-            assert (
-                new_x_velocity >= last_x_velocity
-            ), f"The velocity didn't increase at step {i}!"
+            assert new_x_velocity >= last_x_velocity, (
+                f"The velocity didn't increase at step {i}!"
+            )
             assert y_velocity <= 0.5
             assert z_velocity <= 0.5
             last_x_velocity = new_x_velocity
@@ -69,9 +69,9 @@ def test_dvl_sensor_straight():
             new_x_velocity, y_velocity, z_velocity = env.step([-100, 0])["DVLSensor"][
                 :3
             ]
-            assert (
-                new_x_velocity <= last_x_velocity
-            ), f"The velocity didn't decrease at step {i}!"
+            assert new_x_velocity <= last_x_velocity, (
+                f"The velocity didn't decrease at step {i}!"
+            )
             assert y_velocity <= 0.5
             assert z_velocity <= 0.5
             last_x_velocity = new_x_velocity
@@ -108,9 +108,9 @@ def test_dvl_sensor_rotated():
         # Move forward, making sure y is relatively small, and x is increasing
         for i in range(22):
             new_x_velocity, y_velocity, z_velocity = env.step([100, 0])["DVLSensor"][:3]
-            assert (
-                new_x_velocity >= last_x_velocity
-            ), f"The velocity didn't increase at step {i}!"
+            assert new_x_velocity >= last_x_velocity, (
+                f"The velocity didn't increase at step {i}!"
+            )
             assert y_velocity <= 0.5
             assert z_velocity <= 0.5
             last_x_velocity = new_x_velocity
@@ -124,9 +124,9 @@ def test_dvl_sensor_rotated():
             new_x_velocity, y_velocity, z_velocity = env.step([-100, 0])["DVLSensor"][
                 :3
             ]
-            assert (
-                new_x_velocity <= last_x_velocity
-            ), f"The velocity didn't decrease at step {i}!"
+            assert new_x_velocity <= last_x_velocity, (
+                f"The velocity didn't decrease at step {i}!"
+            )
             assert y_velocity <= 0.5
             assert z_velocity <= 0.5
             last_x_velocity = new_x_velocity

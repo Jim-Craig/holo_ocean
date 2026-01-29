@@ -61,9 +61,9 @@ def test_depth_sensor_falling(cfg):
 
         for _ in range(85):
             new_location = env.tick()["DepthSensor"]
-            assert (
-                new_location[0] < last_location[0]
-            ), "UAV's location sensor did not detect falling!"
+            assert new_location[0] < last_location[0], (
+                "UAV's location sensor did not detect falling!"
+            )
             last_location = new_location
 
         # Give the UAV time to bounce and settle
@@ -74,9 +74,9 @@ def test_depth_sensor_falling(cfg):
         last_location = env.tick()["DepthSensor"]
         new_location = env.tick()["DepthSensor"]
 
-        assert almost_equal(
-            last_location, new_location
-        ), "The vehicle did not seem to settle!"
+        assert almost_equal(last_location, new_location), (
+            "The vehicle did not seem to settle!"
+        )
 
 
 @pytest.mark.parametrize(

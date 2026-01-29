@@ -8,10 +8,10 @@ environment:
 steps:
   - name: Check Python Formatting
     pull: if-not-exists
-    image: pyfound/black
+    image: ghcr.io/astral-sh/ruff:debian
     commands:
       - cd client
-      - black --diff example.py setup.py src/holoocean tests
+      - ruff format --check example.py setup.py src/holoocean tests
     depends_on:
       - clone
 

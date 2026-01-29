@@ -1,11 +1,9 @@
 from holoocean.command import TideCommand
-from holoocean.exceptions import HoloOceanException
 import numpy
 import random
 
 
 class TideController:
-
     def __init__(
         self, client, amplitude=100.0, frequency=2000, tide_type="TideNormal", active=0
     ):

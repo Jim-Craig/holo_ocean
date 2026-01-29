@@ -47,10 +47,9 @@ def test_static_prop():
         # get the final location
         final_location = env.tick(50)["LocationSensor"]
 
-        assert almost_equal(
-            init_location, final_location
-        ), "Uav \
-            continued to fall despite spawning a platform underneath!"
+        assert almost_equal(init_location, final_location), (
+            "Uav continued to fall despite spawning a platform underneath!"
+        )
 
 
 def test_sim_physics_prop():
@@ -78,7 +77,6 @@ def test_sim_physics_prop():
         # get the final location after the uav has been knocked over
         final_location = env.tick(100)["LocationSensor"]
 
-        assert not almost_equal(
-            init_location, final_location
-        ), "Uav \
-            wasn't hit by a spawned sphere!"
+        assert not almost_equal(init_location, final_location), (
+            "Uav wasn't hit by a spawned sphere!"
+        )

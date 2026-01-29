@@ -315,10 +315,7 @@ def fossen_dynamics():
         )
 
 
-
-
 def multi_agent_fossen():
-
     numSteps = 1000
 
     scenario = {

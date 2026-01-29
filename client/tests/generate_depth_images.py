@@ -1,9 +1,7 @@
 import holoocean
 import cv2
 import copy
-import os
 import uuid
-import numpy as np
 
 # from tests.utils.equality import mean_square_err
 

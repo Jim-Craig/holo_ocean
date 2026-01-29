@@ -3,7 +3,6 @@
 import math
 import os
 import holoocean
-from multiprocessing import Process, Event
 
 try:
     unicode  # Python 2

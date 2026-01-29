@@ -38,9 +38,9 @@ def test_collision_sensor_uav_falling():
     ) as env:
         collided = env.tick()["CollisionSensor"][0]
 
-        assert (
-            not collided
-        ), "The UAV is in the air but reported it collided with something!"
+        assert not collided, (
+            "The UAV is in the air but reported it collided with something!"
+        )
 
         for _ in range(160):
             if env.tick()["CollisionSensor"][0]:

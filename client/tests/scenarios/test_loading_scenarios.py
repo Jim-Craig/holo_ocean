@@ -28,9 +28,9 @@ def test_load_scenario(scenario):
     for agent in scenario["agents"]:
         assert agent["agent_name"] in env.agents, "Agent is not in the environment!"
 
-        assert len(agent["sensors"]) == len(
-            env.agents[agent["agent_name"]].sensors
-        ), "length of sensors did not match!"
+        assert len(agent["sensors"]) == len(env.agents[agent["agent_name"]].sensors), (
+            "length of sensors did not match!"
+        )
 
         for sensor in agent["sensors"]:
             sensor_name = (
@@ -38,8 +38,8 @@ def test_load_scenario(scenario):
                 if "sensor_name" in sensor
                 else sensor["sensor_type"]
             )
-            assert (
-                sensor_name in env.agents[agent["agent_name"]].sensors
-            ), "Sensor is missing!"
+            assert sensor_name in env.agents[agent["agent_name"]].sensors, (
+                "Sensor is missing!"
+            )
 
     env.__on_exit__()

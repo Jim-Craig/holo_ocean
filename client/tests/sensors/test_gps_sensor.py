@@ -42,7 +42,7 @@ def test_setting_depth(env, agent_type):
     env._scenario["agents"][0]["agent_type"] = agent_type
     depth = np.random.rand() * 10 + 1
     env._scenario["agents"][0]["sensors"][0]["configuration"]["Depth"] = depth
-    
+
     # Test above surface
     env._scenario["agents"][0]["location"] = [0, 0, 1]
     env.reset()
@@ -61,7 +61,6 @@ def test_setting_depth(env, agent_type):
     state = env.tick()
     assert "GPSSensor" not in state
 
-    
 
 @pytest.mark.parametrize(
     "agent_type",
@@ -87,6 +86,7 @@ def test_random_depth(env, agent_type):
     assert 0 < count
     assert count < num_ticks
 
+
 @pytest.mark.parametrize(
     "agent_type",
     ["HoveringAUV", "TorpedoAUV", "BlueROV2"],
@@ -96,13 +96,13 @@ def test_tide(env, agent_type):
     env._scenario["agents"][0]["sensors"][0]["configuration"]["DepthSigma"] = 0
     depth = np.random.rand() * 10 + 1
     env._scenario["agents"][0]["sensors"][0]["configuration"]["Depth"] = depth
-    env._scenario["agents"][0]["sensors"].append({"sensor_type": "DepthSensor","configuration": {}})
-    
+    env._scenario["agents"][0]["sensors"].append(
+        {"sensor_type": "DepthSensor", "configuration": {}}
+    )
+
     # Test that depth accounts for tide: location before tide is good, after tide is below cutoff
     env._scenario["agents"][0]["location"] = [0, 0, -1 * depth + 1]
     env.reset()
     env.tide(2, True)
     state = env.tick()
     assert "GPSSensor" not in state
-    
-

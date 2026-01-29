@@ -1,7 +1,6 @@
 import holoocean
 import uuid
 import cv2
-import pytest
 import copy
 
 from tests.utils.equality import mean_square_err
@@ -53,4 +52,4 @@ def test_change_watercolor(request):
         filepath = str("/baseline_images/red_water.png")
         baseline = cv2.imread(str(request.fspath.dirname + filepath))
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"The water color is wrong"
+        assert err < 2500, "The water color is wrong"

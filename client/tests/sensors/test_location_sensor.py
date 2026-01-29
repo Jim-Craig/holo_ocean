@@ -47,9 +47,9 @@ def test_location_sensor_after_teleport():
         state = env.tick()
         sensed_loc = state["LocationSensor"]
 
-        assert almost_equal(
-            loc, sensed_loc
-        ), "Sensed location did not match the expected location!"
+        assert almost_equal(loc, sensed_loc), (
+            "Sensed location did not match the expected location!"
+        )
 
 
 uav_config = {
@@ -93,9 +93,9 @@ def test_location_sensor_falling():
 
         for _ in range(85):
             new_location = env.tick()["LocationSensor"]
-            assert (
-                new_location[2] < last_location[2]
-            ), "UAV's location sensor did not detect falling!"
+            assert new_location[2] < last_location[2], (
+                "UAV's location sensor did not detect falling!"
+            )
             last_location = new_location
 
         # Give the UAV time to bounce and settle
@@ -106,9 +106,9 @@ def test_location_sensor_falling():
         last_location = env.tick()["LocationSensor"]
         new_location = env.tick()["LocationSensor"]
 
-        assert almost_equal(
-            last_location, new_location
-        ), "The UAV did not seem to settle!"
+        assert almost_equal(last_location, new_location), (
+            "The UAV did not seem to settle!"
+        )
 
 
 ######################################################

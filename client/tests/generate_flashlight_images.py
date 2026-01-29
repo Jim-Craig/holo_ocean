@@ -54,7 +54,6 @@ config = {
 }
 
 with holoocean.make(scenario_cfg=config, show_viewport=False) as env:
-
     for _ in range(60):
         env.tick()
     pixels = env.tick()["Camera"][:, :, 0:3]

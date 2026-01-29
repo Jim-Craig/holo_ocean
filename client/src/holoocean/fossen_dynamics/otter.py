@@ -69,7 +69,6 @@ class Otter:
     def __init__(
         self, controlSystem="stepInput", r=0, V_current=0, beta_current=0, tau_X=120
     ):
-
         self.config_fnc = None
         # Constants
         D2R = math.pi / 180  # deg2rad
@@ -273,7 +272,6 @@ class Otter:
         # Control forces and moments - with propeller revolution saturation
         thrust = np.zeros(2)
         for i in range(0, 2):
-
             n[i] = sat(n[i], self.n_min, self.n_max)  # saturation, physical limits
 
             if n[i] > 0:  # positive thrust

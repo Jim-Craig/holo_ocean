@@ -27,7 +27,6 @@ config = {
 }
 
 with holoocean.make(scenario_cfg=config) as env:
-
     env.change_time_of_day(0)
     for _ in range(200):
         env.tick()

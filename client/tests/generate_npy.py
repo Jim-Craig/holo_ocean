@@ -1,6 +1,5 @@
 import holoocean
 import numpy as np
-import time
 import uuid
 
 import open3d as o3d
@@ -140,7 +139,6 @@ with holoocean.environments.HoloOceanEnvironment(
     verbose=True,
     uuid=str(uuid.uuid4()),
 ) as env:
-
     # env.spawn_prop("box", )
     while True:
         # Send waypoint to holoocean

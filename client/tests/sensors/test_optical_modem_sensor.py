@@ -55,12 +55,12 @@ def test_transmittable(env):
         env.send_optical_message(0, 1, "Message")
         state = env.step(command)
 
-        assert (
-            "OpticalModemSensor" in state["uav1"]
-        ), "Receiving modem did not receive data when it should have."
-        assert (
-            state["uav1"]["OpticalModemSensor"] == "Message"
-        ), "Wrong message received."
+        assert "OpticalModemSensor" in state["uav1"], (
+            "Receiving modem did not receive data when it should have."
+        )
+        assert state["uav1"]["OpticalModemSensor"] == "Message", (
+            "Wrong message received."
+        )
 
 
 @pytest.mark.parametrize(
@@ -110,9 +110,9 @@ def test_within_max_distance(env):
     for i in range(20):
         env.send_optical_message(0, 1, "Message")
         state = env.tick()
-        assert (
-            "OpticalModemSensor" not in state["uav1"]
-        ), "Receiving modem received data when it should not have done so."
+        assert "OpticalModemSensor" not in state["uav1"], (
+            "Receiving modem received data when it should not have done so."
+        )
 
 
 @pytest.mark.parametrize(
@@ -148,9 +148,9 @@ def test_not_oriented(env):
     for i in range(20):
         env.send_optical_message(0, 1, "Message")
         state = env.step(command)
-        assert (
-            "OpticalModemSensor" not in state["uav1"]
-        ), "Receiving modem received data when it should not have done so."
+        assert "OpticalModemSensor" not in state["uav1"], (
+            "Receiving modem received data when it should not have done so."
+        )
 
 
 @pytest.mark.parametrize(
@@ -194,9 +194,9 @@ def test_obstructed_view(env):
     for _ in range(20):
         env.send_optical_message(0, 1, "Message")
         state = env.step(command)
-        assert (
-            "OpticalModemSensor" not in state["uav1"]
-        ), "Receiving modem received data when it should not have done so."
+        assert "OpticalModemSensor" not in state["uav1"], (
+            "Receiving modem received data when it should not have done so."
+        )
 
 
 @pytest.mark.parametrize(
@@ -246,12 +246,12 @@ def test_distance_noise(env):
         ):
             tests_passed += 1
 
-    assert (
-        tests_passed < num_tests
-    ), "All messages sent when some should have failed due to noise variation."
-    assert (
-        tests_passed > 0
-    ), "All messages failed when some should have passed due to noise variation."
+    assert tests_passed < num_tests, (
+        "All messages sent when some should have failed due to noise variation."
+    )
+    assert tests_passed > 0, (
+        "All messages failed when some should have passed due to noise variation."
+    )
 
 
 @pytest.mark.parametrize(
@@ -304,9 +304,9 @@ def test_angle_noise(env):
         ):
             tests_passed += 1
 
-    assert (
-        tests_passed < num_tests
-    ), "All messages sent when some should have failed due to noise variation."
-    assert (
-        tests_passed > 0
-    ), "All messages failed when some should have passed due to noise variation."
+    assert tests_passed < num_tests, (
+        "All messages sent when some should have failed due to noise variation."
+    )
+    assert tests_passed > 0, (
+        "All messages failed when some should have passed due to noise variation."
+    )

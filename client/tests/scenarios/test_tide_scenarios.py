@@ -1,8 +1,6 @@
 import holoocean
 import uuid
-import numpy
 import cv2
-import pytest
 import copy
 
 from tests.utils.equality import mean_square_err
@@ -44,7 +42,6 @@ def test_auto_tide(request):
         verbose=True,
         uuid=str(uuid.uuid4()),
     ) as env:
-
         env.reset()
         for _ in range(20):
             env.tick()
@@ -58,7 +55,7 @@ def test_auto_tide(request):
         # cv2.waitKey(0)
 
         err = mean_square_err(pixels, baseline)
-        assert err < 3000, f"before tide moved this was already wrong"
+        assert err < 3000, "before tide moved this was already wrong"
 
         for _ in range(25):
             env.tick()
@@ -72,7 +69,7 @@ def test_auto_tide(request):
         # cv2.waitKey(0)
 
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"this is wrong after the tide moved"
+        assert err < 2500, "this is wrong after the tide moved"
         # this is to account for weird lighting differences
 
 
@@ -98,13 +95,13 @@ def test_tide_collisions():
         for _ in range(200):
             env.tick()
         locationZ = env.tick()["DynamicsSensor"][8]
-        assert (
-            abs(locationZ + 2.6) < 0.25
-        ), f"our agent did not collide location = {locationZ}"
+        assert abs(locationZ + 2.6) < 0.25, (
+            f"our agent did not collide location = {locationZ}"
+        )
         env.tide(0, 1)
         for _ in range(100):
             env.tick()
         locationZ = env.tick()["DynamicsSensor"][8]
-        assert (
-            abs(locationZ) < 0.6
-        ), f"our agent did not rise correctly location = {locationZ}"
+        assert abs(locationZ) < 0.6, (
+            f"our agent did not rise correctly location = {locationZ}"
+        )

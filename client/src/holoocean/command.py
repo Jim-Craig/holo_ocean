@@ -283,9 +283,7 @@ class DebugDrawCommand(Command):
         variables = [start, end, color]
 
         for variable in variables:
-
             if not isinstance(variable, list):
-
                 raise TypeError(f"Expected a list, but got {type(variable).__name__}")
 
         self.add_number_parameters(draw_type)

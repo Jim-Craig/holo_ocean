@@ -347,7 +347,7 @@ class HoloOceanEnvironment:
                 tick_every = self._ticks_per_sec / sensor_config["Hz"]
                 if int(tick_every) != tick_every:
                     print(
-                        f"{sensor_config['sensor_name']} rate {sensor_config['Hz']} is not a factor of ticks_per_sec {self._ticks_per_sec}, rounding to {self._ticks_per_sec//int(tick_every)}"
+                        f"{sensor_config['sensor_name']} rate {sensor_config['Hz']} is not a factor of ticks_per_sec {self._ticks_per_sec}, rounding to {self._ticks_per_sec // int(tick_every)}"
                     )
                 sensor_config["tick_every"] = int(tick_every)
 
@@ -1184,12 +1184,13 @@ class HoloOceanEnvironment:
         Args:
             biomass_func (:func:`Callable`): An optional, custom biomass function parameter that takes in a 3D array called "location" and outputs the biomass metric at that location.
 
-            salinity_func (:func:`Callable`): An optional, custom salinity function parameter that takes in a 3D array called "location" and outputs the biomass metric at that location.
+            salinity_func (:func:`Callable`): An optional, custom salinity function parameter that takes in a 3D array called "location" and outputs the salinity metric at that location.
 
-            temperature_func (:func:`Callable`): An optional, custom temperature function parameter that takes in a 3D array called "location" and outputs the biomass metric at that location.a
+            temperature_func (:func:`Callable`): An optional, custom temperature function parameter that takes in a 3D array called "location" and outputs the temperature metric at that location.
             NOTE: when designing these custom functions, you must name the location parameter as "location"
 
             agent (:obj:`string`): the name of the agent that you want to sample biomass, salinity, and temperature from (defaults to main agent)
+
             biomass_range (:obj:`tuple`): the scale range of biomass for the heatmap (defaults to (0, 3))
 
             salinity_range (:obj:`tuple`): the scale range of salinity for the heatmap (defaults to (32.8, 34))
@@ -1214,7 +1215,7 @@ class HoloOceanEnvironment:
     def set_salinity_function(self, agent_name, new_fx):
         """Change the default salinity function to your own custom function
         Args:
-            agent_name (:obj:`string`): The name of the agent that you want to change biomass function for
+            agent_name (:obj:`string`): The name of the agent that you want to change salinity function for
             new_fx (:obj:`callable`): The new function that takes in atleast the argument "location"
         """
         self.agents[agent_name].sensors["BSTSensor"].salinity["salinity_function"] = (
@@ -1224,7 +1225,7 @@ class HoloOceanEnvironment:
     def set_temperature_function(self, agent_name, new_fx):
         """Change the default temperature function to your own custom function
         Args:
-            agent_name (:obj:`string`): The name of the agent that you want to change biomass function for
+            agent_name (:obj:`string`): The name of the agent that you want to change temperature function for
             new_fx (:obj:`callable`): The new function that takes in atleast the argument "location"
         """
         self.agents[agent_name].sensors["BSTSensor"].temperature[

@@ -3,6 +3,7 @@ import pytest
 import uuid
 import numpy as np
 
+
 @pytest.fixture(scope="module")
 def env():
     scenario = {
@@ -45,7 +46,7 @@ def env():
 
 
 def test_currents_underwater(env):
-    """ Test currents acting on underwater vehicle"""
+    """Test currents acting on underwater vehicle"""
 
     env.reset()
     data = env.tick()
@@ -58,30 +59,25 @@ def test_currents_underwater(env):
     data = env.tick()
     dynamics_data = data["DynamicsSensor"]
     acceleration = dynamics_data[:3]
-    assert np.allclose(
-        acceleration, [0.06320982, 0, 0]
-    ), "X current failed"
+    assert np.allclose(acceleration, [0.06320982, 0, 0]), "X current failed"
 
     env.reset()
     env.set_ocean_currents("auv0", [0, 1, 0])
     data = env.tick()
     dynamics_data = data["DynamicsSensor"]
     acceleration = dynamics_data[:3]
-    assert np.allclose(
-        acceleration, [0, 0.06320982, 0]
-    ), "Y current failed"
+    assert np.allclose(acceleration, [0, 0.06320982, 0]), "Y current failed"
 
     env.reset()
     env.set_ocean_currents("auv0", [0, 0, 1])
     data = env.tick()
     dynamics_data = data["DynamicsSensor"]
     acceleration = dynamics_data[:3]
-    assert np.allclose(
-        acceleration, [0, 0, 0.06320982]
-    ), "Z current failed"
+    assert np.allclose(acceleration, [0, 0, 0.06320982]), "Z current failed"
+
 
 def test_currents_surface(env):
-    """ Test currents acting on surface vessel"""
+    """Test currents acting on surface vessel"""
 
     env._scenario["agents"][0]["agent_type"] = "SurfaceVessel"
     env._scenario["agents"][0]["location"] = [10, 10, 0.1]
@@ -92,9 +88,9 @@ def test_currents_surface(env):
     data = env.tick(10)
     dynamics_data = data["DynamicsSensor"]
     acceleration = dynamics_data[:3]
-    assert np.allclose(
-        acceleration[:2], [0.00199408, 0], rtol=2e-2
-    ), "Surface Vessel X Current Failed"
+    assert np.allclose(acceleration[:2], [0.00199408, 0], rtol=2e-2), (
+        "Surface Vessel X Current Failed"
+    )
 
     env.reset()
     env.tick(500)  # Let the vessel settle
@@ -102,6 +98,6 @@ def test_currents_surface(env):
     data = env.tick(10)
     dynamics_data = data["DynamicsSensor"]
     acceleration = dynamics_data[:3]
-    assert np.allclose(
-        acceleration[:2], [0, 0.00197457], rtol=2e-2
-    ), "Surface Vessel Y Current Failed"
+    assert np.allclose(acceleration[:2], [0, 0.00197457], rtol=2e-2), (
+        "Surface Vessel Y Current Failed"
+    )

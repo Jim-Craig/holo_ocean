@@ -1,7 +1,6 @@
 import holoocean
 import uuid
 import cv2
-import pytest
 import copy
 
 from tests.utils.equality import mean_square_err
@@ -89,7 +88,7 @@ def test_flashlights(request):
         # cv2.imshow("meant to be", baseline)
         # cv2.waitKey(0)
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"Flashlights set up incorrectly"
+        assert err < 2500, "Flashlights set up incorrectly"
 
         env.turn_off_flashlight("flashlight1")
         env.turn_off_flashlight("flashlight2")
@@ -103,7 +102,7 @@ def test_flashlights(request):
 
         # All flashlights should be off (command)
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"Flashlights turned off incorrectly"
+        assert err < 2500, "Flashlights turned off incorrectly"
 
         env.turn_on_flashlight(
             "flashlight4", beam_width=30, location_z_offset=10, color_G=0
@@ -117,7 +116,7 @@ def test_flashlights(request):
 
         # Only flashlight 4 should be on with the settings from the command
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"Flashlight turned on incorrectly by command"
+        assert err < 2500, "Flashlight turned on incorrectly by command"
 
         env.turn_off_flashlight("flashlight4")
         env.turn_on_flashlight("flashlight1")
@@ -130,4 +129,4 @@ def test_flashlights(request):
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
         # Flashlight 1 should be on by command but keep the setting from the config
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"Flashlight did not keep parameters from config"
+        assert err < 2500, "Flashlight did not keep parameters from config"

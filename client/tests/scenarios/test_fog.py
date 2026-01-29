@@ -1,7 +1,6 @@
 import holoocean
 import uuid
 import cv2
-import pytest
 import copy
 
 from tests.utils.equality import mean_square_err
@@ -81,7 +80,7 @@ def test_water_fog(request):
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
 
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"Default fog set incorrectly"
+        assert err < 2500, "Default fog set incorrectly"
 
         # Change to purple fog
         env.water_fog(5, 0.5, 1.0, 0.0, 1.0)
@@ -98,7 +97,7 @@ def test_water_fog(request):
         # cv2.waitKey(0)
 
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"Purple fog set incorrectly"
+        assert err < 2500, "Purple fog set incorrectly"
 
 
 """Test to make sure that air fog gets set correctly"""
@@ -126,7 +125,7 @@ def test_air_fog(request):
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
 
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"Air should be clear at the start"
+        assert err < 2500, "Air should be clear at the start"
 
         # Add air fog
         env.air_fog(1.5, 2, 0.0, 0.5, 1.0)
@@ -138,4 +137,4 @@ def test_air_fog(request):
         assert baseline is not None, f"Failed to load baseline image from {filepath}"
 
         err = mean_square_err(pixels, baseline)
-        assert err < 2500, f"Air fog set incorrectly"
+        assert err < 2500, "Air fog set incorrectly"

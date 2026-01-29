@@ -1,7 +1,5 @@
 import holoocean
-import cv2
 import copy
-import os
 import uuid
 import pytest
 import numpy as np
@@ -66,31 +64,31 @@ def test_raycast_lidar_sensor(cfg1):
 
         expected = np.load("tests/sensors/baseline_data/expected_lidar.npy")
         # Verify that the x, y, and z is in the expected range 200
-        assert np.all(actual[:, 0] >= -200) and np.all(
-            actual[:, 0] <= 200
-        ), "X values are not in the range [-200, 200]!"
-        assert np.all(actual[:, 1] >= -200) and np.all(
-            actual[:, 1] <= 200
-        ), "Y values are not in the range [-200, 200]!"
-        assert np.all(actual[:, 2] >= -200) and np.all(
-            actual[:, 2] <= 200
-        ), "Z values are not in the range [-200, 200]!"
+        assert np.all(actual[:, 0] >= -200) and np.all(actual[:, 0] <= 200), (
+            "X values are not in the range [-200, 200]!"
+        )
+        assert np.all(actual[:, 1] >= -200) and np.all(actual[:, 1] <= 200), (
+            "Y values are not in the range [-200, 200]!"
+        )
+        assert np.all(actual[:, 2] >= -200) and np.all(actual[:, 2] <= 200), (
+            "Z values are not in the range [-200, 200]!"
+        )
 
         # Verify that the intensity and ring values are in the expected range
-        assert np.all(actual[:, 3] >= 0) and np.all(
-            actual[:, 3] <= 1
-        ), "Intensity values are not in the range [0, 1]!"
-        assert np.all(actual[:, 4] >= 0) and np.all(
-            actual[:, 4] <= 127
-        ), "Ring values are not in the range [0, 127]!"
+        assert np.all(actual[:, 3] >= 0) and np.all(actual[:, 3] <= 1), (
+            "Intensity values are not in the range [0, 1]!"
+        )
+        assert np.all(actual[:, 4] >= 0) and np.all(actual[:, 4] <= 127), (
+            "Ring values are not in the range [0, 127]!"
+        )
 
         # Verify that dropout and noise are applied correctly due to RandomSeed
-        assert (
-            actual.shape == expected.shape
-        ), f"Lidar data shape {actual.shape} does not match expected shape {expected.shape} !"
-        assert np.allclose(
-            actual, expected, atol=1e-4
-        ), "Lidar data does not match expected values!"
+        assert actual.shape == expected.shape, (
+            f"Lidar data shape {actual.shape} does not match expected shape {expected.shape} !"
+        )
+        assert np.allclose(actual, expected, atol=1e-4), (
+            "Lidar data does not match expected values!"
+        )
 
 
 @pytest.mark.parametrize("seed1, seed2", [(42, 123)])
@@ -127,9 +125,9 @@ def test_random_seed_changes_output(seed1, seed2, cfg1):
     if lidar1.shape != lidar2.shape:
         assert True  # Shapes differ, so outputs differ
     else:
-        assert not np.allclose(
-            lidar1, lidar2, atol=1e-6
-        ), "Lidar outputs should differ for different seeds!"
+        assert not np.allclose(lidar1, lidar2, atol=1e-6), (
+            "Lidar outputs should differ for different seeds!"
+        )
 
 
 @pytest.fixture
@@ -199,9 +197,9 @@ def test_raycast_lidar_sensor_no_dropoff(cfg2):
             print(
                 f"Comparing scan 0 (shape:{scans[0].shape}) to scan {i} (shape:{scans[i].shape})"
             )
-            assert np.allclose(
-                scans[0], scans[i], atol=1e-4
-            ), f"Scan {i} does not match the first scan!"
+            assert np.allclose(scans[0], scans[i], atol=1e-4), (
+                f"Scan {i} does not match the first scan!"
+            )
 
 
 @pytest.fixture
@@ -255,9 +253,9 @@ def test_fov_variation(cfg2, upper, lower):
         if state.__contains__("turtle0"):
             state = state["turtle0"]
         lidar = state["RaycastLidar"]
-        assert (
-            lidar.shape[0] > 0
-        ), f"No lidar points collected for FOV ({upper}, {lower})"
+        assert lidar.shape[0] > 0, (
+            f"No lidar points collected for FOV ({upper}, {lower})"
+        )
 
 
 # Test the Hz ticks per capture functionality. Should return nothing 2/3 of the time, and return data 1/3 of the time.

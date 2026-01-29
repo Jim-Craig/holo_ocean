@@ -1,7 +1,6 @@
 import holoocean
 import cv2
 import copy
-import os
 import uuid
 
 # from tests.utils.equality import mean_square_err
@@ -89,7 +88,6 @@ def test_viewport_capture_after_teleport(resolution):
         verbose=True,
         uuid=str(uuid.uuid4()),
     ) as env:
-
         env.should_render_viewport(True)
         env.move_viewport([0.9, -1.75, 0.5], [0, 0, 0])
 

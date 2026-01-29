@@ -1,6 +1,5 @@
 import holoocean
 import numpy as np
-from tests.utils.equality import almost_equal
 import uuid
 from scipy.spatial.transform import Rotation
 import pytest
@@ -62,6 +61,6 @@ def test_orientation_sensor_after_teleport(env, num):
     state = env.tick()
     sensed_orientation = state["OrientationSensor"]
 
-    assert np.allclose(
-        np.zeros(3), rot_error(R, sensed_orientation), atol=1e-5
-    ), "Expected orientation did not match the expected orientation!"
+    assert np.allclose(np.zeros(3), rot_error(R, sensed_orientation), atol=1e-5), (
+        "Expected orientation did not match the expected orientation!"
+    )

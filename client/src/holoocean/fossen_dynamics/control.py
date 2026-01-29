@@ -59,7 +59,6 @@ def PIDpolePlacement(
     v_max,
     sampleTime,
 ):
-
     # PID gains based on pole placement
     Kp = m * wn**2.0 - k
     Kd = m * 2.0 * zeta * wn - d
@@ -81,7 +80,6 @@ def PIDpolePlacement(
 def DPpolePlacement(
     e_int, M3, D3, eta3, nu3, x_d, y_d, psi_d, wn, zeta, eta_ref, sampleTime
 ):
-
     # PID gains based on pole placement
     M3_diag = np.diag(np.diag(M3))
     D3_diag = np.diag(np.diag(D3))
@@ -128,7 +126,6 @@ def integralSMC(
     v_max,
     sampleTime,
 ):
-
     # Sliding surface
     v_r_dot = a_d - 2 * lam * e_v - lam**2 * ssa(e_x)
     v_r = v_d - 2 * lam * ssa(e_x) - lam**2 * e_int

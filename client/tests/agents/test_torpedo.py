@@ -53,12 +53,13 @@ def test_manual_dynamics(env):
     state = env.step(des, 20)
     lin_accel = state["DynamicsSensor"][0:3]
     ang_accel = state["DynamicsSensor"][9:12]
-    assert np.allclose(
-        des[:3], lin_accel, rtol=1e-3
-    ), f"Manual dynamics didn't achieve the correct linear acceleration. Should be {des[:3]}, got {lin_accel}"
-    assert np.allclose(
-        des[3:], ang_accel, rtol=1e-3
-    ), f"Manual dynamics didn't achieve the correct angular acceleration. Should be {des[3:]}, got {ang_accel}"
+
+    assert np.allclose(des[:3], lin_accel), (
+        f"Manual dynamics didn't achieve the correct linear acceleration. Should be {des[:3]}, got {lin_accel}"
+    )
+    assert np.allclose(des[3:], ang_accel), (
+        f"Manual dynamics didn't achieve the correct angular acceleration. Should be {des[3:]}, got {ang_accel}"
+    )
 
 
 def test_fossen_dynamics(env):
@@ -80,12 +81,12 @@ def test_fossen_dynamics(env):
         16:18
     ]  # PULL OUT PITCH and heading in radians
     # Assert that pitch and heading are less than 0
-    assert (
-        pitch_heading[0] < 0
-    ), f"Pitch should be less than 0, but got {pitch_heading[0]}"
-    assert (
-        pitch_heading[1] < 0
-    ), f"Heading should be less than 0, but got {pitch_heading[1]}"
+    assert pitch_heading[0] < 0, (
+        f"Pitch should be less than 0, but got {pitch_heading[0]}"
+    )
+    assert pitch_heading[1] < 0, (
+        f"Heading should be less than 0, but got {pitch_heading[1]}"
+    )
 
 
 def test_fossen_autopilot(env):
@@ -108,12 +109,13 @@ def test_fossen_autopilot(env):
     heading_actual = state["DynamicsSensorRPY"][17]
     depth_error = abs(depth - depth_actual)
     heading_error = abs(heading - heading_actual)
-    assert np.allclose(
-        depth, depth_actual, atol=1.0
-    ), f"Autopilot depth not achieved within 1 meter (Depth error was: {depth_error})"
-    assert np.allclose(
-        heading, heading_actual, atol=10.0
-    ), f"Autopilot heading not acheived within 10 degrees (Heading error was {heading_error})"
+
+    assert np.allclose(depth, depth_actual, atol=1.0), (
+        f"Autopilot depth not achieved within 1 meter (Depth error was: {depth_error})"
+    )
+    assert np.allclose(heading, heading_actual, atol=10.0), (
+        f"Autopilot heading not acheived within 10 degrees (Heading error was {heading_error})"
+    )
 
 
 def test_fin_dynamics(env):
@@ -126,12 +128,12 @@ def test_fin_dynamics(env):
     ang_accel = state["DynamicsSensor"][9:12]
     target_lin_accel = np.array([0.7525106, -0.01888119, 0.01457546])
     target_ang_accel = np.array([-0.00471005, 0.03474867, 0.03910198])
-    assert np.allclose(
-        target_lin_accel, lin_accel
-    ), f"Fin dynamics didn't achieve the correct linear acceleration. Should be {target_lin_accel}, got {lin_accel}"
-    assert np.allclose(
-        target_ang_accel, ang_accel
-    ), f"Fin dynamics didn't achieve the correct angular acceleration. Should be {target_ang_accel}, got {ang_accel}"
+    assert np.allclose(target_lin_accel, lin_accel), (
+        f"Fin dynamics didn't achieve the correct linear acceleration. Should be {target_lin_accel}, got {lin_accel}"
+    )
+    assert np.allclose(target_ang_accel, ang_accel), (
+        f"Fin dynamics didn't achieve the correct angular acceleration. Should be {target_ang_accel}, got {ang_accel}"
+    )
 
 
 # TODO: Test to make sure fins saturate at max deflection

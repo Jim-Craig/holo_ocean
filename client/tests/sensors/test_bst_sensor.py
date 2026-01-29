@@ -1,7 +1,5 @@
 import holoocean
-
 import holoocean.environments
-import numpy as np
 import uuid
 
 
@@ -106,7 +104,7 @@ def custom_functions():
     ) as env:
         agent0 = env.agents["auv0"]
         env.set_biomass_function("auv0", bio_fx)
-        env.set_biomass_function("auv0", sal_fx)
+        env.set_salinity_function("auv0", sal_fx)
         env.set_temperature_function("auv0", temp_fx)
         sensor_data = env.tick()
         bst_data = sensor_data["BSTSensor"]

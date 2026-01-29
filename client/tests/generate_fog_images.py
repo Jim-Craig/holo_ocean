@@ -1,5 +1,4 @@
 import holoocean
-import numpy as np
 import copy
 import uuid
 import cv2

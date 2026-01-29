@@ -99,15 +99,15 @@ def test_time_cycle(request):
         err3 = mean_square_err(pixels3, baseline3)
         err4 = mean_square_err(pixels4, baseline4)
 
-        assert (
-            err1 < 3000
-        ), f"Sun rotation mismatch at cycle 1: MSE={err1:.2f}, expected < 3000"
-        assert (
-            err2 < 3600
-        ), f"Sun rotation mismatch at cycle 2: MSE={err2:.2f}, expected < 3600"
-        assert (
-            err3 < 3000
-        ), f"Sun rotation mismatch at cycle 3: MSE={err3:.2f}, expected < 3000"
-        assert (
-            err4 < 3000
-        ), f"Sun rotation mismatch at cycle 4: MSE={err4:.2f}, expected < 3000"
+        assert err1 < 3000, (
+            f"Sun rotation mismatch at cycle 1: MSE={err1:.2f}, expected < 3000"
+        )
+        assert err2 < 3600, (
+            f"Sun rotation mismatch at cycle 2: MSE={err2:.2f}, expected < 3600"
+        )
+        assert err3 < 3000, (
+            f"Sun rotation mismatch at cycle 3: MSE={err3:.2f}, expected < 3000"
+        )
+        assert err4 < 3000, (
+            f"Sun rotation mismatch at cycle 4: MSE={err4:.2f}, expected < 3000"
+        )
