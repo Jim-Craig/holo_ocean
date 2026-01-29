@@ -195,5 +195,7 @@ formatted.
 Python code should be formatted using `ruff <https://docs.astral.sh/ruff/>`_ and C++ code should be
 formatted using the provided clang-format configuration, based on the UE style guide.
 To format with c++, you can run the following command from engine/ue5-clang-format-file:
+
 .. code:: bash
+
       find ../Source -iname "*.h" -o -iname "*.cpp" | xargs clang-format -style=file -i
