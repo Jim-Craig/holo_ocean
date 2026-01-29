@@ -90,7 +90,7 @@ Available Semantic Labels
 =========================
 
 Below is the list of all labels currently implemented in HoloOcean. Each world in the Ocean and BusinessCampus packages uses a subset of these labels, depending on the 
-assets in that world (see :ref:`business-campus`and the world subpages in :ref:`ocean`). 
+assets in that world (see :ref:`business-campus` and the world subpages in :ref:`ocean` ). 
 
 .. list-table::
    :widths: 25 25 30

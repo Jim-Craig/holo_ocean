@@ -146,7 +146,7 @@ It is simple to move, rotate, and scale objects within your level. You can eithe
 For more information please reference `Unreal Engine's Documentation <https://dev.epicgames.com/documentation/en-us/unreal-engine/transforming-actors-in-unreal-engine>`_.
 
 Enabling Semantic Labels
-======================
+========================
 
 HoloOcean allows world assets to be assigned a label. Sensors such as the Semantic Segmentation Camera use these labels to return semantic information to the agent for tasks such as image segmentation. 
 
@@ -168,7 +168,7 @@ If you already set up your world for semantic labeling, you will have already do
 
   Following the steps to set up semantic labels in your world will enable "Render CustomDepth Pass" for the assets that recieve semantic tags. Be sure to repeat the process above for all remaining assets in your world without semantic labels, including the landscape. 
 
-.. _`object-collision:
+.. _`object-collision`:
 
 Note on Collision Settings for Objects and Sonar
 ================================================
