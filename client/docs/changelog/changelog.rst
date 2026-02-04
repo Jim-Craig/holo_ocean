@@ -13,8 +13,7 @@ Changelog
   - see https://github.com/BYU-PCCL/holodeck/wiki/Holodeck-Release-Notes-Template
 
 HoloOcean 2.3.0
-===============
-*1/29/2026*
+*2/5/2026*
 
 New Features
 ------------
