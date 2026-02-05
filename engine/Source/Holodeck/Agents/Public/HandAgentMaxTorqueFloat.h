@@ -3,35 +3,36 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HandAgent.h"
 #include "HolodeckCore/Public/HolodeckControlScheme.h"
 #include "JointMaxTorqueControlScheme.h"
-#include "HandAgent.h"
 
 #include "HandAgentMaxTorqueFloat.generated.h"
 
 /**
- * UHandAgentMaxTorqueFloat - JointMaxTorqueControlScheme, but the last three elements in the
- * command array control the Hand agent's movement in the x, y, and z planes so it can float around.
+ * UHandAgentMaxTorqueFloat - JointMaxTorqueControlScheme, but the last three
+ * elements in the command array control the Hand agent's movement in the x, y,
+ * and z planes so it can float around.
  */
 UCLASS()
-class HOLODECK_API UHandAgentMaxTorqueFloat : public UHolodeckControlScheme
-{
+class HOLODECK_API UHandAgentMaxTorqueFloat : public UHolodeckControlScheme {
 	GENERATED_BODY()
 
 public:
 	UHandAgentMaxTorqueFloat(const FObjectInitializer& ObjectInitializer) {};
 
-	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) override;
+	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds)
+		override;
 
 	unsigned int GetControlSchemeSizeInBytes() const override;
 
 	/**
-	 * This control scheme delegates most of its work to this UJointMaxTorqueControlScheme,
-	 * which must be provided with this method after initializing it.
+	 * This control scheme delegates most of its work to this
+	 * UJointMaxTorqueControlScheme, which must be provided with this method after
+	 * initializing it.
 	 */
 	void SetTorqueControlScheme(UJointMaxTorqueControlScheme* Scheme);
 
 private:
-	UJointMaxTorqueControlScheme *TorqueControlScheme;
-
+	UJointMaxTorqueControlScheme* TorqueControlScheme;
 };

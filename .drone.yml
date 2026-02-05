@@ -2,8 +2,30 @@ kind: pipeline
 type: docker
 name: default
 
+environment:
+  PYENV_ROOT: "/opt/pyenv"
 
 steps:
+  - name: Check Python Formatting
+    pull: if-not-exists
+    image: ghcr.io/astral-sh/ruff:debian
+    commands:
+      - cd client
+      - ruff format --check example.py setup.py src/holoocean tests
+    depends_on:
+      - clone
+
+  - name: Check C++ Formatting
+    pull: if-not-exists
+    image: python:3.10.12-slim-bullseye
+    commands:
+      - cd engine/ue5-clang-format-file
+      - pip install clang-format
+      # The following command can format all the files if you copy it and replace the --dry-run --Werror flags with -i
+      - find ../Source -iname "*.h" -o -iname "*.cpp" | xargs clang-format -style=file --dry-run --Werror
+    depends_on:
+      - clone
+  
   - name: fix-permissions
     image: alpine
     user: root
@@ -11,6 +33,7 @@ steps:
     - chmod -R 0777 /drone/src
     depends_on:
       - clone
+
   - name: Build Editor
     image: ghcr.io/epicgames/unreal-engine:dev-slim-5.3.2
     commands:
@@ -21,6 +44,8 @@ steps:
       - echo "The commit builds"
     depends_on:
       - fix-permissions
+      - Check C++ Formatting
+      - Check Python Formatting
 
   - name: Package Project
     image: ghcr.io/epicgames/unreal-engine:dev-slim-5.3.2
@@ -118,8 +143,7 @@ steps:
     environment:
       HOLODECKPATH: packages
     commands:
-      - cd client
-      - pip3 install .
+      - cd client && pip3 install .
       - python3 -c "import holoocean; holoocean.install('TestWorlds', branch='${DRONE_BRANCH}', commit='${DRONE_COMMIT:0:7}')"
     depends_on:
       - build_docker
@@ -134,8 +158,7 @@ steps:
     environment:
       HOLODECKPATH: packages
     commands:
-      - cd client
-      - pip3 install .
+      - cd client && pip3 install .
       - python3 -c "import holoocean; holoocean.install('TestWorlds', branch='${DRONE_TAG}', commit='${DRONE_COMMIT:0:7}')"
     depends_on:
       - build_docker
@@ -148,8 +171,7 @@ steps:
     environment:
       HOLODECKPATH: packages
     commands:
-      - cd client
-      - pip3 install .
+      - cd client && pip3 install .
       - python3 -c "import holoocean; holoocean.install('TestWorlds', branch='${DRONE_BRANCH}', commit='${DRONE_COMMIT:0:7}')"
     depends_on:
       - build_docker
@@ -167,8 +189,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py39-agents"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:/$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py39-agents"
     depends_on:
       - install_package
       - install_package_pr
@@ -184,8 +207,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py39-lcm"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py39-lcm"
     depends_on:
       - py39-agents
     when:
@@ -199,8 +223,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py39-scenarios"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py39-scenarios"
     depends_on:
       - py39-lcm
     when:
@@ -215,8 +240,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py310-agents"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py310-agents"
     depends_on:
       - install_package
       - install_package_pr
@@ -231,8 +257,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py310-lcm"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py310-lcm"
     depends_on:
       - py310-agents
     when:
@@ -246,8 +273,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py310-scenarios"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py310-scenarios"
     depends_on:
       - py310-lcm
     when:
@@ -262,8 +290,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py311-agents"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py311-agents"
     depends_on:
       - install_package
       - py39-scenarios
@@ -278,8 +307,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py311-lcm"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py311-lcm"
     depends_on:
       - py311-agents
     when:
@@ -293,8 +323,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py311-scenarios"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py311-scenarios"
     depends_on:
       - py311-lcm
     when:
@@ -309,8 +340,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py312-agents"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py312-agents"
     depends_on:
       - install_package
       - py310-scenarios
@@ -325,8 +357,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py312-lcm"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py312-lcm"
     depends_on:
       - py312-agents
     when:
@@ -340,8 +373,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py312-scenarios"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py312-scenarios"
     depends_on:
       - py312-lcm
     when:
@@ -356,8 +390,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py313-agents"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py313-agents"
     depends_on:
        - install_package
        - py311-scenarios
@@ -368,9 +403,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - echo $$CONTAINER
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py313-lcm"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py313-lcm"
     depends_on:
       - py313-agents
 
@@ -380,21 +415,22 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py313-scenarios"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py39-scenarios"
     depends_on:
       - py313-lcm
       
   ## Test Python 3.9-3.13 Sensors
-
   - name: py39-sensors
     image: docker:24.0-cli
     volumes:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py39-sensors"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py39-sensors"
     depends_on:
       - py39-scenarios
       - py310-scenarios
@@ -412,8 +448,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py310-sensors"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py310-sensors"
     depends_on:
       - py39-sensors
     when:
@@ -427,8 +464,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py311-sensors"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py311-sensors"
     depends_on:
       - py310-sensors
     when:
@@ -442,8 +480,9 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py312-sensors"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py312-sensors"
     depends_on:
       - py311-sensors
     when:
@@ -457,12 +496,14 @@ steps:
       - name: docker_sock
         path: /var/run/docker.sock
     commands:
-      - export CONTAINER=$$(hostname)
-      - docker run --rm --gpus all --volumes-from $CONTAINER "byu-holoocean/holoocean:$(cat /drone/src/.tag)" sh -c "cd /drone/src/client && tox -e py313-sensors"
+      - |
+        docker run --rm --gpus all --volumes-from $(hostname) "byu-holoocean/holoocean:$(cat /drone/src/.tag)" \
+        sh -c "export PATH='$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH' && cd /drone/src/client && tox -e py313-sensors"
     depends_on:
       - py313-scenarios
       - py312-sensors
 
+  ## Update Docs Repo
   - name: Update_Docs_repo 
     image: "byu-holoocean/holoocean:${DRONE_COMMIT:0:7}"
     volumes:
@@ -470,7 +511,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       - git clone https://github.com/byu-holoocean/holoocean-docs.git
-      - pip3 install bs4 sphinx==5.0.2 sphinx-rtd-theme==2.0.0 sphinx-copybutton==0.5.2 autodocsumm==0.2.12 scipy matplotlib
+      - pip3 install bs4 sphinx==7.4.7 sphinx-rtd-theme==2.0.0 sphinx-copybutton==0.5.2 autodocsumm==0.2.14 scipy matplotlib
       - export PATH="/home/ue4/.local/bin:$PATH"
       - python3 client/docmaker.py
       - cd holoocean-docs
@@ -497,7 +538,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       - git clone https://github.com/byu-holoocean/holoocean-docs.git
-      - pip3 install bs4 sphinx==5.0.2 sphinx-rtd-theme==2.0.0 sphinx-copybutton==0.5.2 autodocsumm==0.2.12 scipy matplotlib
+      - pip3 install bs4 sphinx==7.4.7 sphinx-rtd-theme==2.0.0 sphinx-copybutton==0.5.2 autodocsumm==0.2.14 scipy matplotlib
       - export PATH="/home/ue4/.local/bin:$PATH"
       - python3 client/docmaker.py
       - rm -rf holoocean-docs/develop

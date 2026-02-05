@@ -1,12 +1,13 @@
-#include "Holodeck.h"
 #include "Command.h"
+#include "Holodeck.h"
 #include "HolodeckGameMode.h"
 
-UCommand::UCommand() {
-	
-}
+UCommand::UCommand() {}
 
-void UCommand::Init(const std::vector<float>& NumberParameters, const std::vector<std::string>& StringParameters, AActor* const ParameterTarget) {
+void UCommand::Init(
+	const std::vector<float>&		NumberParameters,
+	const std::vector<std::string>& StringParameters,
+	AActor* const					ParameterTarget) {
 	this->NumberParams = NumberParameters;
 	this->StringParams = StringParameters;
 	this->Target = ParameterTarget;
@@ -15,7 +16,7 @@ void UCommand::Init(const std::vector<float>& NumberParameters, const std::vecto
 AHolodeckAgent* UCommand::GetAgent(FString AgentName) {
 
 	AHolodeckGameMode* GameTarget = static_cast<AHolodeckGameMode*>(Target);
-	UHolodeckServer* Server = GameTarget->GetAssociatedServer();
+	UHolodeckServer*   Server = GameTarget->GetAssociatedServer();
 	if (Server->AgentMap.Contains(AgentName)) {
 		return Server->AgentMap[AgentName];
 	} else {

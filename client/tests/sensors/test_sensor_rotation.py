@@ -1,4 +1,4 @@
-import cv2, os
+import cv2
 from tests.utils.equality import mean_square_err
 import holoocean
 import pytest

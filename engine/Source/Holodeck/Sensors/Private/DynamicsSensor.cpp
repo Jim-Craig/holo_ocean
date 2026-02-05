@@ -1,7 +1,7 @@
 // MIT License (c) 2021 BYU FRoStLab see LICENSE file
 
-#include "Holodeck.h"
 #include "DynamicsSensor.h"
+#include "Holodeck.h"
 
 UDynamicsSensor::UDynamicsSensor() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -11,8 +11,9 @@ UDynamicsSensor::UDynamicsSensor() {
 void UDynamicsSensor::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::Boolean>("UseCOM")) {
@@ -21,17 +22,18 @@ void UDynamicsSensor::ParseSensorParms(FString ParmsJson) {
 		if (JsonParsed->HasTypedField<EJson::Boolean>("UseRPY")) {
 			UseRPY = JsonParsed->GetBoolField("UseRPY");
 		}
-
-	}
-	else {
-		UE_LOG(LogHolodeck, Fatal, TEXT("UDynamicsSensor::ParseSensorParms:: Unable to parse json."));
+	} else {
+		UE_LOG(
+			LogHolodeck,
+			Fatal,
+			TEXT("UDynamicsSensor::ParseSensorParms:: Unable to parse json."));
 	}
 }
 
 void UDynamicsSensor::InitializeSensor() {
 	Super::InitializeSensor();
 
-	//You need to get the pointer to the object you are attached to. 
+	// You need to get the pointer to the object you are attached to.
 	Parent = Cast<UPrimitiveComponent>(this->GetAttachParent());
 
 	// Initialize all vectors
@@ -46,29 +48,32 @@ void UDynamicsSensor::InitializeSensor() {
 	Rotation = FRotator();
 }
 
-void UDynamicsSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
-	//check if your parent pointer is valid, and if the sensor is on. Then get the location and buffer, then send the location to the buffer. 
+void UDynamicsSensor::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
+	// check if your parent pointer is valid, and if the sensor is on. Then get
+	// the location and buffer, then send the location to the buffer.
 	if (Parent != nullptr && bOn) {
 		// Linear Acceleration & Velocity
 		LinearVelocityThen = LinearVelocity;
-		if(UseCOM){
+		if (UseCOM) {
 			LinearVelocity = Parent->GetPhysicsLinearVelocity();
-		}
-		else{
-			LinearVelocity  = Parent->GetPhysicsLinearVelocityAtPoint(this->GetComponentLocation());
+		} else {
+			LinearVelocity =
+				Parent->GetPhysicsLinearVelocityAtPoint(this->GetComponentLocation());
 		}
 		LinearVelocity = ConvertLinearVector(LinearVelocity, UEToClient);
 		LinearAcceleration = (LinearVelocity - LinearVelocityThen) / DeltaTime;
 
 		// Position
-		if(UseCOM){
+		if (UseCOM) {
 			Position = this->GetAttachParent()->GetComponentLocation();
-		}
-		else{
+		} else {
 			Position = this->GetComponentLocation();
 		}
 		Position = ConvertLinearVector(Position, UEToClient);
-		
+
 		// Ang Acceleration & Velocity
 		AngularVelocityThen = AngularVelocity;
 		// Angular velocity doesn't depend on the location on the object
@@ -77,10 +82,9 @@ void UDynamicsSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, 
 		AngularAcceleration = (AngularVelocity - AngularVelocityThen) / DeltaTime;
 
 		// Rotation
-		if(UseCOM){
+		if (UseCOM) {
 			Rotation = this->GetAttachParent()->GetComponentRotation();
-		}
-		else{
+		} else {
 			Rotation = this->GetComponentRotation();
 		}
 
@@ -101,20 +105,18 @@ void UDynamicsSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, 
 		FloatBuffer[12] = AngularVelocity.X;
 		FloatBuffer[13] = AngularVelocity.Y;
 		FloatBuffer[14] = AngularVelocity.Z;
-		if(UseRPY){
+		if (UseRPY) {
 			RPY = RotatorToRPY(Rotation);
 			FloatBuffer[15] = RPY.X;
 			FloatBuffer[16] = RPY.Y;
 			FloatBuffer[17] = RPY.Z;
-
-		}
-		else{
+		} else {
 			Quat = Rotation.Quaternion();
 			// Flip quaternion y axis
 			FloatBuffer[15] = Quat.X;
-			FloatBuffer[16] = -1*Quat.Y;
+			FloatBuffer[16] = -1 * Quat.Y;
 			FloatBuffer[17] = Quat.Z;
-			FloatBuffer[18] = -1*Quat.W;
+			FloatBuffer[18] = -1 * Quat.W;
 		}
 	}
 }

@@ -66,7 +66,6 @@ class Torpedo:
         V_current=0,
         beta_current=0,
     ):
-
         self.D2R = np.pi / 180  # deg2rad
         self.config_fnc = configure_torpedo_from_scenario
 

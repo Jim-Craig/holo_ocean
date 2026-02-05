@@ -1,21 +1,31 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
+#include "RenderViewportCommand.h"
 #include "Holodeck.h"
 #include "HolodeckGameMode.h"
-#include "RenderViewportCommand.h"
 
 void URenderViewportCommand::Execute() {
-	UE_LOG(LogHolodeck, Log, TEXT("URenderViewportCommand::Execute toggling viewport rendering"));
+	UE_LOG(
+		LogHolodeck,
+		Log,
+		TEXT("URenderViewportCommand::Execute toggling viewport rendering"));
 
 	if (StringParams.size() != 0 || NumberParams.size() != 1) {
-		UE_LOG(LogHolodeck, Error, TEXT("Unexpected argument length found in URenderViewportCommand. Command not executed."));
+		UE_LOG(
+			LogHolodeck,
+			Error,
+			TEXT(
+				"Unexpected argument length found in URenderViewportCommand. "
+				"Command not executed."));
 		return;
 	}
 
 	bool succeeded;
 
-	// TODO: Apparently you aren't "supposed" to just manually send a command like this.
-	//       It would be better to get a reference to the ViewFamily to do `ViewFamily.EngineShowFlags.Rendering = 0`;
+	// TODO: Apparently you aren't "supposed" to just manually send a command like
+	// this.
+	//       It would be better to get a reference to the ViewFamily to do
+	//       `ViewFamily.EngineShowFlags.Rendering = 0`;
 	//		 This is basically what the command below does.
 
 	const FString command = TEXT("ShowFlag.Rendering ");
@@ -29,5 +39,4 @@ void URenderViewportCommand::Execute() {
 	} else {
 		UE_LOG(LogHolodeck, Log, TEXT("URenderViewportCommand failed!"));
 	}
-
 }

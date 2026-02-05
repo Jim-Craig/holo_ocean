@@ -1,11 +1,11 @@
 """Helpful Utilities"""
+
 import math
 import os
 import holoocean
-from multiprocessing import Process, Event
 
 try:
-    unicode        # Python 2
+    unicode  # Python 2
 except NameError:
     unicode = str  # Python 3
 
@@ -18,6 +18,7 @@ def get_holoocean_version():
     """
     return holoocean.__version__
 
+
 def _get_holoocean_folder():
     if "HOLODECKPATH" in os.environ and os.environ["HOLODECKPATH"] != "":
         return os.environ["HOLODECKPATH"]
@@ -29,6 +30,7 @@ def _get_holoocean_folder():
         return os.path.expanduser("~\\AppData\\Local\\holoocean")
 
     raise NotImplementedError("holoocean is only supported for Linux and Windows")
+
 
 def get_holoocean_path():
     """Gets the path of the holoocean environment
@@ -51,14 +53,16 @@ def convert_unicode(value):
 
     """
     if isinstance(value, dict):
-        return {convert_unicode(key): convert_unicode(value)
-                for key, value in value.iteritems()}
+        return {
+            convert_unicode(key): convert_unicode(value)
+            for key, value in value.iteritems()
+        }
 
     if isinstance(value, list):
         return [convert_unicode(item) for item in value]
 
     if isinstance(value, unicode):
-        return value.encode('utf-8')
+        return value.encode("utf-8")
 
     return value
 

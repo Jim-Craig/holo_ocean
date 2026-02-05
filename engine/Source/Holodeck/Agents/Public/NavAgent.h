@@ -3,38 +3,37 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "HolodeckCore/Public/HolodeckAgent.h"
 #include "Holodeck.h"
 #include "HolodeckAgent.h"
+#include "HolodeckCore/Public/HolodeckAgent.h"
 
 #include "NavAgent.generated.h"
 
 UCLASS()
-class HOLODECK_API ANavAgent : public AHolodeckAgent
-{
+class HOLODECK_API ANavAgent : public AHolodeckAgent {
 	GENERATED_BODY()
 
 public:
 	/**
-	* Default Constructor.
-	*/
+	 * Default Constructor.
+	 */
 	ANavAgent();
 
 	/**
-	* BeginPlay
-	* Called when the game starts.
-	* Registers the reward and terminal signals.
-	*/
+	 * BeginPlay
+	 * Called when the game starts.
+	 * Registers the reward and terminal signals.
+	 */
 	void InitializeAgent() override;
 
 	/**
-	* Tick
-	* Called each frame.
-	* @param DeltaSeconds the time since the last tick.
-	*/
+	 * Tick
+	 * Called each frame.
+	 * @param DeltaSeconds the time since the last tick.
+	 */
 	void Tick(float DeltaSeconds) override;
 
-	UFUNCTION(BlueprintCallable, Category="Holodeck")
+	UFUNCTION(BlueprintCallable, Category = "Holodeck")
 	FVector GetTarget();
 
 	UFUNCTION(BlueprintCallable, Category = "Holodeck")
@@ -44,7 +43,6 @@ public:
 	void* GetRawActionBuffer() const override { return (void*)CommandArray; };
 
 private:
-	float CommandArray[3];
+	float	CommandArray[3];
 	FVector Target;
-
 };

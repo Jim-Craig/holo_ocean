@@ -6,111 +6,134 @@
 
 #pragma once
 
-#include "SemanticLidarData.h"
-
 #include <cstdint>
 #include <vector>
+#include <numeric>
 
-namespace holoocean
-{
-	namespace data
-	{
-		class LidarDetection
-		{
+namespace holoocean {
+	namespace data {
+		class LidarDetection {
 		public:
 			FVector3d point{};
-			float intensity;
+			float	  intensity;
+			uint32_t  ring{};
 
-			LidarDetection() : point(0.0, 0.0, 0.0), intensity{0.0}
-			{
-				
+			LidarDetection() : point(0.0, 0.0, 0.0), intensity{ 0.0 }, ring{ 0 } {
+				// Default constructor
 			}
 
-			LidarDetection(double x, double y, double z, float intensity) :
-				point(x, y, z), intensity{intensity}
-			{ }
+			LidarDetection(double x, double y, double z, float intensity, uint32_t ring)
+				: point(x, y, z), intensity{ intensity }, ring{ ring } {}
 
-			LidarDetection(FVector3f p, float intensity) :
-				point(p), intensity{intensity}
-			{ }
+			LidarDetection(FVector3d p, float intensity, uint32_t ring)
+				: point(p), intensity{ intensity }, ring{ ring } {}
 
-			void WritePlyHeaderInfo(std::ostream& out) const
-			{
-				out << "property float32 x\n" \
-				  "property float32 y\n" \
-				  "property float32 z\n" \
-				  "property float32 I";
+			virtual void WritePlyHeaderInfo(std::ostream& out) const {
+				out << "property float32 x\n"
+					   "property float32 y\n"
+					   "property float32 z\n"
+					   "property float32 I\n"
+					   "property uint32 Ring";
 			}
 
-			void WriteDetection(std::ostream& out) const
-			{
-				out << point.X << ' ' << point.Y << ' ' << point.Z << ' ' << intensity;
+			virtual void WriteDetection(std::ostream& out) const {
+				out << point.X << ' ' << point.Y << ' ' << point.Z << ' ' << intensity
+					<< ' ' << ring;
 			}
+
+			virtual ~LidarDetection() = default;
 		};
 
-		class LidarData : public SemanticLidarData
-		{
+		class LidarData {
+
+			static_assert(sizeof(float) == sizeof(uint32_t), "Invalid float size");
 
 		public:
 			explicit LidarData(uint32_t ChannelCount = 0u)
-			  : SemanticLidarData(ChannelCount) {
+				: _header(Index::SIZE + ChannelCount, 0u) {
+				_header[Index::ChannelCount] = ChannelCount;
 			}
 
-			LidarData(float* buffer, uint32_t ChannelCount = 0u) : SemanticLidarData(ChannelCount)
-			{
+			LidarData(
+				float*	 buffer,
+				uint32_t ChannelCount = 0u,
+				uint32_t NumPointComponents = 5u) {
 				Buffer = buffer;
+				channelCount = ChannelCount;
+				this->NumPointComponents = NumPointComponents;
 			}
 
-			LidarData &operator=(LidarData &&) = default;
+			float GetHorizontalAngle() const { return horizontalAngle; }
 
-			~LidarData() = default;
+			void SetHorizontalAngle(float angle) { this->horizontalAngle = angle; }
 
-			virtual void ResetMemory(std::vector<uint32_t> points_per_channel)
-			{
-				//std::memset(_header.data() + Index::SIZE, 0, sizeof(uint32_t) * GetChannelCount());
+			uint32_t GetChannelCount() const { return channelCount; }
 
-				uint32_t total_points = static_cast<uint32_t>(
-					std::accumulate(points_per_channel.begin(), points_per_channel.end(), 0));
+			std::vector<float> GetPoints() const {
+				return std::vector<float>(points.begin(), points.end());
+			}
+
+			virtual void WriteChannelCount(std::vector<uint32_t> points_per_channel) {
+				for (auto idxChannel = 0u; idxChannel < GetChannelCount(); ++idxChannel)
+					_header[Index::SIZE + idxChannel] = points_per_channel[idxChannel];
+			}
+
+			virtual void ResetMemory(std::vector<uint32_t> points_per_channel) {
+				// std::memset(_header.data() + Index::SIZE, 0, sizeof(uint32_t) *
+				// GetChannelCount());
+
+				uint32_t total_points = static_cast<uint32_t>(std::accumulate(
+					points_per_channel.begin(), points_per_channel.end(), 0));
 
 				points.clear();
-				points.reserve(total_points * 4);
+				points.reserve(total_points * NumPointComponents);
 
-				LastFrameMaxPoints = NumPoints;
 				NumPoints = 1;
 				Buffer[0] = static_cast<float>(total_points);
 			}
 
-			void WritePointSync(LidarDetection& detection)
-			{
+			void WritePointSync(LidarDetection& detection) {
+
 				points.emplace_back(detection.point.X);
 				points.emplace_back(detection.point.Y);
 				points.emplace_back(detection.point.Z);
 				points.emplace_back(detection.intensity);
+				points.emplace_back(static_cast<float>(detection.ring));
 
-				Buffer[4 * NumPoints] = detection.point.X;
-				Buffer[4 * NumPoints + 1] = detection.point.Y;
-				Buffer[4 * NumPoints + 2] = detection.point.Z;
-				Buffer[4 * NumPoints + 3] = detection.intensity;
+				Buffer[NumPointComponents * NumPoints + 0] = detection.point.X / 100;
+				Buffer[NumPointComponents * NumPoints + 1] = -detection.point.Y
+					/ 100; // Negate Y for Unreal's coordinate system, so we return in
+						   // RH coordinate system
+				Buffer[NumPointComponents * NumPoints + 2] = detection.point.Z / 100;
+				Buffer[NumPointComponents * NumPoints + 3] = detection.intensity;
+				Buffer[NumPointComponents * NumPoints + 4] =
+					static_cast<float>(detection.ring);
+
 				NumPoints++;
 			}
 
-			virtual void WritePointSync(SemanticLidarDetection& detection) override
-			{
-				(void) detection;
-			}
+			LidarData& operator=(LidarData&&) = default;
 
-			std::size_t CountOfPoints()
-			{
-				return points.size();
-			}
+			virtual ~LidarData() = default;
+
+			std::size_t CountOfPoints() { return points.size(); }
 
 			std::vector<float> points;
-			float* Buffer;
-			int NumPoints = 0;
-			int LastFrameMaxPoints = 0;
+			float*			   Buffer;
+			int				   NumPoints = 0;
+			float			   horizontalAngle = 0.0f;
+			uint32_t		   channelCount = 0;
 
-			
-		private:
+		protected:
+			enum Index : size_t {
+				HorizontalAngle,
+				ChannelCount,
+				SIZE
+			};
+
+			std::vector<uint32_t> _header = std::vector<uint32_t>(Index::SIZE, 0u);
+			uint32_t			  NumPointComponents =
+				5u; // Default to 5 components: x, y, z, intensity, ring
 		};
-	}	
-}
+	} // namespace data
+} // namespace holoocean

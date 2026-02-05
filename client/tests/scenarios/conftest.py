@@ -1,9 +1,5 @@
-from typing import Callable, List
-
 import holoocean
-import pytest
 from holoocean import packagemanager as pm
-from holoocean.environments import HoloOceanEnvironment
 from holoocean.sensors import SensorDefinition
 
 

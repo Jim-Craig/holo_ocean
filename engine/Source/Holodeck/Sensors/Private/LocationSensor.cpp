@@ -1,5 +1,5 @@
-#include "Holodeck.h"
 #include "LocationSensor.h"
+#include "Holodeck.h"
 
 ULocationSensor::ULocationSensor() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -9,8 +9,9 @@ ULocationSensor::ULocationSensor() {
 void ULocationSensor::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::Number>("Sigma")) {
@@ -26,25 +27,30 @@ void ULocationSensor::ParseSensorParms(FString ParmsJson) {
 		if (JsonParsed->HasTypedField<EJson::Array>("Cov")) {
 			mvn.initCov(JsonParsed->GetArrayField("Cov"));
 		}
-
-	}
-	else {
-		UE_LOG(LogHolodeck, Fatal, TEXT("ULocationSensor::ParseSensorParms:: Unable to parse json."));
+	} else {
+		UE_LOG(
+			LogHolodeck,
+			Fatal,
+			TEXT("ULocationSensor::ParseSensorParms:: Unable to parse json."));
 	}
 }
 
 void ULocationSensor::InitializeSensor() {
 	Super::InitializeSensor();
 
-	//You need to get the pointer to the object you are attached to. 
+	// You need to get the pointer to the object you are attached to.
 	Parent = this->GetAttachParent();
 }
 
-void ULocationSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
-	//check if your parent pointer is valid, and if the sensor is on. Then get the location and buffer, then send the location to the buffer. 
+void ULocationSensor::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
+	// check if your parent pointer is valid, and if the sensor is on. Then get
+	// the location and buffer, then send the location to the buffer.
 	if (Parent != nullptr && bOn) {
 		FVector Location = this->GetComponentLocation();
-		float* FloatBuffer = static_cast<float*>(Buffer);
+		float*	FloatBuffer = static_cast<float*>(Buffer);
 		Location = ConvertLinearVector(Location, UEToClient);
 		Location += mvn.sampleFVector();
 		FloatBuffer[0] = Location.X;

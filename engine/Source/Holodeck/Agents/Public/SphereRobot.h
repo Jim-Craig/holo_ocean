@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Holodeck.h"
-
 #include "HolodeckAgent.h"
 
 #include "SphereRobot.generated.h"
@@ -12,28 +11,27 @@ static float MAX_ROTATION_SPEED = 20;
 static float MAX_FORWARD_SPEED = 20;
 
 UCLASS()
-class HOLODECK_API ASphereRobot : public AHolodeckAgent
-{
+class HOLODECK_API ASphereRobot : public AHolodeckAgent {
 	GENERATED_BODY()
 
 public:
 	/**
-	  * Default Constructor.
-	  */
+	 * Default Constructor.
+	 */
 	ASphereRobot();
 
 	/**
-	* BeginPlay
-	* Called when the game starts.
-	* Registers the reward and terminal signals.
-	*/
+	 * BeginPlay
+	 * Called when the game starts.
+	 * Registers the reward and terminal signals.
+	 */
 	void InitializeAgent() override;
-	
+
 	/**
-	  * Tick
-	  * Called each frame.
-	  * @param DeltaSeconds the time since the last tick.
-	  */
+	 * Tick
+	 * Called each frame.
+	 * @param DeltaSeconds the time since the last tick.
+	 */
 	void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

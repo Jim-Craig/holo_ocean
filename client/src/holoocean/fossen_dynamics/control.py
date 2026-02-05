@@ -2,7 +2,7 @@
 Control methods.
 
 Reference: T. I. Fossen (2021). Handbook of Marine Craft Hydrodynamics and
-Motion Control. 2nd. Edition, Wiley. 
+Motion Control. 2nd. Edition, Wiley.
 URL: www.fossen.biz/wiley
 
 Author:     Thor I. Fossen
@@ -11,27 +11,32 @@ Author:     Thor I. Fossen
 import numpy as np
 from holoocean.fossen_dynamics.helper_functions import ssa, Rzyx
 
-def refModel3(x_d, v_d, a_d, r, wn_d, zeta_d, v_max, sampleTime):
-    '''
-    [x_d,v_d,a_d] = refModel3(x_d,v_d,a_d,r,wn_d,zeta_d,v_max,sampleTime) is a 3-order 
-    reference model for generation of a smooth desired position x_d, velocity |v_d| < v_max, 
-    and acceleration a_d. Inputs are natural frequency wn_d and relative damping zeta_d.
-    '''
-    
-    # desired "jerk"
-    j_d = wn_d**3 * (r -x_d) - (2*zeta_d+1) * wn_d**2 * v_d - (2*zeta_d+1) * wn_d * a_d
 
-   # Forward Euler integration
-    x_d += sampleTime * v_d             # desired position
-    v_d += sampleTime * a_d             # desired velocity
-    a_d += sampleTime * j_d             # desired acceleration 
-    
+def refModel3(x_d, v_d, a_d, r, wn_d, zeta_d, v_max, sampleTime):
+    """
+    [x_d,v_d,a_d] = refModel3(x_d,v_d,a_d,r,wn_d,zeta_d,v_max,sampleTime) is a 3-order
+    reference model for generation of a smooth desired position x_d, velocity |v_d| < v_max,
+    and acceleration a_d. Inputs are natural frequency wn_d and relative damping zeta_d.
+    """
+
+    # desired "jerk"
+    j_d = (
+        wn_d**3 * (r - x_d)
+        - (2 * zeta_d + 1) * wn_d**2 * v_d
+        - (2 * zeta_d + 1) * wn_d * a_d
+    )
+
+    # Forward Euler integration
+    x_d += sampleTime * v_d  # desired position
+    v_d += sampleTime * a_d  # desired velocity
+    a_d += sampleTime * j_d  # desired acceleration
+
     # Velocity saturation
-    if (v_d > v_max):
+    if v_d > v_max:
         v_d = v_max
-    elif (v_d < -v_max): 
-        v_d = -v_max    
-    
+    elif v_d < -v_max:
+        v_d = -v_max
+
     return x_d, v_d, a_d
 
 
@@ -54,9 +59,8 @@ def PIDpolePlacement(
     v_max,
     sampleTime,
 ):
-
     # PID gains based on pole placement
-    Kp = m * wn ** 2.0 - k
+    Kp = m * wn**2.0 - k
     Kd = m * 2.0 * zeta * wn - d
     Ki = (wn / 10.0) * Kp
 
@@ -76,7 +80,6 @@ def PIDpolePlacement(
 def DPpolePlacement(
     e_int, M3, D3, eta3, nu3, x_d, y_d, psi_d, wn, zeta, eta_ref, sampleTime
 ):
-
     # PID gains based on pole placement
     M3_diag = np.diag(np.diag(M3))
     D3_diag = np.diag(np.diag(D3))
@@ -89,11 +92,7 @@ def DPpolePlacement(
     e = eta3 - np.array([x_d, y_d, psi_d])
     e[2] = ssa(e[2])
     R = Rzyx(0.0, 0.0, eta3[2])
-    tau = (
-        - np.matmul((R.T @ Kp), e)
-        - np.matmul(Kd, nu3)
-        - np.matmul((R.T @ Ki), e_int)
-    )
+    tau = -np.matmul((R.T @ Kp), e) - np.matmul(Kd, nu3) - np.matmul((R.T @ Ki), e_int)
 
     # Low-pass filters, Euler's method
     T = 5.0 * np.array([1 / wn[0][0], 1 / wn[1][1], 1 / wn[2][2]])
@@ -127,19 +126,20 @@ def integralSMC(
     v_max,
     sampleTime,
 ):
-
     # Sliding surface
-    v_r_dot = a_d - 2 * lam * e_v - lam ** 2 * ssa(e_x)
-    v_r     = v_d - 2 * lam * ssa(e_x) - lam ** 2 * e_int
-    sigma   = e_v + 2 * lam * ssa(e_x) + lam ** 2 * e_int
+    v_r_dot = a_d - 2 * lam * e_v - lam**2 * ssa(e_x)
+    v_r = v_d - 2 * lam * ssa(e_x) - lam**2 * e_int
+    sigma = e_v + 2 * lam * ssa(e_x) + lam**2 * e_int
 
     #  Control law
     if abs(sigma / phi_b) > 1.0:
-        delta = ( T_nomoto * v_r_dot + v_r - K_d * sigma 
-                 - K_sigma * np.sign(sigma) ) / K_nomoto
+        delta = (
+            T_nomoto * v_r_dot + v_r - K_d * sigma - K_sigma * np.sign(sigma)
+        ) / K_nomoto
     else:
-        delta = ( T_nomoto * v_r_dot + v_r - K_d * sigma 
-                 - K_sigma * (sigma / phi_b) ) / K_nomoto
+        delta = (
+            T_nomoto * v_r_dot + v_r - K_d * sigma - K_sigma * (sigma / phi_b)
+        ) / K_nomoto
 
     # Integral error, Euler's method
     e_int += sampleTime * ssa(e_x)

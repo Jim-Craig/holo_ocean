@@ -1,8 +1,7 @@
 from holoocean.command import ChangeTimeOfDayCommand
-from holoocean.exceptions import HoloOceanException
+
 
 class TimeController:
-
     def __init__(self, client, frequency=0, hour=12, active=False):
         self.frequency = frequency
         self.hour = hour

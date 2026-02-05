@@ -11,8 +11,6 @@ import fnmatch
 import zipfile
 import pprint
 
-import time
-import select
 
 from queue import Queue
 from threading import Thread
@@ -298,7 +296,7 @@ def install(package_name, url=None, branch=None, commit=None):
 
         if branch is not None:
             if util.get_os_key() != "Linux":
-                if branch is not "develop":
+                if branch != "develop":
                     print(f"Can't install from branch when using {util.get_os_key()}")
                     return
                 if not _validVersion(user_version, "2.0.1"):

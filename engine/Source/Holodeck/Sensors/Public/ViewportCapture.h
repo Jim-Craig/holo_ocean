@@ -4,37 +4,40 @@
 
 #include "Holodeck.h"
 
-#include "HolodeckViewportClient.h"
 #include "HolodeckSensor.h"
+#include "HolodeckViewportClient.h"
 
 #include "ViewportCapture.generated.h"
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class HOLODECK_API UViewportCapture : public UHolodeckSensor {
 	GENERATED_BODY()
 
-public:	
+public:
 	/**
-	  * Default Constructor.
-	  */
+	 * Default Constructor.
+	 */
 	UViewportCapture();
 
 	/**
-	* InitializeSensor
-	* Sets up the class
-	*/
+	 * InitializeSensor
+	 * Sets up the class
+	 */
 	virtual void InitializeSensor() override;
 
 	/**
-	* Allows parameters to be set dynamically
-	*/
+	 * Allows parameters to be set dynamically
+	 */
 	virtual void ParseSensorParms(FString ParmsJson) override;
-	
+
 protected:
 	// See HolodeckSensor for documentation for these overridden functions.
 	int GetNumItems() override { return Width * Height; };
 	int GetItemSize() override { return sizeof(FColor); };
-	void TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void TickSensorComponent(
+		float						 DeltaTime,
+		ELevelTick					 TickType,
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere)
 	bool bGrayScale;

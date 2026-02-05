@@ -5,14 +5,14 @@ import copy
 
 from tests.utils.equality import mean_square_err
 
-config= {
+config = {
     "name": "test_time",
     "world": "TestWorld",
     "package_name": "TestWorlds",
     "main_agent": "auv0",
     "ticks_per_sec": 60,
     "frames_per_sec": 60,
-    "agents":[
+    "agents": [
         {
             "agent_name": "auv0",
             "agent_type": "SurfaceVessel",
@@ -20,30 +20,32 @@ config= {
                 {
                     "sensor_type": "RGBCamera",
                     "sensor_name": "Camera",
-                    "socket": "Platform"
+                    "socket": "Platform",
                 }
             ],
             "control_scheme": 0,
             "location": [-1.0, -50.0, 1.0],
-            "rotation": [0.0, 0.0, 90.0]
+            "rotation": [0.0, 0.0, 90.0],
         }
-    ]
+    ],
 }
 
 """Test to make sure that the sun is rotating correctly correctly"""
+
+
 def test_time_cycle(request):
     global config
     cfg = copy.deepcopy(config)
     binary_path = holoocean.packagemanager.get_binary_path_for_package("TestWorlds")
     with holoocean.environments.HoloOceanEnvironment(
-        scenario = cfg,
-        binary_path = binary_path,
-        show_viewport = False,
-        verbose = True,
-        uuid = str(uuid.uuid4())
+        scenario=cfg,
+        binary_path=binary_path,
+        show_viewport=False,
+        verbose=True,
+        uuid=str(uuid.uuid4()),
     ) as env:
         env.reset()
-        
+
         env.change_time_of_day(0)
         for _ in range(200):
             env.tick()
@@ -96,10 +98,16 @@ def test_time_cycle(request):
         err2 = mean_square_err(pixels2, baseline2)
         err3 = mean_square_err(pixels3, baseline3)
         err4 = mean_square_err(pixels4, baseline4)
-        
-        
-        assert err1 < 3000, f"Sun rotation mismatch at cycle 1: MSE={err1:.2f}, expected < 3000"
-        assert err2 < 3600, f"Sun rotation mismatch at cycle 2: MSE={err2:.2f}, expected < 3600"
-        assert err3 < 3000, f"Sun rotation mismatch at cycle 3: MSE={err3:.2f}, expected < 3000"
-        assert err4 < 3000, f"Sun rotation mismatch at cycle 4: MSE={err4:.2f}, expected < 3000"
-    
+
+        assert err1 < 3000, (
+            f"Sun rotation mismatch at cycle 1: MSE={err1:.2f}, expected < 3000"
+        )
+        assert err2 < 3600, (
+            f"Sun rotation mismatch at cycle 2: MSE={err2:.2f}, expected < 3600"
+        )
+        assert err3 < 3000, (
+            f"Sun rotation mismatch at cycle 3: MSE={err3:.2f}, expected < 3000"
+        )
+        assert err4 < 3000, (
+            f"Sun rotation mismatch at cycle 4: MSE={err4:.2f}, expected < 3000"
+        )

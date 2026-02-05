@@ -19,4 +19,3 @@ class TimeoutException(HoloOceanException):
 
 class NotFoundException(HoloOceanException):
     """Raised when a package cannot be found"""
-

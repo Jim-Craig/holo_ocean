@@ -13,19 +13,19 @@
  * A Holodeck Sphere Robot Controller
  */
 UCLASS()
-class HOLODECK_API ASphereRobotController : public AHolodeckPawnController
-{
+class HOLODECK_API ASphereRobotController : public AHolodeckPawnController {
 	GENERATED_BODY()
-	
+
 public:
 	/**
-	  * Default Constructor
-	  */
-	ASphereRobotController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	 * Default Constructor
+	 */
+	ASphereRobotController(
+		const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/**
-	  * Default Destructor
-	  */
+	 * Default Destructor
+	 */
 	~ASphereRobotController();
 
 	void AddControlSchemes() override {

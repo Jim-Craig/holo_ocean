@@ -1,5 +1,5 @@
-#include "Holodeck.h"
 #include "AvoidTask.h"
+#include "Holodeck.h"
 #include "Json.h"
 
 // Set default values
@@ -11,8 +11,9 @@ void UAvoidTask::InitializeSensor() {
 void UAvoidTask::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::String>("ToAvoid")) {
@@ -39,37 +40,42 @@ void UAvoidTask::ParseSensorParms(FString ParmsJson) {
 			MinDistance = JsonParsed->GetNumberField("MinDistance");
 		}
 	} else {
-		UE_LOG(LogHolodeck, Warning, TEXT("UAvoidTask::ParseSensorParms:: Unable to parse json."));
+		UE_LOG(
+			LogHolodeck,
+			Warning,
+			TEXT("UAvoidTask::ParseSensorParms:: Unable to parse json."));
 	}
 }
 
 // Called every frame
-void UAvoidTask::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void UAvoidTask::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	if (ToAvoid == nullptr && ToAvoidTag != "")
 		ToAvoid = FindActorWithTag(ToAvoidTag);
 
 	if (ToAvoid) {
 		// Get location and distance
-		FVector StartVec = GetActorSocketLocation(ToAvoid, StartSocket); // Parent->GetActorLocation();
+		FVector StartVec =
+			GetActorSocketLocation(ToAvoid, StartSocket); // Parent->GetActorLocation();
 		FVector EndVec = GetActorSocketLocation(Parent, EndSocket);
 		FVector DistanceVec = EndVec - StartVec;
-		float Distance = DistanceVec.Size();
-		
+		float	Distance = DistanceVec.Size();
+
 		if (OnlyWithinSight) {
-			bool can_see = IsInSight(ToAvoid, Parent, StartVec, EndVec, FOVRadians, DistanceVec, Distance);
-			
+			bool can_see = IsInSight(
+				ToAvoid, Parent, StartVec, EndVec, FOVRadians, DistanceVec, Distance);
+
 			if (can_see && Distance < MinDistance) {
 				Reward = MaxScore * Distance / MinDistance;
-			}
-			else {
+			} else {
 				Reward = 100;
 			}
-		}
-		else {
+		} else {
 			if (Distance < MinDistance) {
 				Reward = MaxScore * Distance / MinDistance;
-			}
-			else {
+			} else {
 				Reward = 100;
 			}
 		}

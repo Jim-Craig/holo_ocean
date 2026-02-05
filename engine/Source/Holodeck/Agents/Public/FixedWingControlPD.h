@@ -2,9 +2,9 @@
 
 #include "Holodeck.h"
 
-#include "HolodeckPawnController.h"
 #include "FixedWing.h"
 #include "HolodeckControlScheme.h"
+#include "HolodeckPawnController.h"
 #include "SimplePID.h"
 #include <math.h>
 
@@ -20,8 +20,8 @@ const float FW_ROT_P = 0.1;
 const float FW_ROT_D = 0.1;
 
 /**
-* UFixedWingControlPD
-*/
+ * UFixedWingControlPD
+ */
 UCLASS()
 class HOLODECK_API UFixedWingControlPD : public UHolodeckControlScheme {
 public:
@@ -29,17 +29,20 @@ public:
 
 	UFixedWingControlPD(const FObjectInitializer& ObjectInitializer);
 
-	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds) override;
+	void Execute(void* const CommandArray, void* const InputCommand, float DeltaSeconds)
+		override;
 
 	unsigned int GetControlSchemeSizeInBytes() const override {
 		return 6 * sizeof(float);
 	}
 
-	void SetController(AHolodeckPawnController* const Controller) { FixedWingController = Controller; };
+	void SetController(AHolodeckPawnController* const Controller) {
+		FixedWingController = Controller;
+	};
 
 private:
 	AHolodeckPawnController* FixedWingController;
-	AFixedWing* FixedWing;
+	AFixedWing*				 FixedWing;
 
 	SimplePID PositionController;
 	SimplePID RotationController;

@@ -3,13 +3,16 @@
 #pragma once
 
 /**
- * 
+ *
  */
-class HOLODECK_API EasyFileManager
-{
+class HOLODECK_API EasyFileManager {
 public:
 	EasyFileManager();
 	~EasyFileManager();
 
-	void SaveToFile(FString Data, FString FileName, FString Path = "C:\\Users\\robert.pottorff\\Desktop\\", bool bOverwrite = true);
+	void SaveToFile(
+		FString Data,
+		FString FileName,
+		FString Path = "C:\\Users\\robert.pottorff\\Desktop\\",
+		bool	bOverwrite = true);
 };

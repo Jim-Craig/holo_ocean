@@ -9,6 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
+
 class GPSSensor(object):
     __slots__ = ["timestamp", "position"]
 
@@ -18,7 +19,7 @@ class GPSSensor(object):
 
     def __init__(self):
         self.timestamp = 0
-        self.position = [ 0.0 for dim0 in range(3) ]
+        self.position = [0.0 for dim0 in range(3)]
 
     def encode(self):
         buf = BytesIO()
@@ -28,40 +29,48 @@ class GPSSensor(object):
 
     def _encode_one(self, buf):
         buf.write(struct.pack(">q", self.timestamp))
-        buf.write(struct.pack('>3f', *self.position[:3]))
+        buf.write(struct.pack(">3f", *self.position[:3]))
 
     def decode(data):
-        if hasattr(data, 'read'):
+        if hasattr(data, "read"):
             buf = data
         else:
             buf = BytesIO(data)
         if buf.read(8) != GPSSensor._get_packed_fingerprint():
             raise ValueError("Decode error")
         return GPSSensor._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = GPSSensor()
         self.timestamp = struct.unpack(">q", buf.read(8))[0]
-        self.position = struct.unpack('>3f', buf.read(12))
+        self.position = struct.unpack(">3f", buf.read(12))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     def _get_hash_recursive(parents):
-        if GPSSensor in parents: return 0
-        tmphash = (0x211cfac3b0dd5486) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
+        if GPSSensor in parents:
+            return 0
+        tmphash = (0x211CFAC3B0DD5486) & 0xFFFFFFFFFFFFFFFF
+        tmphash = (
+            ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)
+        ) & 0xFFFFFFFFFFFFFFFF
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
     def _get_packed_fingerprint():
         if GPSSensor._packed_fingerprint is None:
-            GPSSensor._packed_fingerprint = struct.pack(">Q", GPSSensor._get_hash_recursive([]))
+            GPSSensor._packed_fingerprint = struct.pack(
+                ">Q", GPSSensor._get_hash_recursive([])
+            )
         return GPSSensor._packed_fingerprint
+
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
     def get_hash(self):
         """Get the LCM hash of the struct"""
         return struct.unpack(">Q", GPSSensor._get_packed_fingerprint())[0]
-

@@ -1,9 +1,9 @@
 // MIT License (c) 2021 BYU FRoStLab see LICENSE file
 
-#include "Holodeck.h"
-#include "Benchmarker.h"
-#include "HolodeckBuoyantAgent.h"
 #include "SidescanSonar.h"
+#include "Benchmarker.h"
+#include "Holodeck.h"
+#include "HolodeckBuoyantAgent.h"
 // #pragma warning (disable : 4101)
 
 USidescanSonar::USidescanSonar() {
@@ -20,16 +20,17 @@ void USidescanSonar::BeginDestroy() {
 void USidescanSonar::ParseSensorParms(FString ParmsJson) {
 
 	// Override the Parent Class defaults for some key parameters
-	Azimuth = 170; 			// degrees
-	Elevation = 0.25;		// degrees
-	RangeMin = 0.5 * 100; 	// 0.5 m (in cm)
-	RangeMax = 35 * 100; 	// 35 m (in cm)
+	Azimuth = 170;		  // degrees
+	Elevation = 0.25;	  // degrees
+	RangeMin = 0.5 * 100; // 0.5 m (in cm)
+	RangeMax = 35 * 100;  // 35 m (in cm)
 
 	// Parse any parent class parameters that were provided in the configuration
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		// For handling noise
@@ -69,133 +70,145 @@ void USidescanSonar::ParseSensorParms(FString ParmsJson) {
 		if (JsonParsed->HasTypedField<EJson::Number>("ElevationBins")) {
 			ElevationBins = JsonParsed->GetIntegerField("ElevationBins");
 		}
-	}
-	else {
-		UE_LOG(LogHolodeck, Fatal, TEXT("USidescanSonar::ParseSensorParms:: Unable to parse json."));
+	} else {
+		UE_LOG(
+			LogHolodeck,
+			Fatal,
+			TEXT("USidescanSonar::ParseSensorParms:: Unable to parse json."));
 	}
 
 	// Parse through the Range parameters given to us
-	if(RangeBins != 0){
+	if (RangeBins != 0) {
 		RangeRes = (RangeMax - RangeMin) / RangeBins;
-	} 
-	else if(RangeRes != 0){
+	} else if (RangeRes != 0) {
 		RangeBins = (RangeMax - RangeMin) / RangeRes;
-	}
-	else{
+	} else {
 		RangeRes = 5; // cm
 		RangeBins = (RangeMax - RangeMin) / RangeRes;
 	}
 
 	// Parse through the Azimuth parameters given to us
-	if(AzimuthBins != 0){
+	if (AzimuthBins != 0) {
 		AzimuthRes = Azimuth / AzimuthBins;
-	} 
-	else if(AzimuthRes != 0){
+	} else if (AzimuthRes != 0) {
 		AzimuthBins = Azimuth / AzimuthRes;
-	}
-	else{
+	} else {
 		// Calculate how large the azimuth bins should be
-		AzimuthRes = (180 * Octree::OctreeMin) / (Pi * (RangeMin + 0.1 * (RangeMax - RangeMin)));
+		AzimuthRes =
+			(180 * Octree::OctreeMin) / (Pi * (RangeMin + 0.1 * (RangeMax - RangeMin)));
 		AzimuthBins = Azimuth / AzimuthRes;
 	}
 
 	// Parse through the Elevation parameters given to us
-	if(ElevationBins != 0){
+	if (ElevationBins != 0) {
 		ElevationRes = Elevation / ElevationBins;
-	} 
-	else if(ElevationRes != 0){
+	} else if (ElevationRes != 0) {
 		ElevationBins = Elevation / ElevationRes;
-	}
-	else{
+	} else {
 		// Calculate how large our shadowing bins should be
-		ElevationBins = (RangeMin*Elevation*Pi/180) / Octree::OctreeMin;
-		if(ElevationBins < 1) ElevationBins = 1;
+		ElevationBins = (RangeMin * Elevation * Pi / 180) / Octree::OctreeMin;
+		if (ElevationBins < 1)
+			ElevationBins = 1;
 		ElevationRes = Elevation / ElevationBins;
 	}
 }
 
 void USidescanSonar::InitializeSensor() {
 	Super::InitializeSensor();
-	
+
 	// setup count of each bin
 	count = new int32[RangeBins](); // Sidescan Sonar (1d array)
 
-	for(int i=0;i<AzimuthBins*ElevationBins;i++){
+	for (int i = 0; i < AzimuthBins * ElevationBins; i++) {
 		sortedLeaves.Add(TArray<Octree*>());
 		sortedLeaves[i].Reserve(10000);
 	}
 }
 
 // Conversion from Spherical coordinates to Euclidian
-FVector spherToEucSS(float r, float theta, float phi, FTransform SensortoWorld){
-	float x = r*UKismetMathLibrary::DegSin(phi)*UKismetMathLibrary::DegCos(theta);
-	float y = r*UKismetMathLibrary::DegSin(phi)*UKismetMathLibrary::DegSin(theta);
-	float z = r*UKismetMathLibrary::DegCos(phi);
+FVector spherToEucSS(float r, float theta, float phi, FTransform SensortoWorld) {
+	float x = r * UKismetMathLibrary::DegSin(phi) * UKismetMathLibrary::DegCos(theta);
+	float y = r * UKismetMathLibrary::DegSin(phi) * UKismetMathLibrary::DegSin(theta);
+	float z = r * UKismetMathLibrary::DegCos(phi);
 	return UKismetMathLibrary::TransformLocation(SensortoWorld, FVector(x, y, z));
 }
 
-
-void USidescanSonar::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void USidescanSonar::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickSensorComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if(TickCounter == 0){
+	if (TickCounter == 0) {
 		// reset things and get ready
 		float* result = static_cast<float*>(Buffer);
-		std::fill(result, result+RangeBins, 0);
-		std::fill(count, count+RangeBins, 0);
-		
-		for(auto& sl: sortedLeaves){
+		std::fill(result, result + RangeBins, 0);
+		std::fill(count, count + RangeBins, 0);
+
+		for (auto& sl : sortedLeaves) {
 			sl.Reset();
 		}
 
 		// Finds leaves in range and puts them in foundLeaves
-		findLeaves();		
-
+		findLeaves();
 
 		// SORT THEM INTO AZIMUTH/ELEVATION BINS
 		int32 idx;
-		for(TArray<Octree*>& bin : foundLeaves){
-			for(Octree* l : bin){
+		for (TArray<Octree*>& bin : foundLeaves) {
+			for (Octree* l : bin) {
 				// Compute bins while we're parallelized
-				l->idx.Y = (int32)((l->locSpherical.Y - minAzimuth)/ AzimuthRes);
-				l->idx.Z = (int32)((l->locSpherical.Z - minElev)/ ElevationRes);
+				l->idx.Y = (int32)((l->locSpherical.Y - minAzimuth) / AzimuthRes);
+				l->idx.Z = (int32)((l->locSpherical.Z - minElev) / ElevationRes);
 				// Sometimes we get float->int rounding errors
-				if(l->idx.Y == AzimuthBins) --l->idx.Y;
+				if (l->idx.Y == AzimuthBins)
+					--l->idx.Y;
 
 				// UE_LOG(LogTemp, Warning, TEXT("Index Y: %d"), l->idx.Y);
 
-				idx = l->idx.Z*AzimuthBins + l->idx.Y;
+				idx = l->idx.Z * AzimuthBins + l->idx.Y;
 				sortedLeaves[idx].Emplace(l);
 			}
 		}
 
-
 		// HANDLE SHADOWING
 		shadowLeaves();
 
-
 		// ADD IN ALL CONTRIBUTIONS
 		// Reuse idx variable from above
-		for(TArray<Octree*>& bin : sortedLeaves){
-			for(Octree* l : bin){
+		for (TArray<Octree*>& bin : sortedLeaves) {
+			for (Octree* l : bin) {
 				// Calculate range bin
 				l->idx.X = (int32)((l->locSpherical.X - RangeMin) / RangeRes);
-				if (l->idx.X == RangeBins) { // This happens if l->locSpherical.X is equal to (or really close to) RangeMax. Which is very rare, but is possible
-					l->idx.X = RangeBins - 1; // Adjusts l->idx.X to ensure later computations for 'idx' produce expected values
+				if (l->idx.X == RangeBins) { // This happens if l->locSpherical.X is
+					// equal to (or really close to) RangeMax.
+					// Which is very rare, but is possible
+					l->idx.X =
+						RangeBins - 1; // Adjusts l->idx.X to ensure later computations
+									   // for 'idx' produce expected values
 				}
-				// The following two statements shouldn't ever be possible, but we include them just in case we have a unique situation, to avoid unexplained behavior
+				// The following two statements shouldn't ever be possible, but we
+				// include them just in case we have a unique situation, to avoid
+				// unexplained behavior
 				else if (l->idx.X > RangeBins) {
-					UE_LOG(LogHolodeck, Fatal, TEXT("USidescanSonar::TickSensorComponent 'l->idx.X' was assigned a value larger than RangeBins"));
-				}
-				else if (l->idx.X < 0) {
-					UE_LOG(LogHolodeck, Fatal, TEXT("USidescanSonar::TickSensorComponent 'l->idx.X' was assigned a negative value"));
+					UE_LOG(
+						LogHolodeck,
+						Fatal,
+						TEXT(
+							"USidescanSonar::TickSensorComponent 'l->idx.X' was "
+							"assigned a value larger than RangeBins"));
+				} else if (l->idx.X < 0) {
+					UE_LOG(
+						LogHolodeck,
+						Fatal,
+						TEXT(
+							"USidescanSonar::TickSensorComponent 'l->idx.X' was "
+							"assigned a negative value"));
 				}
 
 				// Add to their appropriate bin
-				if (l->idx.Y > (AzimuthBins / 2)){
+				if (l->idx.Y > (AzimuthBins / 2)) {
 					idx = RangeBins / 2 - l->idx.X / 2 - 1;
-				}
-				else{
+				} else {
 					idx = RangeBins / 2 + l->idx.X / 2;
 				}
 
@@ -204,24 +217,32 @@ void USidescanSonar::TickSensorComponent(float DeltaTime, ELevelTick TickType, F
 			}
 		}
 
-
 		// NORMALIZE THE BUFFER
 		for (int i = 0; i < RangeBins; i++) {
-			if(count[i] != 0){
+			if (count[i] != 0) {
 				result[i] *= (1 + multNoise.sampleFloat()) / count[i];
 				result[i] += addNoise.sampleRayleigh();
-			}
-			else{
+			} else {
 				result[i] = addNoise.sampleRayleigh();
 			}
 		}
 	}
 
-	if (runtickCounter == 20 && (RangeMin*Elevation*Pi/180) / Octree::OctreeMin < 1)
-	{
+	if (runtickCounter == 20
+		&& (RangeMin * Elevation * Pi / 180) / Octree::OctreeMin < 1) {
 		float recommendedElevation = Octree::OctreeMin * 180 / (RangeMin * Pi);
 		float recommendedOctreeMin = RangeMin * Elevation * Pi / 180 / 100;
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("WARNING: Elevation angle potentially too small with current OctreeMin configuration\n Recommended changes (pick one):\n Elevation = %f\n OctreeMin = %f\n"), recommendedElevation, recommendedOctreeMin));
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			5.0f,
+			FColor::Red,
+			FString::Printf(
+				TEXT(
+					"WARNING: Elevation angle potentially too small with current "
+					"OctreeMin configuration\n Recommended changes (pick one):\n "
+					"Elevation = %f\n OctreeMin = %f\n"),
+				recommendedElevation,
+				recommendedOctreeMin));
 	}
 
 	runtickCounter++;

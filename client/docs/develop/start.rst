@@ -187,3 +187,15 @@ in the Unreal Editor, go to Window -> Output Log.
 
 See `Unreal's documentation <https://dev.epicgames.com/documentation/en-us/unreal-engine/logging-in-unreal-engine>`_ 
 for more information on logging in Unreal Engine.
+
+Code Formatting
+===============
+If you are going to pull request changes to the C++ or Python code, please ensure that your code is properly
+formatted.
+Python code should be formatted using `ruff <https://docs.astral.sh/ruff/>`_ and C++ code should be
+formatted using the provided clang-format configuration, based on the UE style guide.
+To format with c++, you can run the following command from engine/ue5-clang-format-file:
+
+.. code:: bash
+
+      find ../Source -iname "*.h" -o -iname "*.cpp" | xargs clang-format -style=file -i

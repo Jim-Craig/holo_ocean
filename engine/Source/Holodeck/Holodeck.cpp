@@ -2,6 +2,6 @@
 
 #include "Holodeck.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Holodeck, "Holodeck" );
+IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, Holodeck, "Holodeck");
 
 DEFINE_LOG_CATEGORY(LogHolodeck);

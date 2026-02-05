@@ -16,14 +16,14 @@ base_cfg = {
                 {
                     "sensor_type": "RGBCamera",
                     "sensor_name": "RGBCamera",
-                    "socket":"CameraRightSocket"
+                    "socket": "CameraRightSocket",
                 }
             ],
             "control_scheme": 3,
             "location": [0, -52, -1],
-            "rotation": [0, 0, 0]
+            "rotation": [0, 0, 0],
         }
-    ]
+    ],
 }
 
 with holoocean.make(scenario_cfg=base_cfg) as env:

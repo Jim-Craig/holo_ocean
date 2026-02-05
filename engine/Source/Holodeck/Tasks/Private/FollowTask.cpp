@@ -1,5 +1,5 @@
-#include "Holodeck.h"
 #include "FollowTask.h"
+#include "Holodeck.h"
 #include "Json.h"
 
 // Set default values
@@ -11,8 +11,9 @@ void UFollowTask::InitializeSensor() {
 void UFollowTask::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::String>("ToFollow")) {
@@ -32,13 +33,17 @@ void UFollowTask::ParseSensorParms(FString ParmsJson) {
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Number>("MinDistance")) {
-			MinDistance = ConvertClientDistanceToUnreal(JsonParsed->GetNumberField("MinDistance"));
+			MinDistance = ConvertClientDistanceToUnreal(
+				JsonParsed->GetNumberField("MinDistance"));
 		}
 	}
 }
 
 // Called every frame
-void UFollowTask::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void UFollowTask::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	if (ToFollow == nullptr && ToFollowTag != "")
 		ToFollow = FindActorWithTag(ToFollowTag);
 
@@ -47,18 +52,18 @@ void UFollowTask::TickSensorComponent(float DeltaTime, ELevelTick TickType, FAct
 		FVector StartVec = GetActorSocketLocation(Parent, "CameraSocket");
 		FVector EndVec = GetActorSocketLocation(ToFollow, FollowSocket);
 		FVector DistanceVec = EndVec - StartVec;
-		float Distance = DistanceVec.Size();
+		float	Distance = DistanceVec.Size();
 
 		if (OnlyWithinSight) {
-			bool can_see = IsInSight(Parent, ToFollow, StartVec, EndVec, FOVRadians, DistanceVec, Distance);
-			
+			bool can_see = IsInSight(
+				Parent, ToFollow, StartVec, EndVec, FOVRadians, DistanceVec, Distance);
+
 			if (can_see && Distance < MinDistance) {
 				Reward = MaxScore * (MinDistance - Distance) / MinDistance;
 			} else {
 				Reward = 0;
 			}
-		}
-		else {
+		} else {
 			if (Distance < MinDistance) {
 				Reward = MaxScore * (MinDistance - Distance) / MinDistance;
 			} else {

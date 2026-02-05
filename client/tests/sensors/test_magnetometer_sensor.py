@@ -41,9 +41,9 @@ def test_setting_vector(env, num):
     """Make sure setting the vector gets us what we want"""
     vec = np.random.rand(3)
     vec /= np.linalg.norm(vec)
-    env._scenario["agents"][0]["sensors"][0]["configuration"][
-        "MagneticVector"
-    ] = vec.tolist()
+    env._scenario["agents"][0]["sensors"][0]["configuration"]["MagneticVector"] = (
+        vec.tolist()
+    )
     env._scenario["agents"][0]["rotation"] = (np.random.rand(3) * 30).tolist()
 
     env.reset()
@@ -60,9 +60,9 @@ def test_random(env, num):
     """Make sure enabling noise perturbs things"""
     vec = np.random.rand(3)
     vec /= np.linalg.norm(vec)
-    env._scenario["agents"][0]["sensors"][0]["configuration"][
-        "MagneticVector"
-    ] = vec.tolist()
+    env._scenario["agents"][0]["sensors"][0]["configuration"]["MagneticVector"] = (
+        vec.tolist()
+    )
     env._scenario["agents"][0]["rotation"] = (np.random.rand(3) * 30).tolist()
 
     env._scenario["agents"][0]["sensors"][0]["configuration"]["Sigma"] = 10

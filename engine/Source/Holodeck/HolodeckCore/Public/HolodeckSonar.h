@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "HolodeckCore/Public/HolodeckSensor.h"
 
-#include "GenericPlatform/GenericPlatformMath.h"
-#include "Octree.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Async/ParallelFor.h"
+#include "GenericPlatform/GenericPlatformMath.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Octree.h"
 
 #include "HolodeckSonar.generated.h"
 
@@ -17,28 +17,30 @@
  * UHolodeckSonar
  */
 UCLASS()
-class HOLODECK_API UHolodeckSonar : public UHolodeckSensor
-{
+class HOLODECK_API UHolodeckSonar : public UHolodeckSensor {
 	GENERATED_BODY()
-	
+
 public:
 	/*
-	* Default Constructor
-	*/
-	UHolodeckSonar(){}
+	 * Default Constructor
+	 */
+	UHolodeckSonar() {}
 
 	/**
-	* Allows parameters to be set dynamically
-	*/
+	 * Allows parameters to be set dynamically
+	 */
 	virtual void ParseSensorParms(FString ParmsJson) override;
 
 	/*
-	* Cleans up octree
-	*/
+	 * Cleans up octree
+	 */
 	virtual void BeginDestroy() override;
 
 protected:
-	void TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void TickSensorComponent(
+		float						 DeltaTime,
+		ELevelTick					 TickType,
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere)
 	float RangeMax = 1000;
@@ -76,7 +78,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool ShowWarning = true;
 
-	//property for using approximation or not for atan2
+	// property for using approximation or not for atan2
 	UPROPERTY(EditAnywhere)
 	bool UseApprox = true;
 
@@ -115,16 +117,17 @@ protected:
 	virtual bool inRange(Octree* tree);
 	void leavesInRange(Octree* tree, TArray<Octree*>& leafs, float stopAt);
 	FVector spherToEuc(float r, float theta, float phi, FTransform SensortoWorld);
-	
+
 private:
 	/*
 	 * Parent
-	 * After initialization, Parent contains a pointer to whatever the sensor is attached to.
+	 * After initialization, Parent contains a pointer to whatever the sensor is
+	 * attached to.
 	 */
 	AActor* Parent;
 
 	// holds our implementation of Octrees
-	Octree* octree = nullptr;
+	Octree*			octree = nullptr;
 	TArray<Octree*> agents;
 	void viewLeaves(Octree* tree);
 

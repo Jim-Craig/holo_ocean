@@ -1,22 +1,21 @@
 #pragma once
 
-#include "Holodeck.h"
 #include "Command.h"
+#include "Holodeck.h"
+
 #include "TurnOffFlashlightCommand.generated.h"
 
 /**
-* TurnOffFlashlightCommand
-* Command used to turn off the vehicle's flashlight
-* NumberParams expects 1 argument, Flashlight name
-*/
+ * TurnOffFlashlightCommand
+ * Command used to turn off the vehicle's flashlight
+ * NumberParams expects 1 argument, Flashlight name
+ */
 
 UCLASS()
-class HOLODECK_API UTurnOffFlashlightCommand : public UCommand
-{
+class HOLODECK_API UTurnOffFlashlightCommand : public UCommand {
 	GENERATED_BODY()
-	
-	public:
-	//See UCommand for the documentation of this overridden function.
-	void Execute() override;
 
+public:
+	// See UCommand for the documentation of this overridden function.
+	void Execute() override;
 };

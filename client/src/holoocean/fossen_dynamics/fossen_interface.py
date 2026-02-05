@@ -23,7 +23,10 @@ class FossenInterface:
     """
 
     def __init__(
-        self, vehicle_names, scenario, multi_agent=False  # If multiple agents
+        self,
+        vehicle_names,
+        scenario,
+        multi_agent=False,  # If multiple agents
     ):
         self.vehicles = {}
 
@@ -190,7 +193,7 @@ class FossenInterface:
         vehicle.ref_psi = heading
         if abs(heading) > 180.0:
             raise ValueError(
-                f"The heading command value should be on the interval -180 to 180"
+                "The heading command value should be on the interval -180 to 180"
             )
 
     def set_depth_goal(self, vehicle_name, depth):
@@ -206,7 +209,7 @@ class FossenInterface:
         vehicle.ref_z = depth
 
         if depth < 0.0:
-            raise ValueError(f"The depth command value should be greater than 0")
+            raise ValueError("The depth command value should be greater than 0")
 
     def set_rpm_goal(self, vehicle_name, rpm):
         """
@@ -250,7 +253,7 @@ def check_scenario_configuration(scenario, vehicle_name):
     for sensor in sensors:
         if sensor.get("sensor_type") == "DynamicsSensor":
             if (
-                not ("sensor_name" in sensor)
+                "sensor_name" not in sensor
                 or sensor.get("sensor_name") == "DynamicsSensor"
             ):
                 config = sensor.get("configuration", {})
@@ -273,7 +276,6 @@ def check_scenario_configuration(scenario, vehicle_name):
 
 
 def get_vehicle_model(scenario, vehicle_name):
-
     agent = next(
         (agent for agent in scenario["agents"] if agent["agent_name"] == vehicle_name),
         None,

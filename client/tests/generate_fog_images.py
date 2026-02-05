@@ -1,5 +1,4 @@
 import holoocean
-import numpy as np
 import copy
 import uuid
 import cv2
@@ -11,7 +10,7 @@ config_water = {
     "main_agent": "auv0",
     "ticks_per_sec": 60,
     "frames_per_sec": 60,
-    "agents":[
+    "agents": [
         {
             "agent_name": "auv0",
             "agent_type": "BlueROV2",
@@ -19,14 +18,14 @@ config_water = {
                 {
                     "sensor_type": "RGBCamera",
                     "sensor_name": "Camera",
-                    "socket": "CameraSocket"
+                    "socket": "CameraSocket",
                 }
             ],
             "control_scheme": 0,
             "location": [6.0, -47.0, -2.5],
-            "rotation": [0.0, 0.0, 220.0]
+            "rotation": [0.0, 0.0, 220.0],
         }
-    ]
+    ],
 }
 
 config_air = {
@@ -36,7 +35,7 @@ config_air = {
     "main_agent": "auv0",
     "ticks_per_sec": 60,
     "frames_per_sec": 60,
-    "agents":[
+    "agents": [
         {
             "agent_name": "auv0",
             "agent_type": "SurfaceVessel",
@@ -44,14 +43,14 @@ config_air = {
                 {
                     "sensor_type": "RGBCamera",
                     "sensor_name": "Camera",
-                    "socket": "Platform"
+                    "socket": "Platform",
                 }
             ],
             "control_scheme": 0,
             "location": [0.0, -53.0, 0.5],
-            "rotation": [0.0, 0.0, 220.0]
+            "rotation": [0.0, 0.0, 220.0],
         }
-    ]
+    ],
 }
 
 
@@ -75,13 +74,14 @@ def test_fog_water():
         filepath = str("standard_fog.png")
         cv2.imwrite(filepath, pixels)
 
-        env.water_fog(5,0.5,1.0,0.0,1.0)
+        env.water_fog(5, 0.5, 1.0, 0.0, 1.0)
         for _ in range(200):
             env.tick()
 
         pixels = env.tick()["Camera"][:, :, 0:3]
         filepath = str("purple_fog.png")
         cv2.imwrite(filepath, pixels)
+
 
 def test_fog_air():
     global config_air
@@ -103,13 +103,14 @@ def test_fog_air():
         filepath = str("no_air_fog.png")
         cv2.imwrite(filepath, pixels)
 
-        env.air_fog(1.5,2,0.0,0.5,1.0)
+        env.air_fog(1.5, 2, 0.0, 0.5, 1.0)
         for _ in range(200):
             env.tick()
 
         pixels = env.tick()["Camera"][:, :, 0:3]
         filepath = str("air_fog.png")
         cv2.imwrite(filepath, pixels)
+
 
 if __name__ == "__main__":
     test_fog_water()

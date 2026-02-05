@@ -4,6 +4,7 @@ import numpy as np
 from tests.utils.equality import almost_equal
 import pytest
 
+
 @pytest.fixture(scope="module")
 def cfg(vehicle_type="TurtleAgent"):
     turtle_config = {
@@ -57,7 +58,9 @@ def test_pose_sensor_straight(cfg):
             state = env.step(command)
             assert almost_equal(
                 state["PoseSensor"][:3, :3], state["OrientationSensor"]
-            ), f"Rotation in PoseSensor doesn't match that in OrientationSensor at timestep {i}"
-            assert almost_equal(
-                state["PoseSensor"][:3, 3], state["LocationSensor"]
-            ), f"Location in PoseSensor doesn't match that in LocationSensor at timestep {i}"
+            ), (
+                f"Rotation in PoseSensor doesn't match that in OrientationSensor at timestep {i}"
+            )
+            assert almost_equal(state["PoseSensor"][:3, 3], state["LocationSensor"]), (
+                f"Location in PoseSensor doesn't match that in LocationSensor at timestep {i}"
+            )

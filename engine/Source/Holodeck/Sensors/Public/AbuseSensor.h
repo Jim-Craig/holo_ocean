@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "HolodeckCore/Public/HolodeckSensor.h"
+
 #include "AbuseSensor.generated.h"
 
 /**
  * AbuseSensor
  * Inherits from the HolodeckSensor class
- * Check out the parent class for documentation on all of the overridden functions.
- * Returns true if the agent has been abused. 
+ * Check out the parent class for documentation on all of the overridden
+ * functions. Returns true if the agent has been abused.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class HOLODECK_API UAbuseSensor : public UHolodeckSensor {
@@ -18,26 +19,29 @@ class HOLODECK_API UAbuseSensor : public UHolodeckSensor {
 
 public:
 	/*
-	* Default Constructor
-	*/
+	 * Default Constructor
+	 */
 	UAbuseSensor();
 
 	/**
-	* InitializeSensor
-	* Sets up the class
-	*/
+	 * InitializeSensor
+	 * Sets up the class
+	 */
 	virtual void InitializeSensor() override;
 
 	virtual void ParseSensorParms(FString ParmsJson) override;
 
 protected:
-	//See HolodeckSensor for the documentation of these overridden functions.
+	// See HolodeckSensor for the documentation of these overridden functions.
 	int GetNumItems() override { return 1; };
 	int GetItemSize() override { return sizeof(float); };
-	void TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void TickSensorComponent(
+		float						 DeltaTime,
+		ELevelTick					 TickType,
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	AHolodeckAgent* Agent;
-	FVector PrevSpeed;
-	float AccelerationLimit;
+	FVector			PrevSpeed;
+	float			AccelerationLimit;
 };

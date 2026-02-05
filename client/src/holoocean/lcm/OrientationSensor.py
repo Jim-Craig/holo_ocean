@@ -9,6 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
+
 class OrientationSensor(object):
     __slots__ = ["timestamp", "matrix"]
 
@@ -18,7 +19,7 @@ class OrientationSensor(object):
 
     def __init__(self):
         self.timestamp = 0
-        self.matrix = [ [ 0.0 for dim1 in range(3) ] for dim0 in range(3) ]
+        self.matrix = [[0.0 for dim1 in range(3)] for dim0 in range(3)]
 
     def encode(self):
         buf = BytesIO()
@@ -29,16 +30,17 @@ class OrientationSensor(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">q", self.timestamp))
         for i0 in range(3):
-            buf.write(struct.pack('>3f', *self.matrix[i0][:3]))
+            buf.write(struct.pack(">3f", *self.matrix[i0][:3]))
 
     def decode(data):
-        if hasattr(data, 'read'):
+        if hasattr(data, "read"):
             buf = data
         else:
             buf = BytesIO(data)
         if buf.read(8) != OrientationSensor._get_packed_fingerprint():
             raise ValueError("Decode error")
         return OrientationSensor._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -46,25 +48,32 @@ class OrientationSensor(object):
         self.timestamp = struct.unpack(">q", buf.read(8))[0]
         self.matrix = []
         for i0 in range(3):
-            self.matrix.append(struct.unpack('>3f', buf.read(12)))
+            self.matrix.append(struct.unpack(">3f", buf.read(12)))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     def _get_hash_recursive(parents):
-        if OrientationSensor in parents: return 0
-        tmphash = (0x5b2182006827a63) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
+        if OrientationSensor in parents:
+            return 0
+        tmphash = (0x5B2182006827A63) & 0xFFFFFFFFFFFFFFFF
+        tmphash = (
+            ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)
+        ) & 0xFFFFFFFFFFFFFFFF
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
     def _get_packed_fingerprint():
         if OrientationSensor._packed_fingerprint is None:
-            OrientationSensor._packed_fingerprint = struct.pack(">Q", OrientationSensor._get_hash_recursive([]))
+            OrientationSensor._packed_fingerprint = struct.pack(
+                ">Q", OrientationSensor._get_hash_recursive([])
+            )
         return OrientationSensor._packed_fingerprint
+
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
     def get_hash(self):
         """Get the LCM hash of the struct"""
         return struct.unpack(">Q", OrientationSensor._get_packed_fingerprint())[0]
-

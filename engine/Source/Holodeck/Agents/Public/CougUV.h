@@ -3,13 +3,13 @@
 #pragma once
 
 #include "Holodeck.h"
-
 #include "Containers/Array.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Pawn.h"
 #include "HolodeckBuoyantAgent.h"
-#include "HolodeckPawnController.h"
 #include "HolodeckControlScheme.h"
+#include "HolodeckPawnController.h"
+#include "Kismet/KismetMathLibrary.h"
+
 #include "CougUV.generated.h"
 
 const float CUV_MIN_THRUST = -100;
@@ -22,28 +22,27 @@ const float CUV_MAX_ANG_ACCEL = 2;
 
 UCLASS()
 /**
-* ACougUV
-* Inherits from the HolodeckAgent class
-* On any tick this object will apply the given forces.
-* Desired values must be set by a controller.
-*/
-class HOLODECK_API ACougUV : public AHolodeckBuoyantAgent
-{
+ * ACougUV
+ * Inherits from the HolodeckAgent class
+ * On any tick this object will apply the given forces.
+ * Desired values must be set by a controller.
+ */
+class HOLODECK_API ACougUV : public AHolodeckBuoyantAgent {
 	GENERATED_BODY()
 
 public:
 	/**
-	* Default Constructor.
-	*/
+	 * Default Constructor.
+	 */
 	ACougUV();
 
 	void InitializeAgent() override;
 
 	/**
-	* Tick
-	* Called each frame.
-	* @param DeltaSeconds the time since the last tick.
-	*/
+	 * Tick
+	 * Called each frame.
+	 * @param DeltaSeconds the time since the last tick.
+	 */
 	void Tick(float DeltaSeconds) override;
 
 	unsigned int GetRawActionSizeInBytes() const override { return 6 * sizeof(float); };
@@ -53,15 +52,16 @@ public:
 	float GetAccelerationLimit() override { return 200; }
 
 	// Location of all forces to apply
-	FVector thruster = FVector(-120,0,0);
-	TArray<FVector> finTranslation{ FVector(-105,  7.07, 0   ),
-									FVector(-105,  0,    7.07),
-									FVector(-105, -7.07, 0   ),
-									FVector(-105,  0,   -7.07) };
-	TArray<FRotator> finRotation{ 	FRotator(0, 0,  0  ),
-									FRotator(0, 0, -90 ),
-									FRotator(0, 0, -180),
-									FRotator(0, 0, -270) };
+	FVector thruster = FVector(-120, 0, 0);
+
+	TArray<FVector>	 finTranslation{ FVector(-105, 7.07, 0),
+									 FVector(-105, 0, 7.07),
+									 FVector(-105, -7.07, 0),
+									 FVector(-105, 0, -7.07) };
+	TArray<FRotator> finRotation{ FRotator(0, 0, 0),
+								  FRotator(0, 0, -90),
+								  FRotator(0, 0, -180),
+								  FRotator(0, 0, -270) };
 
 	void ApplyFin(int i, float command);
 

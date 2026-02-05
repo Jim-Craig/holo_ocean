@@ -57,9 +57,9 @@ Make sure to tag the PostProcessVolume as ``WaterPPV`` so that the Water Fog Com
 Water Fog (PostProcessVolume 2)
 -------------------------------
 
-To simulate underwater fog and reduce visibility, add a second PostProcessVolume that is the same size as the first one (you can simply duplicate the existing volume) and assign it the ``MM_Fog_Water`` material. 
-In the **Details** panel, navigate to Rendering Features ➡ Post Process Materials, add an element to the array, set it to **Asset Reference**, and select ``MM_Fog_Water``. 
-Alternatively, you can drag the material directly from ``Content/WeatherContent/Fog/MM_Fog_Water``.
+To simulate underwater fog and reduce visibility, add a second PostProcessVolume that is the same size as the first one (you can simply duplicate the existing volume) and assign it the ``MM_Fog_Water_Simple`` material.
+In the **Details** panel, navigate to Rendering Features ➡ Post Process Materials, add an element to the array, set it to **Asset Reference**, and select ``MM_Fog_Water_Simple``. 
+Alternatively, you can drag the material directly from ``Content/WeatherContent/Fog/MM_Fog_Water_Simple``. .
 
 .. image:: images/water_fog_material.png
 
@@ -74,6 +74,9 @@ Although the **Fog_Transition** parameter can also be modified, it is generally 
 .. image:: images/fog_params.png
 
 Make sure to tag the PostProcessVolume as ``WaterPPV`` so that the Water Fog Command and Tides Command function correctly.
+
+If desired, you can also perform the previous steps with a copy of the ``MM_Fog_Water_Simple`` material that you then modify to your needs and save to its own material name. 
+This keeps the original material's settings intact for future use.
 
 
 Lighting
@@ -142,7 +145,30 @@ It is simple to move, rotate, and scale objects within your level. You can eithe
 
 For more information please reference `Unreal Engine's Documentation <https://dev.epicgames.com/documentation/en-us/unreal-engine/transforming-actors-in-unreal-engine>`_.
 
-.. _object-collision:
+Enabling Semantic Labels
+========================
+
+HoloOcean allows world assets to be assigned a label. Sensors such as the Semantic Segmentation Camera use these labels to return semantic information to the agent for tasks such as image segmentation. 
+
+To set up semantic labeling, please reference our tutorial here: :ref:`semantic-segmentation`.
+
+.. _`depth-camera-custom`:
+
+Enabling the Depth Camera
+=========================
+
+HoloOcean includes a Depth camera sensor that returns depth information to agents. To enable this sensor, you must change a setting in the environment and for each asset you wish to be detected by the depth camera. 
+In the Details panel of the Unreal Editor, navigate to each asset you wish to be visible with the depth camera. For each asset, search "depth" and enable "Render CustomDepth Pass". Do this for the landscape as well. 
+
+If you already set up your world for semantic labeling, you will have already done the steps necessary for the Depth Camera to work. 
+
+.. image:: images/depth_camera_settings.png
+
+.. note::
+
+  Following the steps to set up semantic labels in your world will enable "Render CustomDepth Pass" for the assets that recieve semantic tags. Be sure to repeat the process above for all remaining assets in your world without semantic labels, including the landscape. 
+
+.. _`object-collision`:
 
 Note on Collision Settings for Objects and Sonar
 ================================================

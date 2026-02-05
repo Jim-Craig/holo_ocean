@@ -8,37 +8,41 @@
 #include "DynamicsSensor.generated.h"
 
 /**
-* DynamicsSensor
-* Inherits from the HolodeckSensor class
-* Check out the parent class for documentation on all of the overridden functions.
-* Reports the acceleration, velocity, position, ang. accel, ang. vel, orientation for use in implementing custom dyammics 
-*/
+ * DynamicsSensor
+ * Inherits from the HolodeckSensor class
+ * Check out the parent class for documentation on all of the overridden
+ * functions. Reports the acceleration, velocity, position, ang. accel, ang.
+ * vel, orientation for use in implementing custom dyammics
+ */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class HOLODECK_API UDynamicsSensor : public UHolodeckSensor {
 	GENERATED_BODY()
 
 public:
 	/*
-	* Default Constructor
-	*/
+	 * Default Constructor
+	 */
 	UDynamicsSensor();
 
 	/**
-	* InitializeSensor
-	* Sets up the class
-	*/
+	 * InitializeSensor
+	 * Sets up the class
+	 */
 	virtual void InitializeSensor() override;
 
 	/**
-	* Allows parameters to be set dynamically
-	*/
+	 * Allows parameters to be set dynamically
+	 */
 	virtual void ParseSensorParms(FString ParmsJson) override;
 
 protected:
-	//See HolodeckSensor for the documentation of these overridden functions.
+	// See HolodeckSensor for the documentation of these overridden functions.
 	int GetNumItems() override { return UseRPY ? 18 : 19; };
 	int GetItemSize() override { return sizeof(float); };
-	void TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void TickSensorComponent(
+		float						 DeltaTime,
+		ELevelTick					 TickType,
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere)
 	bool UseCOM = true;
@@ -49,19 +53,20 @@ protected:
 private:
 	/*
 	 * Parent
-	 * After initialization, Parent contains a pointer to whatever the sensor is attached to.
+	 * After initialization, Parent contains a pointer to whatever the sensor is
+	 * attached to.
 	 */
 	UPrimitiveComponent* Parent;
 
 	FVector LinearVelocityThen;
 	FVector AngularVelocityThen;
 
-	FVector LinearAcceleration;
-	FVector LinearVelocity;
-	FVector Position;
-	FVector AngularAcceleration;
-	FVector AngularVelocity;
+	FVector	 LinearAcceleration;
+	FVector	 LinearVelocity;
+	FVector	 Position;
+	FVector	 AngularAcceleration;
+	FVector	 AngularVelocity;
 	FRotator Rotation;
-	FQuat Quat;
-	FVector RPY;
+	FQuat	 Quat;
+	FVector	 RPY;
 };

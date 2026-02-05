@@ -1,6 +1,6 @@
-#include "Holodeck.h"
-#include "Conversion.h"
 #include "RotationSensor.h"
+#include "Conversion.h"
+#include "Holodeck.h"
 
 URotationSensor::URotationSensor() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -10,15 +10,18 @@ URotationSensor::URotationSensor() {
 void URotationSensor::InitializeSensor() {
 	Super::InitializeSensor();
 
-	//You need to get the pointer to the object the sensor is attached to. 
+	// You need to get the pointer to the object the sensor is attached to.
 	Parent = this->GetAttachmentRootActor();
 }
 
-void URotationSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+void URotationSensor::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
 	if (Parent != nullptr && bOn) {
 		FRotator Rotation = this->GetComponentRotation();
-		FVector EulerAngles = RotatorToRPY(Rotation);
-		float* FloatBuffer = static_cast<float*>(Buffer);
+		FVector	 EulerAngles = RotatorToRPY(Rotation);
+		float*	 FloatBuffer = static_cast<float*>(Buffer);
 		FloatBuffer[0] = EulerAngles.X;
 		FloatBuffer[1] = EulerAngles.Y;
 		FloatBuffer[2] = EulerAngles.Z;

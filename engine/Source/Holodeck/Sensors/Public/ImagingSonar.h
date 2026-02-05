@@ -5,15 +5,15 @@
 #include "CoreMinimal.h"
 #include "HolodeckCore/Public/HolodeckSonar.h"
 
-#include "GenericPlatform/GenericPlatformMath.h"
-#include "Octree.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Async/ParallelFor.h"
+#include "GenericPlatform/GenericPlatformMath.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "MultivariateNormal.h"
 #include "MultivariateUniform.h"
+#include "Octree.h"
 
-#include <numeric>
 #include "Json.h"
+#include <numeric>
 
 #include "ImagingSonar.generated.h"
 
@@ -22,37 +22,39 @@
  * UImagingSonar
  */
 UCLASS()
-class HOLODECK_API UImagingSonar : public UHolodeckSonar
-{
+class HOLODECK_API UImagingSonar : public UHolodeckSonar {
 	GENERATED_BODY()
-	
+
 public:
 	/*
-	* Default Constructor
-	*/
+	 * Default Constructor
+	 */
 	UImagingSonar();
 
 	/**
-	* InitializeSensor
-	* Sets up the class
-	*/
+	 * InitializeSensor
+	 * Sets up the class
+	 */
 	virtual void InitializeSensor() override;
 
 	/**
-	* Allows parameters to be set dynamically
-	*/
+	 * Allows parameters to be set dynamically
+	 */
 	virtual void ParseSensorParms(FString ParmsJson) override;
 
 	/*
-	* Cleans up octree
-	*/
+	 * Cleans up octree
+	 */
 	virtual void BeginDestroy() override;
 
 protected:
-	//See HolodeckSensor for the documentation of these overridden functions.
-	int GetNumItems() override { return RangeBins*AzimuthBins; };
+	// See HolodeckSensor for the documentation of these overridden functions.
+	int GetNumItems() override { return RangeBins * AzimuthBins; };
 	int GetItemSize() override { return sizeof(float); };
-	void TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void TickSensorComponent(
+		float						 DeltaTime,
+		ELevelTick					 TickType,
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere)
 	int32 RangeBins = 0;
@@ -87,7 +89,8 @@ protected:
 private:
 	/*
 	 * Parent
-	 * After initialization, Parent contains a pointer to whatever the sensor is attached to.
+	 * After initialization, Parent contains a pointer to whatever the sensor is
+	 * attached to.
 	 */
 	AActor* Parent;
 
@@ -96,14 +99,14 @@ private:
 	float perfectCos;
 
 	// Used to hold leaves for multipath
-	TMap<FIntVector,Octree*> mapLeaves;
-	TMap<FIntVector,Octree*> mapSearch;
-	TArray<TArray<Octree*>> cluster;
-	int32* count;
-	int32* hasPerfectNormal;
-	
+	TMap<FIntVector, Octree*> mapLeaves;
+	TMap<FIntVector, Octree*> mapSearch;
+	TArray<TArray<Octree*>>	  cluster;
+	int32*					  count;
+	int32*					  hasPerfectNormal;
+
 	// for adding noise
-	MultivariateNormal<1> addNoise;
-	MultivariateNormal<1> multNoise;
+	MultivariateNormal<1>  addNoise;
+	MultivariateNormal<1>  multNoise;
 	MultivariateUniform<1> rNoise;
 };

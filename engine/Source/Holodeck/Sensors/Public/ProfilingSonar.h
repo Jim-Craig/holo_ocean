@@ -13,19 +13,17 @@
  * UProfilingSonar
  */
 UCLASS()
-class HOLODECK_API UProfilingSonar : public UImagingSonar
-{
+class HOLODECK_API UProfilingSonar : public UImagingSonar {
 	GENERATED_BODY()
-	
+
 public:
 	/*
-	* Default Constructor
-	*/
+	 * Default Constructor
+	 */
 	UProfilingSonar();
 
 	/**
-	* Allows parameters to be set dynamically
-	*/
+	 * Allows parameters to be set dynamically
+	 */
 	virtual void ParseSensorParms(FString ParmsJson) override;
-
 };

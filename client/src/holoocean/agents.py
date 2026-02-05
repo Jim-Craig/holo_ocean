@@ -1,4 +1,5 @@
 """Definitions for different agents that can be controlled from HoloOcean"""
+
 from functools import reduce
 
 import numpy as np
@@ -7,6 +8,7 @@ from . import joint_constraints
 from holoocean.spaces import ContinuousActionSpace, DiscreteActionSpace
 from holoocean.sensors import SensorDefinition, SensorFactory, RGBCamera
 from holoocean.command import AddSensorCommand, RemoveSensorCommand
+
 
 ### BASE CLASSES ###
 class ControlSchemes:
@@ -36,6 +38,7 @@ class ControlSchemes:
         SV_FORCES (int): Used for custom dynamics. All internal dynamics (except collisions) are turned off including
             buoyancy, gravity, and damping. Specify 6-vector of linear and angular acceleration in the global frame.
     """
+
     # Android Control Schemes
     ANDROID_DIRECT_TORQUES = 0
     ANDROID_MAX_SCALED_TORQUES = 1
@@ -103,17 +106,26 @@ class HoloOceanAgent:
 
         self._num_control_schemes = len(self.control_schemes)
 
-        self._max_control_scheme_length = \
-            max(map(lambda x: reduce(lambda i, j: i * j, x[1].buffer_shape),
-                    self.control_schemes))
+        self._max_control_scheme_length = max(
+            map(
+                lambda x: reduce(lambda i, j: i * j, x[1].buffer_shape),
+                self.control_schemes,
+            )
+        )
 
-        self._action_buffer = \
-            self._client.malloc(name, [self._max_control_scheme_length], np.float32)
+        self._action_buffer = self._client.malloc(
+            name, [self._max_control_scheme_length], np.float32
+        )
         # Teleport flag: 0: do nothing, 1: teleport, 2: rotate, 3: teleport and rotate
-        self._teleport_type_buffer = self._client.malloc(name + "_teleport_flag", [1], np.uint8)
-        self._teleport_buffer = self._client.malloc(name + "_teleport_command", [12], np.float32)
-        self._control_scheme_buffer = self._client.malloc(name + "_control_scheme", [1],
-                                                          np.uint8)
+        self._teleport_type_buffer = self._client.malloc(
+            name + "_teleport_flag", [1], np.uint8
+        )
+        self._teleport_buffer = self._client.malloc(
+            name + "_teleport_command", [12], np.float32
+        )
+        self._control_scheme_buffer = self._client.malloc(
+            name + "_control_scheme", [1], np.uint8
+        )
         self._current_control_scheme = 0
         self.set_control_scheme(0)
 
@@ -127,8 +139,7 @@ class HoloOceanAgent:
         self.__act__(action)
 
     def clear_action(self):
-        """Sets the action to zeros, effectively removing any previous actions.
-        """
+        """Sets the action to zeros, effectively removing any previous actions."""
         np.copyto(self._action_buffer, np.zeros(self._action_buffer.shape))
 
     def set_control_scheme(self, index):
@@ -147,11 +158,11 @@ class HoloOceanAgent:
         Args:
             location (np.ndarray, optional): An array with three elements specifying the target
                 world coordinates ``[x, y, z]`` in meters (see :ref:`coordinate-system`).
-                
+
                 If ``None`` (default), keeps the current location.
             rotation (np.ndarray, optional): An array with three elements specifying roll, pitch,
                 and yaw in degrees of the agent.
-                
+
                 If ``None`` (default), keeps the current rotation.
 
         """
@@ -171,7 +182,7 @@ class HoloOceanAgent:
             location (np.ndarray): New location (``[x, y, z]`` (see :ref:`coordinate-system`))
             rotation (np.ndarray): New rotation (``[roll, pitch, yaw]``, see (see :ref:`rotations`))
             velocity (np.ndarray): New velocity (``[x, y, z]`` (see :ref:`coordinate-system`))
-            angular_velocity (np.ndarray): New angular velocity (``[x, y, z]`` in **degrees** 
+            angular_velocity (np.ndarray): New angular velocity (``[x, y, z]`` in **degrees**
                 (see :ref:`coordinate-system`))
 
         """
@@ -289,6 +300,7 @@ class UavAgent(HoloOceanAgent):
 
     Inherits from :class:`HoloOceanAgent`.
     """
+
     # constants in Uav.h in holoocean-engine
     __MAX_ROLL = 6.5080
     __MIN_ROLL = -__MAX_ROLL
@@ -296,7 +308,7 @@ class UavAgent(HoloOceanAgent):
     __MAX_PITCH = 5.087
     __MIN_PITCH = -__MAX_PITCH
 
-    __MAX_YAW_RATE = .8
+    __MAX_YAW_RATE = 0.8
     __MIN_YAW_RATE = -__MAX_YAW_RATE
 
     __MAX_FORCE = 5984.4
@@ -306,13 +318,29 @@ class UavAgent(HoloOceanAgent):
 
     @property
     def control_schemes(self):
-        torques_min = [self.__MIN_PITCH, self.__MIN_ROLL, self.__MIN_YAW_RATE, self.__MIN_FORCE]
-        torques_max = [self.__MAX_PITCH, self.__MAX_ROLL, self.__MAX_YAW_RATE, self.__MAX_FORCE]
+        torques_min = [
+            self.__MIN_PITCH,
+            self.__MIN_ROLL,
+            self.__MIN_YAW_RATE,
+            self.__MIN_FORCE,
+        ]
+        torques_max = [
+            self.__MAX_PITCH,
+            self.__MAX_ROLL,
+            self.__MAX_YAW_RATE,
+            self.__MAX_FORCE,
+        ]
         no_min_max = [None, None, None, None]
-        return [("[pitch_torque, roll_torque, yaw_torque, thrust]",
-                 ContinuousActionSpace([4], low=torques_min, high=torques_max)),
-                ("[pitch_target, roll_target, yaw_rate_target, altitude_target]",
-                 ContinuousActionSpace([4], low=no_min_max, high=no_min_max))]
+        return [
+            (
+                "[pitch_torque, roll_torque, yaw_torque, thrust]",
+                ContinuousActionSpace([4], low=torques_min, high=torques_max),
+            ),
+            (
+                "[pitch_target, roll_target, yaw_rate_target, altitude_target]",
+                ContinuousActionSpace([4], low=no_min_max, high=no_min_max),
+            ),
+        ]
 
     def __repr__(self):
         return "UavAgent " + self.name
@@ -324,7 +352,7 @@ class UavAgent(HoloOceanAgent):
 class FixedWing(HoloOceanAgent):
     """Fixed Wing Agent
 
-    This agent is a WIP and is currently just a copy of the Hovering AUV agent. It is not yet ready for public use. 
+    This agent is a WIP and is currently just a copy of the Hovering AUV agent. It is not yet ready for public use.
 
     **Action Space**
 
@@ -342,7 +370,7 @@ class FixedWing(HoloOceanAgent):
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
     **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
     **Instructions for implemeting parameters for Thor Fossen dynamics are given in the corresponding fossen dynamics documentation.**
-        
+
     The following parameters are defined in the C++ code and are not used in the python code. They are provided here for convenience in implementing custom dynamics.
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
     :cvar water_density: (:obj:`float`): Water density in kg / m^3.
@@ -350,15 +378,17 @@ class FixedWing(HoloOceanAgent):
     :cvar cob: (:obj:`np.ndarray`): 3-vecter Center of buoyancy from the center of mass in m.
     :cvar I: (:obj:`np.ndarray`): 3x3 Inertia matrix.
     :cvar thruster_d: (:obj:`np.ndarray`): 8x3 matrix of unit vectors in the direction of thruster propulsion
-    :cvar thruster_p: (:obj:`np.ndarray`): 8x3 matrix of positions in local frame of thrusters positions in m."""
+    :cvar thruster_p: (:obj:`np.ndarray`): 8x3 matrix of positions in local frame of thrusters positions in m.
+    """
+
     # constants in FixedWing.h in holoocean-engine
     __MAX_LIN_ACCEL = 10
     __MAX_ANG_ACCEL = 2
-    __MAX_THRUST = __MAX_LIN_ACCEL*31.02/4
+    __MAX_THRUST = __MAX_LIN_ACCEL * 31.02 / 4
 
     agent_type = "FixedWing"
 
-    ## These parameters are defined in the C++ code and are not used in the python code. They are provided here for convenience. 
+    ## These parameters are defined in the C++ code and are not used in the python code. They are provided here for convenience.
     # mass = 31.02
     # water_density = 997
     # volume = mass / water_density
@@ -385,16 +415,40 @@ class FixedWing(HoloOceanAgent):
     @property
     def control_schemes(self):
         scheme_thrusters = "[Vertical Front Starboard, Vertical Front Port, Vertical Back Port, Vertical Back Starboard, Angled Front Starboard, Angled Front Port, Angled Back Port, Angled Back Starboard]"
-        
+
         scheme_accel = "[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]"
-        limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
-        
+        limits_accel = [
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+        ]
+
         scheme_control = "[des_x, des_y, des_z, des_roll, des_pitch, des_yaw]"
         limits_control = [np.nan, np.nan, np.nan, 180, 90, 180]
-        
-        return [(scheme_thrusters, ContinuousActionSpace([8], low=[-self.__MAX_THRUST]*8, high=[self.__MAX_THRUST]*8)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
-                (scheme_control, ContinuousActionSpace([6], low=[-i for i in limits_control], high=limits_control))]
+
+        return [
+            (
+                scheme_thrusters,
+                ContinuousActionSpace(
+                    [8], low=[-self.__MAX_THRUST] * 8, high=[self.__MAX_THRUST] * 8
+                ),
+            ),
+            (
+                scheme_accel,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_accel], high=limits_accel
+                ),
+            ),
+            (
+                scheme_control,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_control], high=limits_control
+                ),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
@@ -428,6 +482,7 @@ class SphereAgent(HoloOceanAgent):
 
     Inherits from :class:`HoloOceanAgent`.
     """
+
     # constants in SphereRobot.h in holoocean-engine
     __DISCRETE_MIN = 0
     __DISCRETE_MAX = 4
@@ -444,9 +499,21 @@ class SphereAgent(HoloOceanAgent):
     def control_schemes(self):
         cont_min = [self.__MIN_FORWARD_SPEED, self.__MIN_ROTATION_SPEED]
         cont_max = [self.__MAX_FORWARD_SPEED, self.__MAX_ROTATION_SPEED]
-        return [("0: Move forward\n1: Move backward\n2: Turn right\n3: Turn left",
-                 DiscreteActionSpace([1], low=self.__DISCRETE_MIN, high=self.__DISCRETE_MAX, buffer_shape=[2])),
-                ("[forward_movement, rotation]", ContinuousActionSpace([2], low=cont_min, high=cont_max))]
+        return [
+            (
+                "0: Move forward\n1: Move backward\n2: Turn right\n3: Turn left",
+                DiscreteActionSpace(
+                    [1],
+                    low=self.__DISCRETE_MIN,
+                    high=self.__DISCRETE_MAX,
+                    buffer_shape=[2],
+                ),
+            ),
+            (
+                "[forward_movement, rotation]",
+                ContinuousActionSpace([2], low=cont_min, high=cont_max),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
@@ -457,7 +524,7 @@ class SphereAgent(HoloOceanAgent):
         elif self._current_control_scheme is ControlSchemes.SPHERE_DISCRETE:
             # Move forward .185 meters (to match initial release)
             # Turn 10/-10 degrees (to match initial release)
-            actions = np.array([[.185, 0], [-.185, 0], [0, 10], [0, -10]])
+            actions = np.array([[0.185, 0], [-0.185, 0], [0, 10], [0, -10]])
             to_act = np.array(actions[action, :])
             np.copyto(self._action_buffer, to_act)
 
@@ -478,6 +545,7 @@ class AndroidAgent(HoloOceanAgent):
     There are 18 joints with 3 DOF, 10 with 2 DOF, and 20 with 1 DOF.
 
     Inherits from :class:`HoloOceanAgent`."""
+
     # constants in Android.h in holoocean-engine
     __MAX_TORQUE = 20
     __MIN_TORQUE = -__MAX_TORQUE
@@ -492,11 +560,21 @@ class AndroidAgent(HoloOceanAgent):
         scaled_min = [-1 for _ in range(self.__JOINTS_VECTOR_SIZE)]
         scaled_max = [1 for _ in range(self.__JOINTS_VECTOR_SIZE)]
 
-        return [("[Raw Bone Torques] * 94",
-                 ContinuousActionSpace([self.__JOINTS_VECTOR_SIZE], low=direct_min, high=direct_max)),
-                ("[-1 to 1] * 94, where 1 is the maximum torque for a given "
-                 "joint (based on mass of bone)",
-                 ContinuousActionSpace([self.__JOINTS_VECTOR_SIZE], low=scaled_min, high=scaled_max))]
+        return [
+            (
+                "[Raw Bone Torques] * 94",
+                ContinuousActionSpace(
+                    [self.__JOINTS_VECTOR_SIZE], low=direct_min, high=direct_max
+                ),
+            ),
+            (
+                "[-1 to 1] * 94, where 1 is the maximum torque for a given "
+                "joint (based on mass of bone)",
+                ContinuousActionSpace(
+                    [self.__JOINTS_VECTOR_SIZE], low=scaled_min, high=scaled_max
+                ),
+            ),
+        ]
 
     def __repr__(self):
         return "AndroidAgent " + self.name
@@ -530,7 +608,6 @@ class AndroidAgent(HoloOceanAgent):
         "upperarm_r": 21,
         "lowerarm_r": 24,
         "hand_r": 27,
-
         # Leg Joints. Each has[swing1, swing2, twist]
         "thigh_l": 30,
         "calf_l": 33,
@@ -540,7 +617,6 @@ class AndroidAgent(HoloOceanAgent):
         "calf_r": 45,
         "foot_r": 48,
         "ball_r": 51,
-
         # First joint of each finger. Has only [swing1, swing2]
         "thumb_01_l": 54,
         "index_01_l": 56,
@@ -552,7 +628,6 @@ class AndroidAgent(HoloOceanAgent):
         "middle_01_r": 68,
         "ring_01_r": 70,
         "pinky_01_r": 72,
-
         # Second joint of each finger. Has only[swing1]
         "thumb_02_l": 74,
         "index_02_l": 75,
@@ -564,7 +639,6 @@ class AndroidAgent(HoloOceanAgent):
         "middle_02_r": 81,
         "ring_02_r": 82,
         "pinky_02_r": 83,
-
         # Third joint of each finger. Has only[swing1]
         "thumb_03_l": 84,
         "index_03_l": 85,
@@ -575,7 +649,7 @@ class AndroidAgent(HoloOceanAgent):
         "index_03_r": 90,
         "middle_03_r": 91,
         "ring_03_r": 92,
-        "pinky_03_r": 93
+        "pinky_03_r": 93,
     }
 
 
@@ -584,15 +658,16 @@ class HandAgent(HoloOceanAgent):
 
     Can be controlled via torques supplied to its joints and moved around in
     three dimensions.
-    
+
     **Action Space:**
 
     23 or 26 dimensional vector of continuous values representing torques to be
     applied at each joint.
 
     Inherits from :class:`HoloOceanAgent`.
-    
+
     """
+
     # constants in HandAgent.h in holoocean-engine
     __MAX_MOVEMENT_METERS = 0.5
     __MIN_MOVEMENT_METERS = -__MAX_MOVEMENT_METERS
@@ -612,17 +687,34 @@ class HandAgent(HoloOceanAgent):
         joint_min = [-1 for _ in range(self.__JOINTS_DOF)]
         joint_max = [1 for _ in range(self.__JOINTS_DOF)]
 
-        scaled_min = [-1.0 if i < self.__JOINTS_DOF
-                      else self.__MIN_MOVEMENT_METERS for i in range(self.__JOINTS_AND_DIST)]
-        scaled_max = [1.0 if i < self.__JOINTS_DOF
-                      else self.__MAX_MOVEMENT_METERS for i in range(self.__JOINTS_AND_DIST)]
+        scaled_min = [
+            -1.0 if i < self.__JOINTS_DOF else self.__MIN_MOVEMENT_METERS
+            for i in range(self.__JOINTS_AND_DIST)
+        ]
+        scaled_max = [
+            1.0 if i < self.__JOINTS_DOF else self.__MAX_MOVEMENT_METERS
+            for i in range(self.__JOINTS_AND_DIST)
+        ]
 
-        return [("[Raw Bone Torques] * 23", ContinuousActionSpace([self.__JOINTS_DOF], low=raw_min, high=raw_max)),
-                ("[-1 to 1] * 23, where 1 is the maximum torque for the given index"
-                 "joint (based on mass of bone)",
-                 ContinuousActionSpace([self.__JOINTS_DOF], low=joint_min, high=joint_max)),
-                ("[-1 to 1] * 23, scaled torques, then [x, y, z] transform",
-                 ContinuousActionSpace([self.__JOINTS_AND_DIST], low=scaled_min, high=scaled_max))]
+        return [
+            (
+                "[Raw Bone Torques] * 23",
+                ContinuousActionSpace([self.__JOINTS_DOF], low=raw_min, high=raw_max),
+            ),
+            (
+                "[-1 to 1] * 23, where 1 is the maximum torque for the given index"
+                "joint (based on mass of bone)",
+                ContinuousActionSpace(
+                    [self.__JOINTS_DOF], low=joint_min, high=joint_max
+                ),
+            ),
+            (
+                "[-1 to 1] * 23, scaled torques, then [x, y, z] transform",
+                ContinuousActionSpace(
+                    [self.__JOINTS_AND_DIST], low=scaled_min, high=scaled_max
+                ),
+            ),
+        ]
 
     def __repr__(self):
         return "HandAgent " + self.name
@@ -647,40 +739,37 @@ class HandAgent(HoloOceanAgent):
     _joint_indices = {
         # Head, Spine, and Arm joints. Each has[swing1, swing2, twist]
         "hand_r": 0,
-
         # First joint of each finger. Has only [swing1, swing2]
         "thumb_01_r": 3,
         "index_01_r": 5,
         "middle_01_r": 7,
         "ring_01_r": 9,
         "pinky_01_r": 11,
-
         # Second joint of each finger. Has only[swing1]
         "thumb_02_r": 12,
         "index_02_r": 13,
         "middle_02_r": 14,
         "ring_02_r": 15,
         "pinky_02_r": 16,
-
         # Third joint of each finger. Has only[swing1]
         "thumb_03_r": 17,
         "index_03_r": 18,
         "middle_03_r": 19,
         "ring_03_r": 20,
-        "pinky_03_r": 21
+        "pinky_03_r": 21,
     }
 
 
 class NavAgent(HoloOceanAgent):
     """A humanoid character capable of intelligent navigation.
 
-       **Action Space:**
+    **Action Space:**
 
-       Continuous control scheme of the form ``[x_target, y_target, z_target]``. 
-       (see :ref:`coordinate-system`)
+    Continuous control scheme of the form ``[x_target, y_target, z_target]``.
+    (see :ref:`coordinate-system`)
 
-       Inherits from :class:`HoloOceanAgent`.
-       
+    Inherits from :class:`HoloOceanAgent`.
+
     """
 
     # constants in NavAgent.h in holoocean-engine
@@ -693,7 +782,12 @@ class NavAgent(HoloOceanAgent):
     def control_schemes(self):
         low = [self.__MIN_DISTANCE for _ in range(3)]
         high = [self.__MAX_DISTANCE for _ in range(3)]
-        return [("[x_target, y_target, z_target]", ContinuousActionSpace([3], low=low, high=high))]
+        return [
+            (
+                "[x_target, y_target, z_target]",
+                ContinuousActionSpace([3], low=low, high=high),
+            )
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
@@ -711,11 +805,12 @@ class TurtleAgent(HoloOceanAgent):
     **Action Space**:
 
     ``[forward_force, rot_force]``
-    
+
     - ``forward_force`` is capped at 160 in either direction
     - ``rot_force`` is capped at 35 either direction
 
     Inherits from :class:`HoloOceanAgent`."""
+
     # constants in TurtleAgent.h in holoocean-engine
     __MAX_THRUST = 160.0
     __MIN_THRUST = -__MAX_THRUST
@@ -729,7 +824,12 @@ class TurtleAgent(HoloOceanAgent):
     def control_schemes(self):
         low = [self.__MIN_THRUST, self.__MIN_YAW]
         high = [self.__MAX_THRUST, self.__MAX_YAW]
-        return [("[forward_force, rot_force]", ContinuousActionSpace([2], low=low, high=high))]
+        return [
+            (
+                "[forward_force, rot_force]",
+                ContinuousActionSpace([2], low=low, high=high),
+            )
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
@@ -759,10 +859,10 @@ class HoveringAUV(HoloOceanAgent):
     #. Accelerations, in global frame: ``[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]``
 
     Inherits from :class:`HoloOceanAgent`.
-    
+
     :strong:`These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.`
     :strong:`If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.`
-    
+
     The following parameters are defined in the C++ code and are not used in the python code. They are provided here for convenience in implementing custom dynamics.
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
     :cvar water_density: (:obj:`float`): Water density in kg / m^3.
@@ -770,11 +870,13 @@ class HoveringAUV(HoloOceanAgent):
     :cvar cob: (:obj:`np.ndarray`): 3-vecter Center of buoyancy from the center of mass in m.
     :cvar I: (:obj:`np.ndarray`): 3x3 Inertia matrix.
     :cvar thruster_d: (:obj:`np.ndarray`): 8x3 matrix of unit vectors in the direction of thruster propulsion
-    :cvar thruster_p: (:obj:`np.ndarray`): 8x3 matrix of positions in local frame of thrusters positions in m."""
+    :cvar thruster_p: (:obj:`np.ndarray`): 8x3 matrix of positions in local frame of thrusters positions in m.
+    """
+
     # constants in HoveringAUV.h
     __MAX_LIN_ACCEL = 10
     __MAX_ANG_ACCEL = 2
-    __MAX_THRUST = __MAX_LIN_ACCEL*31.02/4
+    __MAX_THRUST = __MAX_LIN_ACCEL * 31.02 / 4
 
     agent_type = "HoveringAUV"
 
@@ -804,26 +906,50 @@ class HoveringAUV(HoloOceanAgent):
     @property
     def control_schemes(self):
         scheme_thrusters = "[Vertical Front Starboard, Vertical Front Port, Vertical Back Port, Vertical Back Starboard, Angled Front Starboard, Angled Front Port, Angled Back Port, Angled Back Starboard]"
-        
+
         scheme_accel = "[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]"
-        limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
-        
+        limits_accel = [
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+        ]
+
         scheme_control = "[des_x, des_y, des_z, des_roll, des_pitch, des_yaw]"
         limits_control = [np.nan, np.nan, np.nan, 180, 90, 180]
-        
-        return [(scheme_thrusters, ContinuousActionSpace([8], low=[-self.__MAX_THRUST]*8, high=[self.__MAX_THRUST]*8)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
-                (scheme_control, ContinuousActionSpace([6], low=[-i for i in limits_control], high=limits_control))]
+
+        return [
+            (
+                scheme_thrusters,
+                ContinuousActionSpace(
+                    [8], low=[-self.__MAX_THRUST] * 8, high=[self.__MAX_THRUST] * 8
+                ),
+            ),
+            (
+                scheme_accel,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_accel], high=limits_accel
+                ),
+            ),
+            (
+                scheme_control,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_control], high=limits_control
+                ),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
 
     def __repr__(self):
         return "HoveringAUV " + self.name
-        
+
 
 class BlueROV2(HoloOceanAgent):
-    """An implementation of the BlueROV2 Heavy vehicle from Blue Robotics.  
+    """An implementation of the BlueROV2 Heavy vehicle from Blue Robotics.
 
     **Action Space**
     Has three possible control schemes, as follows
@@ -835,19 +961,20 @@ class BlueROV2(HoloOceanAgent):
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
     **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
     **Instructions for implemeting parameters for Thor Fossen dynamics are given in the corresponding fossen dynamics documentation.**
-        
+
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
     :cvar water_density: (:obj:`float`): Water density in kg / m^3.
     :cvar volume: (:obj:`float`): Volume of vehicle in m^3.
     :cvar cob: (:obj:`np.ndarray`): 3-vecter Center of buoyancy from the center of mass in m.
     :cvar I: (:obj:`np.ndarray`): 3x3 Inertia matrix.
     :cvar thruster_d: (:obj:`np.ndarray`): 8x3 matrix of unit vectors in the direction of thruster propulsion
-    :cvar thruster_p: (:obj:`np.ndarray`): 8x3 matrix of positions in local frame of thrusters positions in m."""
+    :cvar thruster_p: (:obj:`np.ndarray`): 8x3 matrix of positions in local frame of thrusters positions in m.
+    """
 
     # constants in HoveringAUV.h in holoocean-engine
     __MAX_LIN_ACCEL = 10
     __MAX_ANG_ACCEL = 2
-    __MAX_THRUST = __MAX_LIN_ACCEL*11.5/4
+    __MAX_THRUST = __MAX_LIN_ACCEL * 11.5 / 4
 
     agent_type = "BlueROV2"
 
@@ -879,24 +1006,48 @@ class BlueROV2(HoloOceanAgent):
         scheme_thrusters = "[Vertical Front Starboard, Vertical Front Port, Vertical Back Port, Vertical Back Starboard, Angled Front Starboard, Angled Front Port, Angled Back Port, Angled Back Starboard]"
 
         scheme_accel = "[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]"
-        limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
+        limits_accel = [
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+        ]
 
         scheme_control = "[des_x, des_y, des_z, des_roll, des_pitch, des_yaw]"
         limits_control = [np.nan, np.nan, np.nan, 180, 90, 180]
 
-        return [(scheme_thrusters, ContinuousActionSpace([8], low=[-self.__MAX_THRUST]*8, high=[self.__MAX_THRUST]*8)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
-                (scheme_control, ContinuousActionSpace([6], low=[-i for i in limits_control], high=limits_control))]
+        return [
+            (
+                scheme_thrusters,
+                ContinuousActionSpace(
+                    [8], low=[-self.__MAX_THRUST] * 8, high=[self.__MAX_THRUST] * 8
+                ),
+            ),
+            (
+                scheme_accel,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_accel], high=limits_accel
+                ),
+            ),
+            (
+                scheme_control,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_control], high=limits_control
+                ),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
 
     def __repr__(self):
         return "BlueROV2 " + self.name
-    
+
 
 class SurfaceVessel(HoloOceanAgent):
-    """A simple surface vessel. 
+    """A simple surface vessel.
 
     **Action Space**
 
@@ -910,16 +1061,18 @@ class SurfaceVessel(HoloOceanAgent):
     #. Accelerations, in global frame: ``[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]``
 
     Inherits from :class:`HoloOceanAgent`.
-    
+
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
     **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
-        
+
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
     :cvar water_density: (:obj:`float`): Water density in kg / m^3.
     :cvar volume: (:obj:`float`): Volume of vehicle in m^3.
     :cvar cob: (:obj:`np.ndarray`): 3-vecter Center of buoyancy from the center of mass in m.
     :cvar I: (:obj:`np.ndarray`): 3x3 Inertia matrix.
-    :cvar thruster_p: (:obj:`np.ndarray`): 2x3 matrix of positions in local frame of thrusters positions in m."""
+    :cvar thruster_p: (:obj:`np.ndarray`): 2x3 matrix of positions in local frame of thrusters positions in m.
+    """
+
     # constants in SurfaceVessel.h in holoocean-engine
     __MAX_LIN_ACCEL = 20
     __MAX_ANG_ACCEL = 2
@@ -938,16 +1091,40 @@ class SurfaceVessel(HoloOceanAgent):
     @property
     def control_schemes(self):
         scheme_thrusters = "[Left thruster, Right thruster]"
-        
+
         scheme_accel = "[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]"
-        limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
-        
+        limits_accel = [
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+        ]
+
         scheme_control = "[des_x, des_y]"
         limits_control = [np.nan, np.nan]
-        
-        return [(scheme_thrusters, ContinuousActionSpace([2], low=[-self.__MAX_THRUST]*8, high=[self.__MAX_THRUST]*8)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
-                (scheme_control, ContinuousActionSpace([2], low=[-i for i in limits_control], high=limits_control))]
+
+        return [
+            (
+                scheme_thrusters,
+                ContinuousActionSpace(
+                    [2], low=[-self.__MAX_THRUST] * 8, high=[self.__MAX_THRUST] * 8
+                ),
+            ),
+            (
+                scheme_accel,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_accel], high=limits_accel
+                ),
+            ),
+            (
+                scheme_control,
+                ContinuousActionSpace(
+                    [2], low=[-i for i in limits_control], high=limits_control
+                ),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
@@ -968,7 +1145,7 @@ class TorpedoAUV(HoloOceanAgent):
     #. Accelerations, in global frame: ``[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]``
 
     Inherits from :class:`HoloOceanAgent`.
-    
+
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
     **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
     **Instructions for implemeting parameters for Thor Fossen dynamics are given in the corresponding fossen dynamics documentation.**
@@ -978,7 +1155,9 @@ class TorpedoAUV(HoloOceanAgent):
     :cvar cob: (:obj:`np.ndarray`): 3-vecter Center of buoyancy from the center of mass in m.
     :cvar I: (:obj:`np.ndarray`): 3x3 Inertia matrix.
     :cvar thruster_p: (:obj:`np.ndarray`): 3 matrix of positions in local frame of propeller position in m.
-    :cvar fin_p: (:obj:`np.ndarray`): 4x3 matrix of positions in local frame of fin positions in m."""
+    :cvar fin_p: (:obj:`np.ndarray`): 4x3 matrix of positions in local frame of fin positions in m.
+    """
+
     # constants in TorpedoAUV.h in holoocean-engine
     __MAX_THRUST = 100
     __MAX_FIN = 45
@@ -1002,13 +1181,32 @@ class TorpedoAUV(HoloOceanAgent):
     @property
     def control_schemes(self):
         scheme_fins = "[right_fin, top_fin, left_fin, bottom_fin, thrust]"
-        limits_fins = [self.__MAX_FIN]*4 + [self.__MAX_THRUST]
+        limits_fins = [self.__MAX_FIN] * 4 + [self.__MAX_THRUST]
 
         scheme_accel = "[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]"
-        limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
-        
-        return [(scheme_fins, ContinuousActionSpace([5], low=[-i for i in limits_fins], high=limits_fins)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel))]
+        limits_accel = [
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+        ]
+
+        return [
+            (
+                scheme_fins,
+                ContinuousActionSpace(
+                    [5], low=[-i for i in limits_fins], high=limits_fins
+                ),
+            ),
+            (
+                scheme_accel,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_accel], high=limits_accel
+                ),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
@@ -1029,18 +1227,20 @@ class CougUV(HoloOceanAgent):
     #. Accelerations, in global frame: ``[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]``
 
     Inherits from :class:`HoloOceanAgent`.
-    
+
     **These variables are the constants used in the C++ for "Thruster" and "PD" control schemes. Editing them in python will not change the vehicle behavior.**
     **If using the "custom dynamics" control scheme, these values are ignored, and any desired dynamics parameters must be defined separately in your dynamics implementation.**
     **Instructions for implemeting parameters for Thor Fossen dynamics are given in the corresponding fossen dynamics documentation.**
-    
+
     :cvar mass: (:obj:`float`): Mass of the vehicle in kg.
     :cvar water_density: (:obj:`float`): Water density in kg / m^3.
     :cvar volume: (:obj:`float`): Volume of vehicle in m^3.
     :cvar cob: (:obj:`np.ndarray`): 3-vecter Center of buoyancy from the center of mass in m.
     :cvar I: (:obj:`np.ndarray`): 3x3 Inertia matrix.
     :cvar thruster_p: (:obj:`np.ndarray`): 3 matrix of positions in local frame of propeller position in m.
-    :cvar fin_p: (:obj:`np.ndarray`): 4x3 matrix of positions in local frame of fin positions in m."""
+    :cvar fin_p: (:obj:`np.ndarray`): 4x3 matrix of positions in local frame of fin positions in m.
+    """
+
     # constants in CougUV.h
     __MAX_THRUST = 100
     __MAX_FIN = 45
@@ -1064,13 +1264,32 @@ class CougUV(HoloOceanAgent):
     @property
     def control_schemes(self):
         scheme_fins = "[right_fin, top_fin, left_fin, bottom_fin, thrust]"
-        limits_fins = [self.__MAX_FIN]*4 + [self.__MAX_THRUST]
+        limits_fins = [self.__MAX_FIN] * 4 + [self.__MAX_THRUST]
 
         scheme_accel = "[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]"
-        limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
-        
-        return [(scheme_fins, ContinuousActionSpace([5], low=[-i for i in limits_fins], high=limits_fins)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel))]
+        limits_accel = [
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+        ]
+
+        return [
+            (
+                scheme_fins,
+                ContinuousActionSpace(
+                    [5], low=[-i for i in limits_fins], high=limits_fins
+                ),
+            ),
+            (
+                scheme_accel,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_accel], high=limits_accel
+                ),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
@@ -1105,11 +1324,13 @@ class ScubaDiver(HoloOceanAgent):
     :cvar cob: (:obj:`np.ndarray`): 3-vecter Center of buoyancy from the center of mass in m.
     :cvar I: (:obj:`np.ndarray`): 3x3 Inertia matrix.
     :cvar thruster_d: (:obj:`np.ndarray`): 8x3 matrix of unit vectors in the direction of thruster propulsion
-    :cvar thruster_p: (:obj:`np.ndarray`): 8x3 matrix of positions in local frame of thrusters positions in m."""
+    :cvar thruster_p: (:obj:`np.ndarray`): 8x3 matrix of positions in local frame of thrusters positions in m.
+    """
+
     # constants in ScubaDiver.h in holoocean-engine
     __MAX_LIN_ACCEL = 10
     __MAX_ANG_ACCEL = 2
-    __MAX_THRUST = __MAX_LIN_ACCEL*100.0/4
+    __MAX_THRUST = __MAX_LIN_ACCEL * 100.0 / 4
 
     agent_type = "ScubaDiver"
     # # The following parameters are defined in the C++ code and are not used in the python code. They are provided here only for convenience, and may not be correct. Check the C++ code for the most up-to-date information.
@@ -1140,14 +1361,38 @@ class ScubaDiver(HoloOceanAgent):
         scheme_thrusters = "[Vertical Front Starboard, Vertical Front Port, Vertical Back Port, Vertical Back Starboard, Angled Front Starboard, Angled Front Port, Angled Back Port, Angled Back Starboard]"
 
         scheme_accel = "[lin_accel_x, lin_accel_y, lin_accel_z, ang_accel_x, ang_accel_y, ang_accel_x]"
-        limits_accel = [self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_LIN_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL, self.__MAX_ANG_ACCEL]
+        limits_accel = [
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_LIN_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+            self.__MAX_ANG_ACCEL,
+        ]
 
         scheme_control = "[des_x, des_y, des_z, des_roll, des_pitch, des_yaw]"
         limits_control = [np.nan, np.nan, np.nan, 180, 90, 180]
 
-        return [(scheme_thrusters, ContinuousActionSpace([8], low=[-self.__MAX_THRUST]*8, high=[self.__MAX_THRUST]*8)),
-                (scheme_accel, ContinuousActionSpace([6], low=[-i for i in limits_accel], high=limits_accel)),
-                (scheme_control, ContinuousActionSpace([6], low=[-i for i in limits_control], high=limits_control))]
+        return [
+            (
+                scheme_thrusters,
+                ContinuousActionSpace(
+                    [8], low=[-self.__MAX_THRUST] * 8, high=[self.__MAX_THRUST] * 8
+                ),
+            ),
+            (
+                scheme_accel,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_accel], high=limits_accel
+                ),
+            ),
+            (
+                scheme_control,
+                ContinuousActionSpace(
+                    [6], low=[-i for i in limits_control], high=limits_control
+                ),
+            ),
+        ]
 
     def get_joint_constraints(self, joint_name):
         return None
@@ -1166,9 +1411,9 @@ class AgentDefinition:
             reference.
         sensors (:class:`~holoocean.sensors.SensorDefinition` or class type (if no duplicate sensors)): A list of
             HoloOceanSensors to read from this agent.
-        starting_loc (:obj:`list` of :obj:`float`): Starting ``[x, y, z]`` location for agent 
+        starting_loc (:obj:`list` of :obj:`float`): Starting ``[x, y, z]`` location for agent
             (see :ref:`coordinate-system`)
-        starting_rot (:obj:`list` of :obj:`float`): Starting ``[roll, pitch, yaw]`` rotation for agent 
+        starting_rot (:obj:`list` of :obj:`float`): Starting ``[roll, pitch, yaw]`` rotation for agent
             (see :ref:`rotations`)
         existing (:obj:`bool`): If the agent exists in the world or not (deprecated)
     """
@@ -1189,8 +1434,16 @@ class AgentDefinition:
         "FixedWing": FixedWing,
     }
 
-    def __init__(self, agent_name, agent_type, sensors=None, starting_loc=(0, 0, 0),
-                 starting_rot=(0, 0, 0), existing=False, is_main_agent=False):
+    def __init__(
+        self,
+        agent_name,
+        agent_type,
+        sensors=None,
+        starting_loc=(0, 0, 0),
+        starting_rot=(0, 0, 0),
+        existing=False,
+        is_main_agent=False,
+    ):
         self.starting_loc = starting_loc
         self.starting_rot = starting_rot
         self.existing = existing
@@ -1198,9 +1451,9 @@ class AgentDefinition:
         self.is_main_agent = is_main_agent
         for i, sensor_def in enumerate(self.sensors):
             if not isinstance(sensor_def, SensorDefinition):
-                self.sensors[i] = \
-                    SensorDefinition(agent_name, agent_type,
-                                     sensor_def.sensor_type, sensor_def)
+                self.sensors[i] = SensorDefinition(
+                    agent_name, agent_type, sensor_def.sensor_type, sensor_def
+                )
         self.name = agent_name
 
         if isinstance(agent_type, str):
@@ -1210,8 +1463,7 @@ class AgentDefinition:
 
 
 class AgentFactory:
-    """Creates an agent object
-    """
+    """Creates an agent object"""
 
     @staticmethod
     def build_agent(client, agent_def):

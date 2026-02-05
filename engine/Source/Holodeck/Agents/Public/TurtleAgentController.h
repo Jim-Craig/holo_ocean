@@ -10,22 +10,22 @@
 #include "TurtleAgentController.generated.h"
 
 /**
-* A Holodeck Turtle Agent Controller
-*/
+ * A Holodeck Turtle Agent Controller
+ */
 UCLASS()
-class HOLODECK_API ATurtleAgentController : public AHolodeckPawnController
-{
+class HOLODECK_API ATurtleAgentController : public AHolodeckPawnController {
 	GENERATED_BODY()
 
 public:
 	/**
-	* Default Constructor
-	*/
-	ATurtleAgentController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	 * Default Constructor
+	 */
+	ATurtleAgentController(
+		const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/**
-	* Default Destructor
-	*/
+	 * Default Destructor
+	 */
 	~ATurtleAgentController();
 
 	void AddControlSchemes() override {

@@ -1,7 +1,7 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "SimplePID.h"
+#include "Holodeck.h"
 
 SimplePID::SimplePID() {
 	Integrator = 0.0f;
@@ -12,7 +12,7 @@ SimplePID::SimplePID() {
 }
 
 SimplePID::SimplePID(const float P, const float I, const float D)
-		: P(P), I(I), D(D), Tau(0.05) {
+	: P(P), I(I), D(D), Tau(0.05) {
 	Integrator = 0.0f;
 	Differentiator = 0.0f;
 	LastError = 0.0f;
@@ -34,19 +34,22 @@ float SimplePID::ComputePID(float Desired, float Current, float Delta) {
 
 	// Derivative
 	// Noise reduction (See "Small Unmanned Aircraft". Chapter 6. Slide 31/33)
-	// d/dx w.r.t. error:: differentiator_ = (2*tau_ - dt)/(2*tau_ + dt)*differentiator_ + 2/(2*tau_ + dt)*(error - last_error_);
+	// d/dx w.r.t. error:: differentiator_ = (2*tau_ - dt)/(2*tau_ +
+	// dt)*differentiator_ + 2/(2*tau_ + dt)*(error - last_error_);
 	if (Delta > 0.0)
-		Differentiator = (2.0 * Tau - Delta) / (2.0 * Tau + Delta) * Differentiator + 2.0 / (2.0 * Tau + Delta) * (Current - LastState);
+		Differentiator = (2.0 * Tau - Delta) / (2.0 * Tau + Delta) * Differentiator
+			+ 2.0 / (2.0 * Tau + Delta) * (Current - LastState);
 
 	LastError = Error;
 	LastState = Current;
 
-	// Note the negative der. term.  This is because now the differentiator is in the feedback loop rather than the forward loop
+	// Note the negative der. term.  This is because now the differentiator is in
+	// the feedback loop rather than the forward loop
 	return P * Error + I * Integrator - D * Differentiator;
 }
 
 float SimplePID::ComputePIDDirect(float XC, float X, float XDot, float Delta) {
-	//XC is the desired, X is the current
+	// XC is the desired, X is the current
 	float Error = XC - X;
 
 	if (Delta == 0 || MyAbs(Error) > 9999999) {
@@ -61,19 +64,24 @@ float SimplePID::ComputePIDDirect(float XC, float X, float XDot, float Delta) {
 	return P * Error + I * Integrator - D * XDot;
 }
 
-float SimplePID::ComputePIDDirect(float XC, float X, float XDot, float Delta, bool bIsAngle, bool Degrees) {
+float SimplePID::ComputePIDDirect(
+	float XC,
+	float X,
+	float XDot,
+	float Delta,
+	bool  bIsAngle,
+	bool  Degrees) {
 	// XC is the desired, X is the current
 	float Error = XC - X;
 
 	if (bIsAngle) {
-		if(Degrees){
-			if (Error >= 180) 
+		if (Degrees) {
+			if (Error >= 180)
 				Error -= (2.0 * 180);
 			else if (Error <= -180)
 				Error += (2 * 180);
-		}
-		else{
-			if (Error >= PI) 
+		} else {
+			if (Error >= PI)
 				Error -= (2.0 * PI);
 			else if (Error <= -PI)
 				Error += (2 * PI);

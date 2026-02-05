@@ -1,7 +1,8 @@
 // MIT License (c) 2021 BYU FRoStLab see LICENSE file
 
-#include "Holodeck.h"
 #include "GPSSensor.h"
+#include "HolodeckBuoyantAgent.h"
+#include "Holodeck.h"
 
 UGPSSensor::UGPSSensor() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -11,8 +12,9 @@ UGPSSensor::UGPSSensor() {
 void UGPSSensor::ParseSensorParms(FString ParmsJson) {
 	Super::ParseSensorParms(ParmsJson);
 
-	TSharedPtr<FJsonObject> JsonParsed;
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParmsJson);
+	TSharedPtr<FJsonObject>		   JsonParsed;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader =
+		TJsonReaderFactory<TCHAR>::Create(ParmsJson);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed)) {
 
 		if (JsonParsed->HasTypedField<EJson::Number>("Sigma")) {
@@ -30,7 +32,8 @@ void UGPSSensor::ParseSensorParms(FString ParmsJson) {
 		}
 
 		if (JsonParsed->HasTypedField<EJson::Number>("Depth")) {
-			// Take absolute value in case people put it in as a negative (ie depth is down)
+			// Take absolute value in case people put it in as a negative (ie depth is
+			// down)
 			GPSDepth = UKismetMathLibrary::Abs(JsonParsed->GetNumberField("Depth"));
 		}
 
@@ -40,39 +43,57 @@ void UGPSSensor::ParseSensorParms(FString ParmsJson) {
 		if (JsonParsed->HasTypedField<EJson::Number>("DepthCov")) {
 			depthMVN.initCov(JsonParsed->GetNumberField("DepthCov"));
 		}
-
-	}
-	else {
-		UE_LOG(LogHolodeck, Fatal, TEXT("UGPSSensor::ParseSensorParms:: Unable to parse json."));
+	} else {
+		UE_LOG(
+			LogHolodeck,
+			Fatal,
+			TEXT("UGPSSensor::ParseSensorParms:: Unable to parse json."));
 	}
 }
 
 void UGPSSensor::InitializeSensor() {
 	Super::InitializeSensor();
 
-	//You need to get the pointer to the object you are attached to. 
+	// You need to get the pointer to the object you are attached to.
 	Parent = this->GetAttachParent();
+	// Need to get the agent you are attached to for receiving a GPS measurement with
+	// changing water level
+	if (Parent) {
+		Agent = Parent->GetOwner();
+	}
+	if (Agent) {
+		BuoyantAgent = Cast<AHolodeckBuoyantAgent>(Agent);
+	}
 }
 
-void UGPSSensor::TickSensorComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
-	//check if your parent pointer is valid, and if the sensor is on. Then get the location and buffer, then send the location to the buffer. 
+void UGPSSensor::TickSensorComponent(
+	float						 DeltaTime,
+	ELevelTick					 TickType,
+	FActorComponentTickFunction* ThisTickFunction) {
+	// check if your parent pointer is valid, and if the sensor is on. Then get
+	// the location and buffer, then send the location to the buffer.
 	if (Parent != nullptr && bOn) {
 		FVector Location = this->GetComponentLocation();
 
 		// Get location
 		float* FloatBuffer = static_cast<float*>(Buffer);
 		Location = ConvertLinearVector(Location, UEToClient);
-
-		// Check to make sure we're not any deeper than depth
-		float depth = -1*Location.Z + depthMVN.sampleFloat();
-		if(depth < GPSDepth){
+		float depth = -1 * Location.Z + depthMVN.sampleFloat();
+		if (BuoyantAgent == nullptr) {
+			UE_LOG(
+				LogHolodeck,
+				Log,
+				TEXT(
+					"BuoyantAgent is a nullptr -- GPSSensor does not account for changing tide"));
+		} else {
+			depth += (BuoyantAgent->SurfaceLevel / 100);
+		}
+		if (depth < GPSDepth) {
 			Location += mvn.sampleFVector();
 			FloatBuffer[0] = Location.X;
 			FloatBuffer[1] = Location.Y;
 			FloatBuffer[2] = Location.Z;
-		}
-		// If we are, we get nothing back
-		else{
+		} else {
 			FloatBuffer[0] = std::numeric_limits<double>::quiet_NaN();
 			FloatBuffer[1] = std::numeric_limits<double>::quiet_NaN();
 			FloatBuffer[2] = std::numeric_limits<double>::quiet_NaN();

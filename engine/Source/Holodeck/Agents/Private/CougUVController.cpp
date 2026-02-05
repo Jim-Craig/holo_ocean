@@ -1,7 +1,7 @@
 // MIT License (c) 2019 BYU PCCL see LICENSE file
 
-#include "Holodeck.h"
 #include "CougUVController.h"
+#include "Holodeck.h"
 
 ACougUVController::ACougUVController(const FObjectInitializer& ObjectInitializer)
 	: AHolodeckPawnController(ObjectInitializer) {

@@ -10,22 +10,22 @@
 #include "NavAgentController.generated.h"
 
 /**
-* A Holodeck Nav Agent Controller
-*/
+ * A Holodeck Nav Agent Controller
+ */
 UCLASS()
-class HOLODECK_API ANavAgentController : public AHolodeckPawnController
-{
+class HOLODECK_API ANavAgentController : public AHolodeckPawnController {
 	GENERATED_BODY()
 
 public:
 	/**
-	* Default Constructor
-	*/
-	ANavAgentController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	 * Default Constructor
+	 */
+	ANavAgentController(
+		const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/**
-	* Default Destructor
-	*/
+	 * Default Destructor
+	 */
 	~ANavAgentController();
 
 	void AddControlSchemes() override {

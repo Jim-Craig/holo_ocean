@@ -4,34 +4,35 @@
 
 #include "Holodeck.h"
 
-#include "HolodeckPawnController.h"
-#include "FixedWingControlThrusters.h"
-#include "FixedWingControlPD.h"
 #include "FixedWing.h"
+#include "FixedWingControlPD.h"
+#include "FixedWingControlThrusters.h"
+#include "HolodeckPawnController.h"
 
 #include "FixedWingController.generated.h"
 
 /**
-* A Holodeck Turtle Agent Controller
-*/
+ * A Holodeck Turtle Agent Controller
+ */
 UCLASS()
-class HOLODECK_API AFixedWingController : public AHolodeckPawnController
-{
+class HOLODECK_API AFixedWingController : public AHolodeckPawnController {
 	GENERATED_BODY()
 
 public:
 	/**
-	* Default Constructor
-	*/
-	AFixedWingController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	 * Default Constructor
+	 */
+	AFixedWingController(
+		const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/**
-	* Default Destructor
-	*/
+	 * Default Destructor
+	 */
 	~AFixedWingController();
 
 	void AddControlSchemes() override {
-		// The default controller currently in ControlSchemes index 0 is the dynamics one. We push it back to index 2 with this code.
+		// The default controller currently in ControlSchemes index 0 is the
+		// dynamics one. We push it back to index 2 with this code.
 
 		// Thruster controller
 		UFixedWingControlThrusters* Thrusters = NewObject<UFixedWingControlThrusters>();

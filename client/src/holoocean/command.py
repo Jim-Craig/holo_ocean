@@ -4,9 +4,9 @@ worry about these.
 
 """
 
-
 import numpy as np
 from holoocean.exceptions import HoloOceanException
+
 
 class CommandsGroup:
     """Represents a list of commands
@@ -32,12 +32,10 @@ class CommandsGroup:
 
         """
         commands = ",".join(map(lambda x: x.to_json(), self._commands))
-        return "{\"commands\": [" + commands + "]}"
+        return '{"commands": [' + commands + "]}"
 
     def clear(self):
-        """Clear the list of commands.
-
-        """
+        """Clear the list of commands."""
         self._commands.clear()
 
     @property
@@ -87,7 +85,7 @@ class Command:
             for x in number:
                 self.add_number_parameters(x)
             return
-        self._parameters.append("{ \"value\": " + str(number) + " }")
+        self._parameters.append('{ "value": ' + str(number) + " }")
 
     def add_string_parameters(self, string):
         """Add given string parameters to the internal list.
@@ -101,7 +99,7 @@ class Command:
             for x in string:
                 self.add_string_parameters(x)
             return
-        self._parameters.append("{ \"value\": \"" + string + "\" }")
+        self._parameters.append('{ "value": "' + string + '" }')
 
     def to_json(self):
         """Converts to json.
@@ -110,8 +108,13 @@ class Command:
             :obj:`str`: This object as a json string.
 
         """
-        to_return = "{ \"type\": \"" + self._command_type +\
-            "\", \"params\": [" + ",".join(self._parameters) + "]}"
+        to_return = (
+            '{ "type": "'
+            + self._command_type
+            + '", "params": ['
+            + ",".join(self._parameters)
+            + "]}"
+        )
         return to_return
 
 
@@ -122,6 +125,7 @@ class CommandCenter:
         client (:class:`~holoocean.holooceanclient.HoloOceanClient`): Client to send commands to
 
     """
+
     def __init__(self, client):
         self._client = client
 
@@ -129,14 +133,14 @@ class CommandCenter:
         self._command_bool_ptr = self._client.malloc("command_bool", [1], np.bool_)
         # This is the size of the command buffer that HoloOcean expects/will read.
         self.max_buffer = 1048576
-        self._command_buffer_ptr = self._client.malloc("command_buffer", [self.max_buffer], np.byte)
+        self._command_buffer_ptr = self._client.malloc(
+            "command_buffer", [self.max_buffer], np.byte
+        )
         self._commands = CommandsGroup()
         self._should_write_to_command_buffer = False
 
     def clear(self):
-        """Clears pending commands
-
-        """
+        """Clears pending commands"""
         self._commands.clear()
 
     def handle_buffer(self):
@@ -171,7 +175,7 @@ class CommandCenter:
 
         """
         np.copyto(self._command_bool_ptr, True)
-        to_write += '0'  # The gason JSON parser in holoocean expects a 0 at the end of the file.
+        to_write += "0"  # The gason JSON parser in holoocean expects a 0 at the end of the file.
         input_bytes = str.encode(to_write)
         if len(input_bytes) > self.max_buffer:
             raise HoloOceanException("Error: Command length exceeds buffer size")
@@ -269,18 +273,17 @@ class DebugDrawCommand(Command):
         lifetime (:obj:`float`): Number of simulation seconds the object should persist. If 0, makes persistent
 
     """
+
     def __init__(self, draw_type, start, end, color, thickness, lifetime):
         super(DebugDrawCommand, self).__init__()
         self._command_type = "DebugDraw"
 
-        #Check type of variable is not numpy array
+        # Check type of variable is not numpy array
 
         variables = [start, end, color]
 
         for variable in variables:
-
             if not isinstance(variable, list):
-
                 raise TypeError(f"Expected a list, but got {type(variable).__name__}")
 
         self.add_number_parameters(draw_type)
@@ -301,6 +304,7 @@ class TeleportCameraCommand(Command):
             (see :ref:`rotations`)
 
     """
+
     def __init__(self, location, rotation):
         Command.__init__(self)
         self._command_type = "TeleportCamera"
@@ -311,8 +315,8 @@ class TeleportCameraCommand(Command):
 class AddSensorCommand(Command):
     """Add a sensor to an agent
 
-        Args:
-            sensor_definition (~holoocean.sensors.SensorDefinition): Sensor to add
+    Args:
+        sensor_definition (~holoocean.sensors.SensorDefinition): Sensor to add
     """
 
     def __init__(self, sensor_definition):
@@ -332,11 +336,12 @@ class AddSensorCommand(Command):
         self.add_number_parameters(sensor_definition.rotation[1])
         self.add_number_parameters(sensor_definition.rotation[2])
 
+
 class OceanCurrentsCommand(Command):
     """Share individual current velocities for each agent
 
-        Args:
-            ocean_currents: current velocity per agent
+    Args:
+        ocean_currents: current velocity per agent
     """
 
     def __init__(self, name, x, y, z, vehicle_debugging):
@@ -357,11 +362,13 @@ class RemoveSensorCommand(Command):
         sensor (:obj:`str`): Name of the sensor to remove
 
     """
+
     def __init__(self, agent, sensor):
         Command.__init__(self)
         self._command_type = "RemoveSensor"
         self.add_string_parameters(agent)
         self.add_string_parameters(sensor)
+
 
 class RotateSensorCommand(Command):
     """Rotate a sensor on the agent. Multiple rotations do not accumulate, but rather sets to the last rotation.
@@ -372,6 +379,7 @@ class RotateSensorCommand(Command):
         rotation (:obj:`list` of :obj:`float`): ``[roll, pitch, yaw]`` rotation for sensor.
 
     """
+
     def __init__(self, agent, sensor, rotation):
         Command.__init__(self)
         self._command_type = "RotateSensor"
@@ -382,12 +390,13 @@ class RotateSensorCommand(Command):
 
 class RenderViewportCommand(Command):
     """Enable or disable the viewport. Note that this does not prevent the viewport from being shown,
-    it just prevents it from being updated. 
+    it just prevents it from being updated.
 
     Args:
         render_viewport (:obj:`bool`): If viewport should be rendered
 
     """
+
     def __init__(self, render_viewport):
         Command.__init__(self)
         self.set_command_type("RenderViewport")
@@ -403,9 +412,28 @@ class RGBCameraRateCommand(Command):
         ticks_per_capture (:obj:`int`): number of ticks between captures
 
     """
+
     def __init__(self, agent_name, sensor_name, ticks_per_capture):
         Command.__init__(self)
         self._command_type = "RGBCameraRate"
+        self.add_string_parameters(agent_name)
+        self.add_string_parameters(sensor_name)
+        self.add_number_parameters(ticks_per_capture)
+
+
+class RaycastLidarRateCommand(Command):
+    """Set the number of ticks between captures of the Raycast Lidar.
+
+    Args:
+        agent_name (:obj:`str`): name of the agent to modify
+        sensor_name (:obj:`str`): name of the sensor to modify
+        ticks_per_capture (:obj:`int`): number of ticks between captures
+
+    """
+
+    def __init__(self, agent_name, sensor_name, ticks_per_capture):
+        Command.__init__(self)
+        self._command_type = "RaycastLidarRate"
         self.add_string_parameters(agent_name)
         self.add_string_parameters(sensor_name)
         self.add_number_parameters(ticks_per_capture)
@@ -418,11 +446,13 @@ class RenderQualityCommand(Command):
         render_quality (:obj:`int`): 0 = low, 1 = medium, 3 = high, 3 = epic
 
     """
+
     def __init__(self, render_quality):
         Command.__init__(self)
         self.set_command_type("AdjustRenderQuality")
         self.add_number_parameters(int(render_quality))
-        
+
+
 class WaterColorCommand(Command):
     """Changes the water color in the current world.
 
@@ -431,12 +461,14 @@ class WaterColorCommand(Command):
         green (:obj:`float`): The green intensity value of the new water, between 0 and 1.
         blue (:obj:`float`): The blue intensity value of the new water, between 0 and 1.
     """
+
     def __init__(self, red, green, blue):
         Command.__init__(self)
         self.set_command_type("WaterColor")
         self.add_number_parameters(float(red))
         self.add_number_parameters(float(green))
         self.add_number_parameters(float(blue))
+
 
 class TideCommand(Command):
     """Changes the water level in the current world.
@@ -445,26 +477,30 @@ class TideCommand(Command):
         adjustment (:obj:`float`): The amount in meters you want to adjust the water level by or the level you want to set the water at.
         absolute (:obj:`bool`): True if you want to set a new surface level and False if you want to adjust the tides by an offset.
     """
+
     def __init__(self, adjustment, absolute):
         Command.__init__(self)
         self.set_command_type("Tide")
         self.add_number_parameters(float(adjustment))
         self.add_number_parameters(int(bool(absolute)))
 
+
 class ChangeWeatherCommand(Command):
     """Changes the weather in the world.
 
     Args:
-        weather (:obj:`int`): The weather wanted (0 - sunny, 1 - cloudy, 2 - rainy).      
+        weather (:obj:`int`): The weather wanted (0 - sunny, 1 - cloudy, 2 - rainy).
     """
+
     def __init__(self, weather):
         Command.__init__(self)
         self.set_command_type("ChangeWeather")
         self.add_number_parameters(int(weather))
 
+
 class SetRainParametersCommand(Command):
-    """Changes the rain's velocity and spawn rate. 
-    You must first activate weather and set it to ``2 - rainy`` using the Change Weather Command 
+    """Changes the rain's velocity and spawn rate.
+    You must first activate weather and set it to ``2 - rainy`` using the Change Weather Command
     before this will have any visible effect.
 
     Args:
@@ -473,6 +509,7 @@ class SetRainParametersCommand(Command):
         vel_z (:obj:`float`): Rain velocity on the z axis. Should be a negative value.
         spawnRate(:obj:`float`): Rain's spawn rate (number of particles).
     """
+
     def __init__(self, vel_x, vel_y, vel_z, spawnRate):
         Command.__init__(self)
         self.set_command_type("SetRainParameters")
@@ -481,12 +518,14 @@ class SetRainParametersCommand(Command):
         self.add_number_parameters(float(vel_z))
         self.add_number_parameters(float(spawnRate))
 
+
 class ChangeTimeOfDayCommand(Command):
-    """Changes the world's time of day. 
+    """Changes the world's time of day.
 
     Args:
         TimeOfDay (:obj:`float`): time of day desired, a number between 0 and 23 inclusive.
     """
+
     def __init__(self, TimeOfDay):
         Command.__init__(self)
         self.set_command_type("ChangeTimeOfDay")
@@ -500,11 +539,13 @@ class SetFPSCommand(Command):
         fps (:obj:`int`): The number of frames per second to set the simulation to.
 
     """
+
     def __init__(self, fps):
         Command.__init__(self)
         self.set_command_type("AdjustFPS")
         self.add_number_parameters(int(fps))
-    
+
+
 class SetTPSCommand(Command):
     """Set the ticks per second of the simulation.
 
@@ -512,11 +553,12 @@ class SetTPSCommand(Command):
         tps (:obj:`int`): The number of ticks per second to set the simulation to.
 
     """
+
     def __init__(self, tps):
         Command.__init__(self)
         self.set_command_type("AdjustTPS")
         self.add_number_parameters(int(tps))
-        
+
 
 class TurnOnFlashlightCommand(Command):
     """Turns on the vehicle's flashlight and sets its visual parameters.
@@ -535,7 +577,20 @@ class TurnOnFlashlightCommand(Command):
         color_B (:obj:`float`): Blue component of the flashlight color. Range: 0.0 to 1.0. (Default = 1)
     """
 
-    def __init__(self, flashlight_name, intensity=5000, beam_width=45, location_x_offset=0, location_y_offset=0, location_z_offset=0, angle_pitch=-30, angle_yaw=0, color_R=1, color_G=1, color_B=1):
+    def __init__(
+        self,
+        flashlight_name,
+        intensity=5000,
+        beam_width=45,
+        location_x_offset=0,
+        location_y_offset=0,
+        location_z_offset=0,
+        angle_pitch=-30,
+        angle_yaw=0,
+        color_R=1,
+        color_G=1,
+        color_B=1,
+    ):
         Command.__init__(self)
         self.set_command_type("TurnOnFlashlight")
         self.add_string_parameters(flashlight_name)
@@ -550,6 +605,7 @@ class TurnOnFlashlightCommand(Command):
         self.add_number_parameters(float(color_G))
         self.add_number_parameters(float(color_B))
 
+
 class TurnOffFlashlightCommand(Command):
     """Turns off the vehicle's flashlight.
 
@@ -561,7 +617,7 @@ class TurnOffFlashlightCommand(Command):
         Command.__init__(self)
         self.set_command_type("TurnOffFlashlight")
         self.add_string_parameters(flashlight_name)
-        
+
 
 class AirFogCommand(Command):
     """Changes the air fog density, depth, and color.
@@ -573,7 +629,10 @@ class AirFogCommand(Command):
         color_G (:obj:`float`): The green component of the fog's color. Range: 0.0 to 1.0. (Default = 0.5).
         color_B (:obj:`float`): The blue component of the fog's color. Range: 0.0 to 1.0. (Default = 0.6).
     """
-    def __init__(self, fogDensity, fogDepth=3.0, color_R=0.45, color_G=0.5, color_B=0.6):
+
+    def __init__(
+        self, fogDensity, fogDepth=3.0, color_R=0.45, color_G=0.5, color_B=0.6
+    ):
         Command.__init__(self)
         self.set_command_type("AirFog")
         self.add_number_parameters(float(fogDensity))
@@ -581,6 +640,7 @@ class AirFogCommand(Command):
         self.add_number_parameters(float(color_R))
         self.add_number_parameters(float(color_G))
         self.add_number_parameters(float(color_B))
+
 
 class WaterFogCommand(Command):
     """Changes the water fog density, depth, and color.
@@ -592,6 +652,7 @@ class WaterFogCommand(Command):
         color_G (:obj:`float`): The green component of the fog's color. Range: 0.0 to 1.0. (Default = 0.6).
         color_B (:obj:`float`): The blue component of the fog's color. Range: 0.0 to 1.0. (Default = 1.0).
     """
+
     def __init__(self, fogDensity, fogDepth=3.0, color_R=0.4, color_G=0.6, color_B=1.0):
         Command.__init__(self)
         self.set_command_type("WaterFog")
@@ -600,6 +661,7 @@ class WaterFogCommand(Command):
         self.add_number_parameters(float(color_R))
         self.add_number_parameters(float(color_G))
         self.add_number_parameters(float(color_B))
+
 
 class CustomCommand(Command):
     """Send a custom command to the currently loaded world.
@@ -610,6 +672,7 @@ class CustomCommand(Command):
         string_params (obj:`list` of :obj:`int`): List of arbitrary string parameters
 
     """
+
     def __init__(self, name, num_params=None, string_params=None):
         if num_params is None:
             num_params = []
@@ -626,6 +689,7 @@ class CustomCommand(Command):
 
 ######################## HOLOOCEAN CUSTOM COMMANDS ###########################
 
+
 class SendAcousticMessageCommand(Command):
     """Set the number of ticks between captures of the RGB camera.
 
@@ -635,7 +699,10 @@ class SendAcousticMessageCommand(Command):
         num (:obj:`int`): number of ticks between captures
 
     """
-    def __init__(self, from_agent_name, from_sensor_name, to_agent_name, to_sensor_name):
+
+    def __init__(
+        self, from_agent_name, from_sensor_name, to_agent_name, to_sensor_name
+    ):
         Command.__init__(self)
         self._command_type = "SendAcousticMessage"
         self.add_string_parameters(from_agent_name)
@@ -643,10 +710,13 @@ class SendAcousticMessageCommand(Command):
         self.add_string_parameters(to_agent_name)
         self.add_string_parameters(to_sensor_name)
 
+
 class SendOpticalMessageCommand(Command):
-    """Send information through OpticalModem.
-    """
-    def __init__(self, from_agent_name, from_sensor_name, to_agent_name, to_sensor_name):
+    """Send information through OpticalModem."""
+
+    def __init__(
+        self, from_agent_name, from_sensor_name, to_agent_name, to_sensor_name
+    ):
         Command.__init__(self)
         self._command_type = "SendOpticalMessage"
         self.add_string_parameters(from_agent_name)

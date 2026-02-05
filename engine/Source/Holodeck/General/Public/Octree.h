@@ -2,124 +2,127 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Engine/World.h"
-#include "Misc/FileHelper.h"
-#include "HAL/FileManagerGeneric.h"
-#include "Containers/Map.h"
 #include "Containers/DiscardableKeyValueCache.h"
+#include "Containers/Map.h"
+#include "CoreMinimal.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/World.h"
+#include "HAL/FileManagerGeneric.h"
 #include "LandscapeProxy.h"
+#include "Misc/FileHelper.h"
 
 #include "Conversion.h"
+#include "JsonDomBuilder.h"
 #include "gason.h"
 #include "jsonbuilder.h"
-#include "JsonDomBuilder.h"
 
-#include <string>
-#include <fstream>
-#include <streambuf>
-#include <functional>
 #include <format>
+#include <fstream>
+#include <functional>
+#include <streambuf>
+#include <string>
 
+class Octree {
+private:
+	// Globals used for calculations
+	static TArray<FVector>							 corners;
+	static TArray<FVector>							 sides;
+	static FCollisionQueryParams					 params;
+	static float									 cornerSize;
+	static FVector									 EnvMin;
+	static FVector									 EnvMax;
+	static UWorld*									 World;
+	static TDiscardableKeyValueCache<FString, float> materials;
 
+	static FVector EnvCenter;
 
-class Octree
-{
-	private:
-        // Globals used for calculations
-        static TArray<FVector> corners;
-        static TArray<FVector> sides;
-        static FCollisionQueryParams params;
-        static float cornerSize;
-        static FVector EnvMin;
-        static FVector EnvMax;
-        static UWorld* World;
-        static TDiscardableKeyValueCache<FString,float> materials;
+	static void loadJson(gason::JsonValue& json, TArray<Octree*>& parent, float size);
+	void toJson(FJsonDomBuilder::FObject& doc);
+	FJsonDomBuilder::FObject createLeafObject();
 
-        static FVector EnvCenter;
+	static FCollisionQueryParams init_params() {
+		FCollisionQueryParams p;
+		p.bTraceComplex = false;
+		p.TraceTag = "";
+		// p.bFindInitialOverlaps = true;
+		// p.bReturnPhysicalMaterial = true;
+		// p.bReturnFaceIndex = true;
+		return p;
+	}
 
-        static void loadJson(gason::JsonValue& json, TArray<Octree*>& parent, float size);
-        void toJson(FJsonDomBuilder::FObject& doc);
-        FJsonDomBuilder::FObject createLeafObject();
+	static FString getMaterialName(FHitResult hit);
+	void fillMaterialProperties(FString mat);
 
-        static FCollisionQueryParams init_params(){
-            FCollisionQueryParams p;
-            p.bTraceComplex = false;
-            p.TraceTag = "";
-            // p.bFindInitialOverlaps = true;
-            // p.bReturnPhysicalMaterial = true;
-            // p.bReturnFaceIndex = true;
-            return p;
-        }
+public:
+	static float OctreeRoot;
+	static float OctreeMax;
+	static float OctreeMin;
 
-        static FString getMaterialName(FHitResult hit);
-        void fillMaterialProperties(FString mat);
+	Octree() {};
+	Octree(FVector loc, float size, FString file = "")
+		: size(size), loc(loc), file(file) {};
+	~Octree() {
+		for (Octree* leaf : leaves) {
+			delete leaf;
+		}
+		leaves.Reset();
+	}
 
-    public:
-        static float OctreeRoot;
-        static float OctreeMax;
-        static float OctreeMin;
+	// Used to setup octree globals
+	static void initOctree(UWorld* w);
 
-        Octree(){};
-		Octree(FVector loc, float size, FString file="") : size(size), loc(loc), file(file) {};
-		~Octree(){ 
-            for(Octree* leaf : leaves){
-                delete leaf;
-            }
-            leaves.Reset();
-        }
+	// Figures out where octree roots are
+	static Octree* makeEnvOctreeRoot();
 
-        // Used to setup octree globals
-        static void initOctree(UWorld* w);
+	// iterative constructs octree
+	static Octree* makeOctree(
+		FVector center,
+		float	octreeSize,
+		float	octreeMin,
+		FString actorName = "");
 
-        // Figures out where octree roots are
-        static Octree* makeEnvOctreeRoot();
+	void unload();
+	void load();
 
-        // iterative constructs octree
-        static Octree* makeOctree(FVector center, float octreeSize, float octreeMin, FString actorName="");
+	// helpers for saving
+	void toJson();
 
-        void unload();
-        void load();
+	// ignore actors
+	static void ignoreActor(const AActor* InIgnoreActor) {
+		params.AddIgnoredActor(InIgnoreActor);
+	}
+	static void resetParams() { params = init_params(); }
 
-        // helpers for saving
-        void toJson();
-		
-        // ignore actors
-        static void ignoreActor(const AActor * InIgnoreActor){
-            params.AddIgnoredActor(InIgnoreActor);
-        }
-        static void resetParams(){ params = init_params(); }
+	int numLeaves();
 
-        int numLeaves();
+	// Used to check if it's a dynamic octree for an agent
+	bool isAgent = false;
 
-        // Used to check if it's a dynamic octree for an agent
-        bool isAgent = false;
-        
-        // Given to all
-        float size;
-        FVector loc;
+	// Given to all
+	float	size;
+	FVector loc;
 
-        // Given to octree roots that have been saved/loaded from file
-        FString file;
-        float makeTill;
+	// Given to octree roots that have been saved/loaded from file
+	FString file;
+	float	makeTill;
 
-        // Given to each non-leaf
-        TArray<Octree*> leaves;
+	// Given to each non-leaf
+	TArray<Octree*> leaves;
 
-        // Given to each leaf 
-        FVector normal;
-        FString material;
-        // impedance
-        float z = 1.0f;
+	// Given to each leaf
+	FVector normal;
+	FString material;
+	// impedance
+	float	z = 1.0f;
 
-        // Used during computations
-        // Value of Range, Elevation, and Azimuth in that order (in cm/degrees/degrees).
-        FVector locSpherical;
-        FVector normalImpact;
-        // Index of Range, Elevation, and Azimuth in that order.
-        FIntVector idx;
-        // Holds cos of angle, and value to put in
-        float cos;
-        float val;
+	// Used during computations
+	// Value of Range, Elevation, and Azimuth in that order (in
+	// cm/degrees/degrees).
+	FVector	   locSpherical;
+	FVector	   normalImpact;
+	// Index of Range, Elevation, and Azimuth in that order.
+	FIntVector idx;
+	// Holds cos of angle, and value to put in
+	float	   cos;
+	float	   val;
 };

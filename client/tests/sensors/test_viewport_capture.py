@@ -1,7 +1,6 @@
 import copy
 import uuid
 import cv2
-import os
 import time
 import pytest
 
@@ -69,9 +68,9 @@ def test_viewport_capture(resolution, request):
 
         err = mean_square_err(pixels, baseline)
 
-        assert (
-            err < 1000
-        ), "The expected screenshot did not match the actual screenshot!"
+        assert err < 1000, (
+            "The expected screenshot did not match the actual screenshot!"
+        )
 
 
 @pytest.mark.skipif(

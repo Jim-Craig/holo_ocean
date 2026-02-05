@@ -1,7 +1,7 @@
 // MIT License (c) 2021 BYU FRoStLab see LICENSE file
 
-#include "Holodeck.h"
 #include "BlueROV2Controller.h"
+#include "Holodeck.h"
 
 ABlueROV2Controller::ABlueROV2Controller(const FObjectInitializer& ObjectInitializer)
 	: AHolodeckPawnController(ObjectInitializer) {
@@ -9,4 +9,3 @@ ABlueROV2Controller::ABlueROV2Controller(const FObjectInitializer& ObjectInitial
 }
 
 ABlueROV2Controller::~ABlueROV2Controller() {}
-

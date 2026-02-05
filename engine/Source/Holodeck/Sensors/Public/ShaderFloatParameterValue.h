@@ -11,8 +11,7 @@
 /// instance is available.
 
 USTRUCT(BlueprintType)
-struct HOLODECK_API FShaderFloatParameterValue
-{
+struct HOLODECK_API FShaderFloatParameterValue {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
