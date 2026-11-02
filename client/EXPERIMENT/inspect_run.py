@@ -48,7 +48,10 @@ prof_A = prof                 # hypothesis A: row 0 = RangeMin (near)
 prof_B = prof[::-1]           # hypothesis B: row 0 = RangeMax (far)
 def centroid(p): return float((rng_axis * p).sum() / max(p.sum(), 1e-9))
 nz = np.nonzero(prof > 0)[0]
-print(f"sonar non-zero rows: {nz.min()}..{nz.max()} of {n_r}")
+print(f"sonar non-zero rows: {nz.min()}..{nz.max()} of {n_r}" if len(nz) else "sonar array is all zeros")
+first_rng = R_MIN + nz.min() / (n_r - 1) * (R_MAX - R_MIN) if len(nz) else None   # row 0 = near (confirmed)
+if first_rng is not None:
+    print(f"first sonar return (row 0 = near): {first_rng:.2f} m")
 print(f"sonar mean return range if row 0 = near: {centroid(prof_A):.2f} m | if row 0 = far: {centroid(prof_B):.2f} m")
 if wedge.any():
     print(f"depth-camera ranges inside the wedge (5/50/95 pct): {np.percentile(r[wedge], [5, 50, 95]).round(2)} m "
@@ -93,4 +96,27 @@ plt.tight_layout()
 out = f"{run}/inspect_{idx:05d}.png"
 fig.savefig(out, dpi=110)
 print("saved", out)
+
+# ---- which camera pixels in the sonar wedge have NO sonar counterpart (nearer than the first return)? ----
+if first_rng is not None and wedge.any():
+    covered = wedge & (r >= first_rng - 0.3)
+    uncovered = wedge & (r < first_rng - 0.3)
+    print(f"of the {wedge.sum()} wedge pixels, {uncovered.sum() / wedge.sum():.1%} are nearer than the first sonar return")
+    ov = rgb.astype(float)
+    ov[covered] = 0.5 * ov[covered] + 0.5 * np.array([0, 255, 0])
+    ov[uncovered] = 0.5 * ov[uncovered] + 0.5 * np.array([255, 0, 0])
+    fig2, a2 = plt.subplots(figsize=(8, 6.5))
+    a2.imshow(ov.astype(np.uint8)); a2.axis("off")
+    a2.set_title("In sonar wedge: green = range >= first sonar return, red = nearer (no sonar counterpart)")
+    out2 = f"{run}/inspect_overlay_{idx:05d}.png"
+    fig2.savefig(out2, dpi=110)
+    print("saved", out2)
+if "sem" in d.files:
+    sem = d["sem"]
+    flat = sem.reshape(-1, sem.shape[-1]) if sem.ndim == 3 else sem.reshape(-1, 1)
+    print(f"semantic camera: shape {sem.shape}, dtype {sem.dtype}, {len(np.unique(flat, axis=0))} distinct values")
+    fig3, a3 = plt.subplots(1, 2, figsize=(12, 4.5))
+    a3[0].imshow(rgb); a3[0].set_title("RGB"); a3[0].axis("off")
+    a3[1].imshow(sem[..., :3] if sem.ndim == 3 else sem); a3[1].set_title("SemCam raw (check alignment with RGB)"); a3[1].axis("off")
+    fig3.savefig(f"{run}/inspect_sem_{idx:05d}.png", dpi=110)
 plt.show()
