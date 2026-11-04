@@ -58,6 +58,8 @@ if wedge.any():
           f"(camera-to-sonar offset not corrected, so expect some mismatch)")
 
 # ---- sonar fan ----
+FLIP_AZIMUTH = True    # sonar column 0 = rightmost (found by check_extrinsics.py)
+
 def fan(arr, size=400):
     half = np.deg2rad(AZ) / 2
     Xf, Yf = np.meshgrid(np.linspace(-R_MAX * np.sin(half), R_MAX * np.sin(half), size),
@@ -65,6 +67,8 @@ def fan(arr, size=400):
     Rr, TH = np.hypot(Xf, Yf), np.arctan2(Xf, Yf)
     ri = ((Rr - R_MIN) / (R_MAX - R_MIN) * (n_r - 1)).round().astype(int)
     ai = ((TH + half) / (2 * half) * (n_az - 1)).round().astype(int)
+    if FLIP_AZIMUTH:
+        ai = n_az - 1 - ai
     ok = (ri >= 0) & (ri < n_r) & (ai >= 0) & (ai < n_az)
     out = np.zeros((size, size))
     out[ok] = arr[ri[ok], ai[ok]]

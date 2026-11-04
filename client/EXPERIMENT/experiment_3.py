@@ -1,11 +1,11 @@
-import os, json, time
+import os, sys, json, time
 import numpy as np
 import matplotlib.pyplot as plt
 import holoocean
 import rig                                   # sensor rig lives in rig.py
 
 # ---------------- scenario ----------------
-scenario = holoocean.packagemanager.get_scenario("PierHarbor-Hovering")
+scenario = holoocean.packagemanager.get_scenario(rig.SCENARIO)
 scenario["package_name"] = "Ocean"
 agent = rig.apply(scenario)
 
@@ -14,7 +14,7 @@ SPEED, TURN = 1.0, 45.0           # m/s and deg/s of target motion
 LEASH, YAW_LEASH = 1.5, 45.0      # how far the target may run ahead of the vehicle (m, deg)
 SAVE_EVERY_M, SAVE_EVERY_DEG = 0.5, 10.0     # while recording, save after moving or turning this much
 START_RECORDING = False
-FLIP_AZIMUTH = False              # set True if the sonar fan looks mirrored relative to the camera
+FLIP_AZIMUTH = True               # sonar column 0 = rightmost (found by check_extrinsics.py); True draws the fan upright
 R_MIN, R_MAX, AZ_DEG = rig.SONAR["RangeMin"], rig.SONAR["RangeMax"], rig.SONAR["Azimuth"]
 N_R, N_AZ = rig.SONAR["RangeBins"], rig.SONAR["AzimuthBins"]
 DT = 1 / rig.TICKS_PER_SEC
@@ -42,7 +42,10 @@ ri, ai, valid, half = fan_map()
 # ---------------- recording setup ----------------
 RUN = time.strftime("run_%Y%m%d_%H%M%S")
 os.makedirs(RUN, exist_ok=True)
-json.dump(rig.meta(), open(f"{RUN}/meta.json", "w"), indent=2)
+NOTE = " ".join(sys.argv[1:])                 # optional: python experiment_3.py "east side of pier, 3 m altitude"
+meta_out = rig.meta()
+meta_out["note"] = NOTE
+json.dump(meta_out, open(f"{RUN}/meta.json", "w"), indent=2)
 
 rec = {"on": START_RECORDING, "snap": False}
 latest, arrived = {}, {}
@@ -106,7 +109,9 @@ print(f"Camera/sonar tilt {rig.TILT_DEG:.0f} deg. Seabed return band (slant rang
 for h in (1.5, 2, 3, 4, 6):
     near, far = rig.seabed_band(h)
     print(f"   altitude {h:>3} m -> {near:5.1f} .. {far:5.1f} m" + ("   (beyond RangeMax)" if far > R_MAX else ""))
-print("Saving to:", RUN)
+print("Scenario:", rig.SCENARIO, "| saving to:", RUN, "| note:", NOTE or "(none)")
+if any(rig.SONAR_OFFSET) or any(rig.SONAR_ROT_OFFSET):
+    print("  NOTE: the sonar offset is NOT zero:", rig.SONAR_OFFSET, rig.SONAR_ROT_OFFSET, "(fine for calibration tests only)")
 
 # ---------------- main ----------------
 with holoocean.make(scenario_cfg=scenario) as env:
@@ -114,6 +119,8 @@ with holoocean.make(scenario_cfg=scenario) as env:
     s = env.tick()
     T = s["PoseSensor"]
     target = np.r_[T[:3, 3], 0.0, 0.0, np.degrees(np.arctan2(T[1, 0], T[0, 0]))]
+    meta_out["start_pose"] = {"xyz": T[:3, 3].tolist(), "yaw_deg": float(target[5])}
+    json.dump(meta_out, open(f"{RUN}/meta.json", "w"), indent=2)
     sonar_max = 0.0
     for _ in range(300):                              # settle (and let the octree build) holding the start pose
         env.act("auv0", target)
