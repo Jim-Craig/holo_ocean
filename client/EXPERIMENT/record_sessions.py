@@ -73,6 +73,8 @@ ap.add_argument("--warmup-ticks", type=int, default=180,
                 help="Ticks to settle / build octree before recording (default: 180)")
 ap.add_argument("--no-display", action="store_true",
                 help="Run headless without Matplotlib live display")
+# Start a manual session somewhere else (the training sessions are outside the scripted area)
+ap.add_argument("--start", type=float, nargs=3, metavar=("X", "Y", "YAW"), default=None)
 args = ap.parse_args()
 
 
@@ -209,6 +211,8 @@ SESSION_START_POSES = {
 }
 
 start_pos, start_yaw = SESSION_START_POSES[args.session]
+if args.start:
+    start_pos, start_yaw = [args.start[0], args.start[1], desired_start_z], args.start[2]
 agent["location"] = list(start_pos)
 agent["rotation"] = [0.0, 0.0, start_yaw]
 

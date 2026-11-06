@@ -10,8 +10,9 @@ For every sample the script measures, over the camera image:
 It assumes the sonar sits exactly where the camera does (identity extrinsics) and that sonar column 0 is the
 rightmost direction, as found with check_extrinsics.py.
 """
-import argparse, glob, json, os
+import argparse, json, os
 import numpy as np
+from run_io import depth_of, list_samples
 import matplotlib.pyplot as plt
 
 ap = argparse.ArgumentParser()
@@ -44,14 +45,12 @@ def analyse(run):
     if any(off.get("translation_m", [0])) or any(off.get("rotation_deg", [0])):
         print(f"  WARNING {run}: the sonar offset in meta.json is not zero; these numbers assume identity.")
 
-    files = sorted(glob.glob(f"{run}/s*.npz"))
-    if not files:
-        raise SystemExit(f"no samples in {run}")
+    files = list_samples(run)
     if len(files) > args.max_samples:
         keep = np.linspace(0, len(files) - 1, args.max_samples).round().astype(int)
         files = [files[i] for i in keep]
 
-    H, W = np.load(files[0])["depth"].shape
+    H, W = depth_of(np.load(files[0])).shape
     f = (W / 2) / np.tan(np.radians(meta.get("fov_deg", 90) / 2))
     s = args.stride
     v, u = np.mgrid[0:H:s, 0:W:s]
@@ -65,7 +64,7 @@ def analyse(run):
     per, ranges = [], []
     for fn in files:
         d = np.load(fn)
-        dep = d["depth"][::s, ::s].astype(float)
+        dep = depth_of(d)[::s, ::s].astype(float)
         sonar = d["sonar"]
         valid = (dep > 0.3) & (dep < 50)
         r = dep * ray

@@ -2,16 +2,17 @@
 
 usage:  python inspect_run.py run_YYYYMMDD_HHMMSS [sample_index]
 """
-import sys, json, glob
+import sys, json
 import numpy as np
 import matplotlib.pyplot as plt
+from run_io import depth_of, list_samples
 
 run = sys.argv[1]
 idx = int(sys.argv[2]) if len(sys.argv) > 2 else 0
 meta = json.load(open(f"{run}/meta.json"))
-files = sorted(glob.glob(f"{run}/s*.npz"))
+files = list_samples(run)
 d = np.load(files[idx])
-rgb, depth, sonar, pose = d["rgb"], d["depth"], d["sonar"], d["pose"]
+rgb, depth, sonar, pose = d["rgb"], depth_of(d), d["sonar"], d["pose"]
 
 so = meta["sonar"]
 R_MIN, R_MAX, AZ, ELEV = so["r_min"], so["r_max"], so["azimuth_deg"], so["elevation_deg"]
@@ -21,8 +22,9 @@ f = (W / 2) / np.tan(np.radians(meta.get("fov_deg", 90) / 2))
 cx, cy = W / 2, H / 2
 
 print(f"{len(files)} samples in {run}; showing #{idx} ({files[idx]})")
-print("arrival ticks (cam, depth, sonar):", d["arrival_ticks"], "| sim time t =", float(d["t"]))
-print("pose z (world):", pose[2, 3], "| speed:", np.linalg.norm(d["vel"]), "m/s")
+print("arrival ticks (cam, depth, sonar):", d["arrival_ticks"] if "arrival_ticks" in d.files else "n/a", "| sim time t =", float(d["t"]) if "t" in d.files else "n/a")
+vel = d["vel"] if "vel" in d.files else (d["velocity"] if "velocity" in d.files else np.full(3, np.nan))
+print("pose z (world):", pose[2, 3], "| speed:", np.linalg.norm(vel), "m/s")
 
 # ---- depth -> camera-frame points (x right, y down, z forward); depth assumed planar ----
 v, u = np.mgrid[0:H, 0:W]
